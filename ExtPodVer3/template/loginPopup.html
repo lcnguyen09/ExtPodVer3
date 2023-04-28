@@ -1,0 +1,94 @@
+<div id="ext-login-popup" style="position: fixed;
+top: 0px;
+bottom: 0px;
+left: 0px;
+right: 0px;
+z-index: 2147483647 !important;
+background: #333c;
+color: #212121;">
+    <div style="width: 30%;
+    min-width: 400px;
+    margin: 0 auto;
+    margin-top: 100px;
+    background: #fff;
+    border-radius: 6px;
+    padding: 15px;
+    position: relative;
+    box-shadow: 0px 6px 18px #b0b0b0;">
+        <div style="width: 128px;
+        height: 64px;
+        margin: 0 auto;
+        margin-top: 0px;
+        background-image: url('{{background_logo}}');
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 90%;
+        border-radius: 6px;
+        box-shadow: 0px 0px 10x #b0b0b0;"></div>
+        <div id="ext-login-popup-close-btn" style="-webkit-mask-image: url('{{background_close}}');
+        background-color: #eb0047;
+        -webkit-mask-size: 40%;
+        -webkit-mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        width: 30px;
+        height: 30px;
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        cursor: pointer;"></div>
+        <div id="ext-login-popup-msg" style="text-align: center;
+        color: red;"></div>
+        <form id="ext-login-form">
+            <div style="position: relative;">
+                <span style="background-image: url('{{background_username}}');
+                background-repeat: no-repeat;
+                background-size: 20px;
+                background-position: 10px center;
+                display: inline-block;
+                width: 40px;
+                height: 40px;
+                position: absolute;
+                top: 10px;"></span>
+                <input type="text" name="email" placeholder="Email" style="width: 100%;
+                font-size: 16px;
+                padding: 10px 10px 10px 40px;
+                margin-top: 10px;
+                border-radius: 6px;
+                border: 1px solid silver;" required="required" />
+            </div>
+            <div style="position: relative;">
+                <span style="background-image: url('{{background_password}}');
+                background-repeat: no-repeat;
+                background-size: 20px;
+                background-position: 10px center;
+                display: inline-block;
+                width: 40px;
+                height: 40px;
+                position: absolute;
+                top: 10px;"></span>
+                <input type="password" name="password" placeholder="Password" style="width: 100%;
+                font-size: 16px;
+                padding: 10px 10px 10px 40px;
+                margin-top: 10px;
+                border-radius: 6px;
+                border: 1px solid silver;" required="required" />
+            </div>
+            <button type="submit" id="ext-login-form-button" style="width: 50%;
+            margin: 0 auto;
+            display: block;
+            margin-top: 10px;
+            font-size: 18px;
+            border: solid 1px #7367f0;
+            border-radius: 6px;
+            background-color: #7367f0;
+            color: #fff;
+            padding: 6px;
+            cursor: pointer;">Login</button>
+        </form>
+        <!-- <div style="text-align: center;
+        margin-top: 10px;">
+            Bạn chưa có tài khoản? <a href="{{register_link}}" target="_blank" style="text-decoration: underline;
+            color: #7367f0;">Đăng ký ngay</a>
+        </div> -->
+    </div>
+</div>

@@ -1,0 +1,9 @@
+button:disabled,
+button[disabled] {
+    background-color: #ccc !important;
+    cursor: not-allowed !important;
+    border-color: #ccc !important;
+}
+.ext-image-picker.checked {
+    border: 1px solid #28c76f !important;
+}

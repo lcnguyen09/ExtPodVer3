@@ -1,0 +1,166 @@
+<div id="ext-tool-menu" style="position: fixed;
+    right: 0px;
+    bottom: 75px;
+    z-index: 1024 !important;
+    font-size: 13px !important;
+    line-height: 18px !important;
+    font-family: 'Montserrat',Helvetica,Arial,serif !important;
+    font-weight: normal !important;">
+    <a href="javascript:;" id="ext-tool-menu-button" style="display: inline-block;">
+        <img src="{{background_logo}}" style="width: 130px;
+        background-color: #f5fbfe;
+        border-radius: 12px;
+        border-top-right-radius: 0px;
+        border-bottom-right-radius: 0px;
+        box-shadow: -2px 0 30px 2px rgb(97 105 119 / 30%);
+        cursor: pointer;
+        border: 1px solid #9fb8c5;
+        padding: 10px;" />
+    </a>
+    <div id="ext-tool-menu-table" style="position: fixed;
+    bottom: 75px;
+    right: 150px;
+    background-color: #fff;
+    border-radius: 6px;
+    z-index: 1024 !important;
+    box-shadow: 0px 0px 16px #666;
+    display: none;">
+        <div id="ext-tool-menu-close-btn" style="-webkit-mask-image: url('{{background_close}}');
+        background-color: #eb0047;
+        -webkit-mask-size: 40%;
+        -webkit-mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        width: 30px;
+        height: 30px;
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        cursor: pointer;"></div>
+        <div style="background-color: #f5fbfe;
+        padding: 15px;
+        border-top-left-radius: 6px;
+        border-top-right-radius: 6px;
+        font-weight: bold;
+        border-bottom: 1px solid #9fb8c5;
+        display: flex;">
+            <span style="-webkit-mask-image: url('{{background_setting}}');
+            background-color: rgba(0, 0, 0, 0.85);
+            -webkit-mask-size: 84%;
+            margin-right: 6px;
+            -webkit-mask-repeat: no-repeat;
+            -webkit-mask-position: center;
+            width: 20px;
+            height: 20px;
+            display: inline-block;"></span> Hub setting
+        </div>
+        <div style="width: 350px; padding: 6px;">
+            <div style="display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            margin-top: 6px;
+            align-items: center;">
+                <label><strong>Hub: </strong></label>
+                <select class="js-slect2" name="ext-hub-picker" id="ext-hub-picker" style="height: 30px !important;">
+                    {{docker_pickers}}
+                </select>
+            </div>
+            <div style="display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            margin-top: 6px;
+            align-items: center;">
+                <label><strong>Template ID: </strong></label>
+                <input style="padding: 6px;
+                border-radius: 6px;
+                border: 1px solid #d1d1d1;
+                max-width: 70%;
+                height: 30px !important;" placeholder="Teamplate Item ID" id="ext-template-item-id"
+                    value="{{template_item_id}}" />
+            </div>
+        </div>
+
+
+        <div style="background-color: #f5fbfe;
+        padding:  5px 15px;
+        font-weight: bold;
+        border-top: 1px solid #9fb8c5;
+        border-bottom: 1px solid #e3e6e8;
+        display: flex;">
+            <span style="-webkit-mask-image: url('{{background_item}}');
+            background-color: rgba(0, 0, 0, 0.85);
+            -webkit-mask-size: 84%;
+            margin-right: 6px;
+            -webkit-mask-repeat: no-repeat;
+            -webkit-mask-position: center;
+            width: 20px;
+            height: 20px;
+            display: inline-block;"></span> Item info
+        </div>
+        <div style="width: 350px; padding: 6px;">
+            <div>
+                <strong>Item name:</strong> <i>{{item_name}}</i>
+            </div>
+            <div>
+                <p style="text-align: center; margin-top: 5px; margin-bottom: 5px;"><strong>Images:</strong> </p>
+                <div style="display: flex;
+                flex-direction: row;
+                justify-content: flex-start;
+                flex-wrap: wrap;">
+                    {{item_images}}
+                </div>
+            </div>
+            <div>
+                <p id="ext-msg" style="text-align: center;"></p>
+            </div>
+        </div>
+        <div style="display: flex;
+        flex-direction: row;
+        line-height: 30px;
+        padding: 15px;
+        justify-content: space-between;
+        background-color: #f5fbfe;
+        border-bottom-left-radius: 6px;
+        border-bottom-right-radius: 6px;">
+            <div>
+                <button type="submit" id="ext-save-item-button" style="
+                margin: 0 auto;
+                font-size: 15px !important;
+                border: solid 1px #7367f0;
+                border-radius: 6px;
+                background-color: #7367f0;
+                color: #fff;
+                padding: 6px;
+                cursor: pointer;
+                display: flex;
+                flex-direction: row;
+                text-transform: capitalize !important;
+                line-height: 15px !important;
+                min-height: auto;
+                font-weight: initial;">
+                <span style="-webkit-mask-image: url('{{background_save}}');
+                    background-color: #ffffff;
+                    -webkit-mask-size: 84%;
+                    margin-right: 6px;
+                    -webkit-mask-repeat: no-repeat;
+                    -webkit-mask-position: center;
+                    width: 16px;
+                    height: 16px;
+                    display: inline-block;"></span> Save Item</button>
+            </div>
+            <div style="display: flex;
+            flex-direction: row;
+            cursor: pointer;
+            " id="btn-logout">
+                <span id="ext-login-popup-close-btn" style="-webkit-mask-image: url('{{background_logout}}');
+                    background-color: #eb0047;
+                    -webkit-mask-size: 40%;
+                    -webkit-mask-repeat: no-repeat;
+                    -webkit-mask-position: center;
+                    width: 30px;
+                    height: 30px;
+                    cursor: pointer;"></span>
+                <span>Logout</span>
+            </div>
+        </div>
+    </div>
+</div>
