@@ -1,30 +1,24 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App";
+import React from "react"
+import ReactDOM from "react-dom/client"
+import { ManagedUIContext } from './contexts/ui.context'
 
-const rootElement = document.createElement("div");
-rootElement.id = "pod-order-react-chrome-app";
+import { Provider } from 'react-redux'
+import store from './redux/redux'
 
-const globalStyles = document.createElement("style");
-globalStyles.innerHTML = `
-  #${rootElement.id} {
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    width: 300px;
-    height: 30vh;
-    background: #ffffff;
-    border-top: 1px solid #c2c2c2;
-    border-left: 1px solid #c2c2c2;
-    z-index: 2147483647;
-  }
-`;
-document.body.appendChild(rootElement);
-document.body.appendChild(globalStyles);
+import App from "./App"
+import "./App.scss"
 
-const root = ReactDOM.createRoot(rootElement);
+const rootElement = document.createElement("div")
+rootElement.id = "podorder-ext-app"
+document.body.appendChild(rootElement)
+const root = ReactDOM.createRoot(rootElement)
 root.render(
   <React.StrictMode>
-    <App />
+    <ManagedUIContext>
+      <Provider store={store}>
+        <App />
+      </Provider>
+    </ManagedUIContext>
+
   </React.StrictMode>
 );

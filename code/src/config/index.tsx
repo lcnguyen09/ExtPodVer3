@@ -1,0 +1,8 @@
+export default {
+    WINDOW_NOMAL_STATE: "NOMAL",
+    WINDOW_MAX_STATE: "MAX",
+    WINDOW_MIN_STATE: "MIN",
+    APP_LOADING_STATE: "LOADING",
+    APP_LOGIN_STATE: "LOGIN"
+
+}
