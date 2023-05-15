@@ -1,16 +1,12 @@
 {
   "compilerOptions": {
-    "typeRoots": [
-      "node_modules/@types"
-    ],
-    "target": "esnext",
+    "target": "es5",
     "lib": [
       "dom",
       "dom.iterable",
       "esnext"
     ],
     "allowJs": true,
-    "sourceMap": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -22,23 +18,9 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx",
-    "types": [
-      "chrome"
-    ],
-    "baseUrl": "./",
-    "rootDir": "./",
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-    },
+    "jsx": "react-jsx"
   },
   "include": [
     "src"
-  ],
-  "exclude": [
-    "node_modules",
-    "node_modules/**"
   ]
 }

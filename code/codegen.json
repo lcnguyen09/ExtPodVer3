@@ -1,0 +1,25 @@
+{
+  "overrides": true,
+  "require": [
+	"ts-node/register"
+  ],
+  "generates": {
+	"./src/graphql/graphql.tsx": {
+	  "schema": {
+		  "http://localhost:3201/graphql": {
+			  "method": "POST"
+		  }
+	  },
+	  "documents": {
+		"./src/graphql/**/*.graphql": {
+		  "noRequire": true
+		}
+	  },
+	  "plugins": [
+		"typescript",
+		"typescript-operations",
+		"typescript-react-apollo"
+	  ]
+	}
+  }
+}

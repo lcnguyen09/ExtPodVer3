@@ -1,0 +1,9 @@
+fragment User on User {
+    _id
+    identity
+    identity_label
+    email
+    name
+    created_at
+    token
+}

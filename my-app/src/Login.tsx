@@ -5,7 +5,6 @@ import {
 	FormGroup,
 	Label,
 	InputGroup,
-	InputGroupAddon,
 	InputGroupText,
 	Input,
 } from "reactstrap"
@@ -50,11 +49,9 @@ function Login() {
 						valid={false}
 						disabled={loading}
 					/>
-					<InputGroupAddon className="cursor-pointer" addonType='append' onClick={() => setPwdVisible(!pwdVisible)}>
 						<InputGroupText className="h-100" onClick={() => setPwdVisible(!pwdVisible)}>
 							{pwdVisible ? <EyeOff size={14} /> : <Eye size={14} />}
 						</InputGroupText>
-					</InputGroupAddon>
 				</InputGroup>
 			</FormGroup>
 			<Button color="primary" type="submit" className="btn btn-primary btn-block w-100 mt-2" disabled={loading} onClick={() => {
