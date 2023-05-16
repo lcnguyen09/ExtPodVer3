@@ -87,6 +87,10 @@
     #podorder-ext-app-body {
         overflow-x: scroll;
     }
+    .form-control:focus {
+        box-shadow: initial;
+        font-size: initial;
+    }
 }
 
 .podorder-ext-app-max {

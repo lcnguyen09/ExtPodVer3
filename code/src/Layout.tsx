@@ -6,7 +6,6 @@ import UiContext from './contexts/ui.context'
 export const Layout: React.FC<any> = ({ children, ...props }) => {
     const { windowView, setWindowView } = UiContext.UseUIContext()
     const { appLoading } = UiContext.UseUIContext()
-
     return <Card className="h-100 card-action card-reload" id="podorder-ext-app-main" animation="false">
         <CardHeader className='d-flex justify-content-between' id="podorder-ext-app-header">
             <CardTitle className='mb-0'>

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import UiContext from './contexts/ui.context'
 import Login from "./Login"
 import Main from "./Main"
 
-export default function Route() {
+export default function Router() {
   const { setAppLoading } = UiContext.UseUIContext()
   const { pageRoute, setPageRoute } = UiContext.UseUIContext()
   const [Component, setComponent] = useState<React.ReactNode | boolean>(false)
