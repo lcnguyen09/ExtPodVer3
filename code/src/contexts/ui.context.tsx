@@ -11,55 +11,48 @@ import React, {
 } from 'react'
 import {
 	WINDOW_VIEWS,
-	PAGE_ROUTES
+	PAGE_ROUTES,
+	ACTION
 } from "./type.context"
 import {
 	Maybe,
-	User
+	User,
+	Docker
 } from "./../graphql/graphql"
 import { get } from 'lodash'
 import $ from 'jquery'
+import {
+	URL_LOGIN,
+	URL_GRAPHQL_ACCOUNT,
+	URL_GRAPHQL
+} from "./contants"
 
 interface UIManageContextProps {
 	children?: ReactNode,
 	[name: string]: Maybe<any>
 }
 
-const DEV_MODE = true
 
 const initialState = {
-	loginUri: DEV_MODE ? "http://localhost:3201/api/v1/auth" : "https://api-account.podorders.store/api/v1/auth",
+	loginUri: URL_LOGIN,
+	accountUri: URL_GRAPHQL_ACCOUNT,
+	hubUri: URL_GRAPHQL,
 	windowView: {
-		mode: "NOMAL",
+		mode: cookieGet("_pod_ext_mode") || "NOMAL",
 		isNomal: () => true,
 		isMax: () => false,
 		isMin: () => false
 	},
 	appLoading: true,
 	pageRoute: "INIT",
-	currentUser: null
+	currentUser: null,
+	currentDocker: null,
 }
-
-type Action =
-	| {
-		type: "SET_LOADING"
-		appLoading: boolean
-	}
-	| {
-		type: "SET_WINDOW_VIEW"
-		view: WINDOW_VIEWS
-	}
-	| {
-		type: "SET_PAGE_ROUTE"
-		page: PAGE_ROUTES
-	}
-	| {
-		type: "SET_CURRENT_USER"
-		user: User | null
-	}
 
 export interface State {
 	loginUri: string,
+	accountUri: string,
+	hubUri: string,
 	windowView: {
 		mode: WINDOW_VIEWS,
 		isNomal: { (): boolean },
@@ -68,21 +61,19 @@ export interface State {
 	}
 	appLoading: boolean,
 	pageRoute: PAGE_ROUTES,
-	currentUser: User | null
+	currentUser: User | null,
+	currentDocker: Docker | null
 }
 
 
 export const UIContext = createContext<State | any>(initialState)
 UIContext.displayName = "UIContext"
 
-function uiReducer(state: State, action: Action) {
+function uiReducer(state: State, action: ACTION) {
 	switch (action.type) {
 		case "SET_WINDOW_VIEW": {
-			if (get(action, "view") === "MAX") {
-				$("body").addClass("podorder-ext-app-max")
-			} else {
-				$("body").removeClass("podorder-ext-app-max")
-			}
+			if (get(action, "view") === "MAX") { $("body").addClass("podorder-ext-app-max") }
+			else { $("body").removeClass("podorder-ext-app-max") }
 			return {
 				...state, windowView: {
 					mode: get(action, "view"),
@@ -99,7 +90,15 @@ function uiReducer(state: State, action: Action) {
 			return { ...state, pageRoute: action.page }
 		}
 		case "SET_CURRENT_USER": {
-			return { ...state, currentUser: action.user }
+			return {
+				...state, currentUser: {
+					...action.user,
+					token: action.user?.token ? action.user?.token : ""
+				}
+			}
+		}
+		case "SET_CURRENT_DOCKER": {
+			return { ...state, currentDocker: action.docker }
 		}
 		default: {
 			return state
@@ -108,18 +107,32 @@ function uiReducer(state: State, action: Action) {
 }
 export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContextProps) => {
 	const [state, dispatch]: Maybe<any> = useReducer<any>(uiReducer, initialState)
-	const setWindowView = (view: WINDOW_VIEWS) => dispatch({ type: "SET_WINDOW_VIEW", view })
+	const [token, setToken] = useStorage("_pod_ext_token")
+	const [docker, setDocker] = useStorage("_pod_ext_docker")
+	const [windowMode, setWindowMode] = useStorage("_pod_ext_mode")
+
+	const setWindowView = (view: WINDOW_VIEWS) => {
+		dispatch({ type: "SET_WINDOW_VIEW", view })
+		setWindowMode(view)
+	}
 	const setAppLoading = (appLoading: boolean) => dispatch({ type: "SET_LOADING", appLoading })
 	const setPageRoute = (page: PAGE_ROUTES) => dispatch({ type: "SET_PAGE_ROUTE", page })
-	const setCurrentUser = (user: User) => dispatch({ type: "SET_CURRENT_USER", user })
-
+	const setCurrentUser = (user: User) => {
+		dispatch({ type: "SET_CURRENT_USER", user })
+		setToken(get(user, "token", ""))
+	}
+	const setCurrentDocker = (docker: Docker) => {
+		dispatch({ type: "SET_CURRENT_DOCKER", docker })
+		setDocker(get(docker, "_id", ""))
+	}
 	const value = React.useMemo(
 		() => ({
 			...state,
 			setWindowView,
 			setAppLoading,
 			setPageRoute,
-			setCurrentUser
+			setCurrentUser,
+			setCurrentDocker
 		}),
 		[state]
 	)
@@ -137,25 +150,7 @@ export const UseUIContext = () => {
 
 
 export const ManagedUIContext: React.FC<UIManageContextProps> = ({ children }: UIManageContextProps) => {
-	const [token, setToken] = useState<string | null>("token")
-	// const [token, loadingToken, setToken, error] = useStorage("token")
-	useEffect(() => {
-		console.log("abc");
-		// const a = useStorageGet(key)
-		// console.log('a: ', a);
-	  }, []) 
-	return <>
-		<UIProvider>{children}</UIProvider>
-		<p onClick={() => {
-			setToken("xyz")
-		}}>Click here {token}</p>
-		<p onClick={() => {
-			setToken("abc")
-		}}>Click here {token}</p>
-	</>
-// 	return <>
-// 	<UIProvider>{children}</UIProvider>
-// </>
+	return <UIProvider>{children}</UIProvider>
 }
 
 export function usePreviousValue(value: any) {
@@ -166,26 +161,57 @@ export function usePreviousValue(value: any) {
 	return ref.current;
 }
 
-export const useStorage = (key: string): [string | null, boolean, (val: string) => void, string | null] => {
+export const useStorage = (key: string): [string | null | undefined, (val: Maybe<string>) => void] => {
 	const [value, setValue] = useState<string | null>(null)
-	const [loading, setLoading] = useState<boolean>(false)
-	const [error, setError] = useState<string | null>(null)
 	useEffect(() => {
-		console.log("abc");
-		// const a = useStorageGet(key)
-		// console.log('a: ', a);
-	  }, []) 
-    const toggleValue = (val: string) => setValue(val)
-    return [value, loading, toggleValue, error]
+		try {
+			chrome.storage.local.get([key]).then((result) => {
+				setValue(get(result, key, "") ? get(result, key, "") : "")
+			})
+		} catch (error) {
+			const newVal = cookieGet(key)
+			setValue(newVal)
+		}
+
+	}, [])
+	useEffect(() => {
+		if (value !== null) {
+			try {
+				chrome.storage.local.set({ [key]: value ? value : "" })
+			} catch (error) {
+				cookieSet(key, value ? value : "")
+			}
+		}
+	}, [value])
+	const cookieGet = (cname: string) => {
+		const name = cname + "=";
+		const decodedCookie = decodeURIComponent(document.cookie);
+		const ca = decodedCookie.split(';');
+		for (let i = 0; i < ca.length; i++) {
+			let c = ca[i];
+			while (c.charAt(0) === ' ') {
+				c = c.substring(1);
+			}
+			if (c.indexOf(name) === 0) {
+				return c.substring(name.length, c.length) ? c.substring(name.length, c.length) : "";
+			}
+		}
+		return '';
+	}
+	const cookieSet = (cname: string, cvalue: any, exdays = 365) => {
+		const d = new Date();
+		d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+		const expires = "expires=" + d.toUTCString();
+		return document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/;";
+	}
+	const toggleValue = (val: Maybe<string>) => {
+		setValue(val)
+	}
+	return [value, toggleValue]
 
 }
 
-export function useStorageGet(cname: string) {
-	if (chrome.storage) {
-		return chrome.storage.local.get([cname]).then(data => {
-			return get(data, cname, null)
-		})
-	}
+function cookieGet(cname: string) {
 	const name = cname + "=";
 	const decodedCookie = decodeURIComponent(document.cookie);
 	const ca = decodedCookie.split(';');
@@ -195,22 +221,11 @@ export function useStorageGet(cname: string) {
 			c = c.substring(1);
 		}
 		if (c.indexOf(name) === 0) {
-			return c.substring(name.length, c.length);
+			return c.substring(name.length, c.length) ? c.substring(name.length, c.length) : "";
 		}
 	}
 	return '';
 }
-
-export function useStorageSet(cname: string, cvalue: any, exdays = 365) {
-	if (chrome.storage) {
-		return chrome.storage.local.set({ [cname]: cvalue })
-	}
-	const d = new Date();
-	d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
-	const expires = "expires=" + d.toUTCString();
-	return document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/;";
-}
-
 
 const UiContext = {
 	ManagedUIContext: ManagedUIContext,

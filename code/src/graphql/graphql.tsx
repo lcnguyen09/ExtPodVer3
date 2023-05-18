@@ -1,9 +1,11 @@
 import { gql } from '@apollo/client';
+import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+const defaultOptions = {} as const;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -5437,13 +5439,18 @@ export type TaskInput = {
   title?: InputMaybe<Scalars['String']>;
 };
 
+export type DockerFragment = { __typename?: 'Docker', _id?: string | null, domain?: string | null, label?: string | null, server?: string | null, sku?: string | null };
+
+export type DockerAuthFragment = { __typename?: 'DockerAuth', auth_id?: string | null, user?: { __typename?: 'User', _id?: string | null, email?: string | null, name?: string | null, identity?: string | null, identity_label?: string | null, role?: string | null, created_at?: number | null, token?: string | null, auth_docker?: Array<{ __typename?: 'AuthDocker', docker_id?: string | null, docker?: { __typename?: 'Docker', _id?: string | null, domain?: string | null, label?: string | null, server?: string | null, sku?: string | null } | null } | null> | null } | null };
+
 export type UserFragment = { __typename?: 'User', _id?: string | null, email?: string | null, name?: string | null, identity?: string | null, identity_label?: string | null, role?: string | null, created_at?: number | null, token?: string | null, auth_docker?: Array<{ __typename?: 'AuthDocker', docker_id?: string | null, docker?: { __typename?: 'Docker', _id?: string | null, domain?: string | null, label?: string | null, server?: string | null, sku?: string | null } | null } | null> | null };
 
 export type AuthDockerFragment = { __typename?: 'AuthDocker', docker_id?: string | null, docker?: { __typename?: 'Docker', _id?: string | null, domain?: string | null, label?: string | null, server?: string | null, sku?: string | null } | null };
 
-export type DockerFragment = { __typename?: 'Docker', _id?: string | null, domain?: string | null, label?: string | null, server?: string | null, sku?: string | null };
+export type CUserQueryVariables = Exact<{ [key: string]: never; }>;
 
-export type DockerAuthFragment = { __typename?: 'DockerAuth', auth_id?: string | null, user?: { __typename?: 'User', _id?: string | null, email?: string | null, name?: string | null, identity?: string | null, identity_label?: string | null, role?: string | null, created_at?: number | null, token?: string | null, auth_docker?: Array<{ __typename?: 'AuthDocker', docker_id?: string | null, docker?: { __typename?: 'Docker', _id?: string | null, domain?: string | null, label?: string | null, server?: string | null, sku?: string | null } | null } | null> | null } | null };
+
+export type CUserQuery = { __typename?: 'RootQuery', cUser?: { __typename?: 'User', _id?: string | null, email?: string | null, name?: string | null, identity?: string | null, identity_label?: string | null, role?: string | null, created_at?: number | null, token?: string | null, auth_docker?: Array<{ __typename?: 'AuthDocker', docker_id?: string | null, docker?: { __typename?: 'Docker', _id?: string | null, domain?: string | null, label?: string | null, server?: string | null, sku?: string | null } | null } | null> | null } | null };
 
 export const DockerFragmentDoc = gql`
     fragment Docker on Docker {
@@ -5485,3 +5492,37 @@ export const DockerAuthFragmentDoc = gql`
   }
 }
     ${UserFragmentDoc}`;
+export const CUserDocument = gql`
+    query CUser {
+  cUser {
+    ...User
+  }
+}
+    ${UserFragmentDoc}`;
+
+/**
+ * __useCUserQuery__
+ *
+ * To run a query within a React component, call `useCUserQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCUserQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCUserQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCUserQuery(baseOptions?: Apollo.QueryHookOptions<CUserQuery, CUserQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CUserQuery, CUserQueryVariables>(CUserDocument, options);
+      }
+export function useCUserLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CUserQuery, CUserQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CUserQuery, CUserQueryVariables>(CUserDocument, options);
+        }
+export type CUserQueryHookResult = ReturnType<typeof useCUserQuery>;
+export type CUserLazyQueryHookResult = ReturnType<typeof useCUserLazyQuery>;
+export type CUserQueryResult = Apollo.QueryResult<CUserQuery, CUserQueryVariables>;

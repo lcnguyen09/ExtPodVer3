@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import {
 	ApolloClient,
 	from,
@@ -8,24 +8,27 @@ import {
 } from '@apollo/client'
 import merge from 'deepmerge'
 import isEqual from 'lodash/isEqual'
-import { IncomingHttpHeaders } from 'http'
 import unfetch from 'isomorphic-unfetch'
 import { onError } from '@apollo/client/link/error'
+import UiContext from './../contexts/ui.context'
+import {
+	URL_GRAPHQL
+} from "./contants"
 
 const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__'
 
 let apolloClient: ApolloClient<NormalizedCacheObject>
 
 interface IApolloStateProps {
-	[APOLLO_STATE_PROP_NAME]?: NormalizedCacheObject
+	[APOLLO_STATE_PROP_NAME]?: NormalizedCacheObject,
+	token?: string | null
 }
 
-function initializeApollo(
-	{ headers, initialState }: {
-		headers?: IncomingHttpHeaders | null, initialState?: NormalizedCacheObject | null
-	} = { headers: null, initialState: null }
+function initializeApollo({ headers, initialState, targetUrl }: {
+	headers?: Record<string, string>, initialState?: NormalizedCacheObject | null, targetUrl?: string
+} = { headers: {}, initialState: null, targetUrl: URL_GRAPHQL }
 ) {
-	const _apolloClient = apolloClient ?? new ApolloClient({
+	const _apolloClient = new ApolloClient({
 		ssrMode: typeof window === 'undefined',
 		link: from([
 			onError(errors => {
@@ -34,16 +37,16 @@ function initializeApollo(
 					errors.response) { errors.response.errors = undefined }
 			}),
 			new HttpLink({
-				uri: "https://account.podorders.store/graphql",
-				credentials: 'include', // Additional fetch() options like `credentials` or `headers`
+				uri: targetUrl,
+				headers: headers,
+				// credentials: "include",
 				fetch: (url: RequestInfo, init: RequestInit) => {
-					return unfetch('/graphql', {
+					return unfetch(url, {
 						...init,
 						headers: {
 							...init.headers,
-							'Access-Control-Allow-Origin': '*',
-							// here we pass the cookie along for each request
-							Cookie: headers?.cookie ?? ''
+							'Access-Control-Allow-Origin': "*",
+							"X-Requested-With": "XMLHttpRequest",
 						}
 					})
 				}
@@ -90,9 +93,16 @@ export function addApolloState(
 
 export function useApollo(pageProps: IApolloStateProps) {
 	const state = pageProps[APOLLO_STATE_PROP_NAME]
-	const store = useMemo(
-		() => initializeApollo({ initialState: state }),
-		[state]
-	)
+	const { accountUri, hubUri, currentUser } = UiContext.UseUIContext()
+	const [targetUrl, setTargetUrl] = useState<string>(accountUri)
+	const store = useMemo(() => initializeApollo({
+		headers: {
+			'Access-Control-Allow-Origin': '*',
+			"X-Requested-With": "XMLHttpRequest",
+			"Authorization": `Bearer ${currentUser?.token}`
+		},
+		initialState: state,
+		targetUrl: targetUrl
+	}), [state, currentUser?.token])
 	return store
 }

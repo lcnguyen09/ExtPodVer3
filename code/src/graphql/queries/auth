@@ -1,0 +1,37 @@
+query Me {
+    me {
+        ...AuthResponse
+    }
+
+    currentOrganization {
+        ...Organization
+    }
+
+    meExtension {
+        ...AuthResponse
+    }
+}
+
+query AuthToken {
+    authToken {
+        ...AuthToken
+    }
+}
+
+query Users($search: String) {
+    users(search: $search) {
+        ...User
+    }
+}
+
+query RolePermissions($role: String!) {
+    rolePermissions(role: $role) {
+        ...RolePermission
+    }
+}
+
+query UserPermissions($user_id: ID!) {
+    userPermissions(user_id: $user_id) {
+        ...Permission
+    }
+}

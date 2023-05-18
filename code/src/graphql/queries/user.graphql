@@ -1,0 +1,5 @@
+query CUser {
+    cUser {
+        ...User
+    }
+}

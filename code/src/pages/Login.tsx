@@ -10,11 +10,10 @@ import {
 	Input,
 	Alert
 } from "reactstrap"
-import UiContext from './contexts/ui.context'
+import UiContext from '../contexts/ui.context'
 import { Eye, EyeOff } from "react-feather"
 import _ from 'lodash'
 import unfetch from 'isomorphic-unfetch'
-// import { useChromeStorageLocal } from 'use-chrome-storage'
 
 const IS_TEST = false
 
@@ -24,7 +23,6 @@ function Login() {
 	const [errorMsg, setErrorMsg] = useState<string>("")
 	const [pwdVisible, setPwdVisible] = useState<boolean>(false)
 	const { setPageRoute, loginUri, appLoading, setAppLoading, currentUser, setCurrentUser } = UiContext.UseUIContext()
-	// const [value, setValue, isPersistent, error, isInitialStateResolved] = useChromeStorageLocal('token', "")
 
 	const _login = () => {
 		setAppLoading(true)
@@ -62,12 +60,13 @@ function Login() {
 					}
 				})
 			}
-			return setCurrentUser(user)
+			setCurrentUser(user)
+			setPageRoute("MAIN")
 		}).then(() => {
-			console.log("setAppLoading false");
+			
 			setAppLoading(false)
 		}).catch(error => {
-			console.log('Login error: ', error);
+			
 			setAppLoading(false)
 			setErrorMsg("Invalid account information")
 		})
