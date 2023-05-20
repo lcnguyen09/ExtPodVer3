@@ -6,7 +6,10 @@
   "generates": {
 	"./src/graphql/graphql.tsx": {
 	  "schema": {
-		  "http://localhost:3001/graphql": {
+		  "http://localhost:8085/graphql": {
+			"headers": {
+				  "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDIyYjFkODFjNzhkYjFhZDNkYWYxMzkiLCJlbWFpbCI6InRhc2tAb25vc3BvZC5jb20iLCJleHAiOjE2ODQxMTQxMzV9.E8gY0pxOvEG1GltCtb_nYeHSltvPKpqJwBGuLnoefEk"
+			  },
 			  "method": "POST"
 		  }
 	  },

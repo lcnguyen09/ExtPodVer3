@@ -4,7 +4,7 @@ import Login from "./pages/Login"
 import Main from "./pages/Main"
 import { get } from "lodash"
 import {
-  useCUserLazyQuery
+  useMeLazyQuery
 } from "./graphql/graphql"
 
 const routers = {
@@ -17,19 +17,19 @@ export default function Router() {
     pageRoute,
     setAppLoading,
     setPageRoute,
-    currentUser,
-    setCurrentUser } = UiContext.UseUIContext()
-  const [fetchCurrentUserQuery] = useCUserLazyQuery({
+    setCurrentUser,
+    token } = UiContext.UseUIContext()
+  const [fetchCurrentUserQuery] = useMeLazyQuery({
     fetchPolicy: "network-only"
   })
   useEffect(() => {
-    if (currentUser?.token) {
+    if (token?.access_token) {
       fetchCurrentUser()
     } else {
       setPageRoute("LOGIN")
       setAppLoading(false)
     }
-  }, [])
+  }, [token?.access_token]) // eslint-disable-line
 
   const failCurrentUser = () => {
     setCurrentUser({})
@@ -41,8 +41,8 @@ export default function Router() {
     fetchCurrentUserQuery({
       fetchPolicy: "network-only"
     }).then(res => {
-      if (res.data?.cUser?._id) {
-        setCurrentUser(res.data?.cUser)
+      if (res.data?.me?._id) {
+        setCurrentUser(res.data?.me)
         setPageRoute("MAIN")
         setAppLoading(false)
       } else {

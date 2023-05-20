@@ -3,7 +3,6 @@ import { Card, CardBody, CardHeader, CardTitle, Collapse, Spinner } from 'reacts
 import { Maximize2, Minimize2, ChevronsDown, ChevronsUp } from "react-feather"
 import UiContext, { useStorage } from './contexts/ui.context'
 
-import { find, get } from 'lodash'
 import NavUser from './components/NavUser'
 
 export default function Layout({ children }: {
@@ -13,47 +12,52 @@ export default function Layout({ children }: {
         windowView,
         setWindowView,
         appLoading,
-        currentUser,
-        setCurrentUser,
+        token,
+        setToken
     } = UiContext.UseUIContext()
-    const [token] = useStorage("_pod_ext_token")
+    const [accessToken] = useStorage("_pod_ext_access_token")
+    const [refreshToken] = useStorage("_pod_ext_refresh_token")
     useEffect(() => {
-        if (token !== null) {
-            setCurrentUser({ token: token })
+        if (accessToken !== null) {
+            setToken({
+                access_token: accessToken,
+                refresh_token: refreshToken
+            })
         }
-    }, [token])
+    }, [accessToken, refreshToken]) // eslint-disable-line
+
     const [windowMode] = useStorage("_pod_ext_mode")
     useEffect(() => {
         if (windowMode !== null) {
             setWindowView(windowMode)
         }
-    }, [windowMode])
+    }, [windowMode]) // eslint-disable-line
 
     return <Card className="h-100 card-action card-reload mb-0" id="podorder-ext-app-main" animation="false">
         <CardHeader className='nav p-1 d-flex flex-row justify-content-between' id="podorder-ext-app-header">
-                <CardTitle className='mb-0'>
-                    <a href="https://task.onospod.com" target="_blank" className='d-block'><div className='brand-logo' /></a>
-                </CardTitle>
-                <div className="actions d-flex justify-content-end align-items-center">
-                    {
-                        windowView.isMax()
-                            ? <Minimize2 cursor="pointer" className='mx-3' size={13} onClick={() => setWindowView("NOMAL")} />
-                            : <Maximize2 cursor="pointer" className='mx-3' size={13} onClick={() => setWindowView("MAX")} />
-                    }
-                    {
-                        windowView.isMin()
-                            ? <ChevronsUp cursor="pointer" className='ml-1' size={15} onClick={() => setWindowView("NOMAL")} />
-                            : <ChevronsDown cursor="pointer" className='ml-1' size={15} onClick={() => setWindowView("MIN")} />
-                    }
-                </div>
+            <CardTitle className='mb-0'>
+                <a href="https://task.onospod.com" target="_blank" rel="noreferrer" className='d-block'><div className='brand-logo' /></a>
+            </CardTitle>
+            <div className="actions d-flex justify-content-end align-items-center">
+                {
+                    windowView === "MAX"
+                        ? <Minimize2 cursor="pointer" className='mx-3' size={13} onClick={() => setWindowView("NOMAL")} />
+                        : <Maximize2 cursor="pointer" className='mx-3' size={13} onClick={() => setWindowView("MAX")} />
+                }
+                {
+                    windowView === "MIN"
+                        ? <ChevronsUp cursor="pointer" className='ml-1' size={15} onClick={() => setWindowView("NOMAL")} />
+                        : <ChevronsDown cursor="pointer" className='ml-1' size={15} onClick={() => setWindowView("MIN")} />
+                }
+            </div>
         </CardHeader>
-        <Collapse isOpen={!windowView.isMin()} className={windowView.isMax() ? " h-100" : ""}>
+        <Collapse id="podorder-ext-app-body" className='position-relative h-100' isOpen={windowView !== "MIN"}>
             {/* {currentUser?._id && <NavDocker />} */}
             <NavUser />
-            <CardBody id="podorder-ext-app-body" className='position-relative'>
+            <CardBody>
                 {
-                    currentUser?.token === null || currentUser?.token === undefined || 
-                    windowMode === null
+                    token?.access_token === null || token?.access_token === undefined ||
+                        windowMode === null
                         ? <div className='d-flex justify-content-center align-items-center mt-5'>
                             <div className='brand-logo' />
                         </div>
@@ -61,7 +65,7 @@ export default function Layout({ children }: {
                             Children.map(children, child => {
                                 if (isValidElement(child)) {
                                     const props = {
-                                        token: token,
+                                        token: token?.access_token,
                                         children: child.props?.children
                                     }
                                     return cloneElement(child, props);

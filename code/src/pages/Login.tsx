@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import {
 	Button,
 	Form,
@@ -12,63 +12,47 @@ import {
 } from "reactstrap"
 import UiContext from '../contexts/ui.context'
 import { Eye, EyeOff } from "react-feather"
-import _ from 'lodash'
-import unfetch from 'isomorphic-unfetch'
-
-const IS_TEST = false
+import { useSignInMutation } from "./../graphql/graphql";
 
 function Login() {
-	const [email, setEmail] = useState<string>("")
-	const [password, setPassword] = useState<string>("")
-	const [errorMsg, setErrorMsg] = useState<string>("")
-	const [pwdVisible, setPwdVisible] = useState<boolean>(false)
-	const { setPageRoute, loginUri, appLoading, setAppLoading, currentUser, setCurrentUser } = UiContext.UseUIContext()
+	const [email, setEmail]: [string, Dispatch<SetStateAction<string>>] = useState<string>("")
+	const [password, setPassword]: [string, Dispatch<SetStateAction<string>>] = useState<string>("")
+	const [errorMsg, setErrorMsg]: [string, Dispatch<SetStateAction<string>>] = useState<string>("")
+	const [pwdVisible, setPwdVisible]: [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(false)
+	const {
+		setPageRoute,
+		appLoading,
+		setAppLoading,
+		setCurrentUser,
+		setToken
+	} = UiContext.UseUIContext()
+	const [signInMutation] = useSignInMutation({ fetchPolicy: "network-only" })
 
-	const _login = () => {
+	const handleSignIn = () => {
 		setAppLoading(true)
 		setErrorMsg("")
-		unfetch(loginUri, {
-			method: "POST",
-			headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-			body: JSON.stringify({ email: email, password: password })
-		}).then((response) => {
-			const { status } = response
-			if (status === 401) {
-				return setErrorMsg("Invalid account information")
+		signInMutation({
+			variables: {
+				signInInput: {
+					email: email,
+					password: password,
+					remember: true
+				}
+			},
+			fetchPolicy: "network-only"
+
+		}).then(res => {
+			if (res?.data?.signIn?._id) {
+				setCurrentUser(res?.data?.signIn)
+				setToken(res?.data?.signIn?.token)
+				setPageRoute("MAIN")
+				setAppLoading(false)
+			} else {
+				setErrorMsg("Invalid account information")
 			}
-			return response.json()
-		}).then((response) => {
-			const user = {
-				_id: _.get(response, "_id", ""),
-				email: _.get(response, "email", ""),
-				name: _.get(response, "name", ""),
-				identity: _.get(response, "identity", ""),
-				identity_label: _.get(response, "identity_label", ""),
-				role: _.get(response, "role", ""),
-				created_at: _.get(response, "created_at", ""),
-				token: _.get(response, "token", ""),
-				auth_docker: _.map(_.get(response, "auth_docker", []), auth_docker => {
-					return {
-						docker_id: _.get(auth_docker, "docker_id", ""),
-						docker: {
-							_id: _.get(auth_docker, ["docker", "_id"], ""),
-							domain: _.get(auth_docker, ["docker", "domain"], ""),
-							label: _.get(auth_docker, ["docker", "label"], ""),
-							server: _.get(auth_docker, ["docker", "server"], ""),
-							sku: _.get(auth_docker, ["docker", "sku"], "")
-						}
-					}
-				})
-			}
-			setCurrentUser(user)
-			setPageRoute("MAIN")
-		}).then(() => {
-			
-			setAppLoading(false)
 		}).catch(error => {
-			
+			setErrorMsg(error?.message)
 			setAppLoading(false)
-			setErrorMsg("Invalid account information")
 		})
 	}
 
@@ -112,7 +96,7 @@ function Login() {
 			{
 				errorMsg && <Alert color="danger" className="text-center mt-1 p-2"><strong>*Error:</strong> <i>{errorMsg}.</i></Alert>
 			}
-			<Button color="primary" type="submit" className="btn btn-primary btn-block w-100 mt-2" disabled={appLoading} onClick={_login}>Sign in</Button>
+			<Button color="primary" type="submit" className="btn btn-primary btn-block w-100 mt-2" disabled={appLoading} onClick={handleSignIn}>Sign in</Button>
 		</Form>
 	</>
 }

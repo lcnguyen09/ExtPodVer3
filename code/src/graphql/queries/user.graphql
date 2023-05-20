@@ -1,5 +1,0 @@
-query CUser {
-    cUser {
-        ...User
-    }
-}

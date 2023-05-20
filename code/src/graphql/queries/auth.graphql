@@ -1,6 +1,6 @@
 query Me {
     me {
-        ...AuthResponse
+        ...Auth
     }
 
     currentOrganization {
@@ -8,7 +8,7 @@ query Me {
     }
 
     meExtension {
-        ...AuthResponse
+        ...Auth
     }
 }
 

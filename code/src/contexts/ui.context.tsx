@@ -4,10 +4,8 @@ import React, {
 	useReducer,
 	useContext,
 	useEffect,
-	useRef,
 	useState,
-	Dispatch,
-	SetStateAction,
+	useMemo,
 } from 'react'
 import {
 	WINDOW_VIEWS,
@@ -16,15 +14,13 @@ import {
 } from "./type.context"
 import {
 	Maybe,
-	User,
-	Docker
+	Auth,
+	AuthToken,
 } from "./../graphql/graphql"
 import { get } from 'lodash'
 import $ from 'jquery'
 import {
-	URL_LOGIN,
-	URL_GRAPHQL_ACCOUNT,
-	URL_GRAPHQL
+	URL_GRAPHQL,
 } from "./contants"
 
 interface UIManageContextProps {
@@ -34,35 +30,21 @@ interface UIManageContextProps {
 
 
 const initialState = {
-	loginUri: URL_LOGIN,
-	accountUri: URL_GRAPHQL_ACCOUNT,
-	hubUri: URL_GRAPHQL,
-	windowView: {
-		mode: cookieGet("_pod_ext_mode") || "NOMAL",
-		isNomal: () => true,
-		isMax: () => false,
-		isMin: () => false
-	},
+	urlGraphql: URL_GRAPHQL,
+	windowView: "MIN",
 	appLoading: true,
 	pageRoute: "INIT",
 	currentUser: null,
-	currentDocker: null,
+	token: null
 }
 
 export interface State {
-	loginUri: string,
-	accountUri: string,
-	hubUri: string,
-	windowView: {
-		mode: WINDOW_VIEWS,
-		isNomal: { (): boolean },
-		isMax: { (): boolean },
-		isMin: { (): boolean }
-	}
+	urlGraphql: string,
+	windowView: WINDOW_VIEWS,
 	appLoading: boolean,
 	pageRoute: PAGE_ROUTES,
-	currentUser: User | null,
-	currentDocker: Docker | null
+	currentUser: Auth | null,
+	token: AuthToken | null,
 }
 
 
@@ -72,15 +54,23 @@ UIContext.displayName = "UIContext"
 function uiReducer(state: State, action: ACTION) {
 	switch (action.type) {
 		case "SET_WINDOW_VIEW": {
-			if (get(action, "view") === "MAX") { $("body").addClass("podorder-ext-app-max") }
-			else { $("body").removeClass("podorder-ext-app-max") }
+			if (get(action, "view") === "MIN") {
+				$("body").addClass("podorder-ext-app-min")
+				$("body").removeClass("podorder-ext-app-max")
+				$("body").removeClass("podorder-ext-app-nomal")
+			}
+			if (get(action, "view") === "MAX") {
+				$("body").addClass("podorder-ext-app-max")
+				$("body").removeClass("podorder-ext-app-min")
+				$("body").removeClass("podorder-ext-app-nomal")
+			}
+			if (get(action, "view") === "NOMAL") {
+				$("body").addClass("podorder-ext-app-nomal")
+				$("body").removeClass("podorder-ext-app-max")
+				$("body").removeClass("podorder-ext-app-min")
+			}
 			return {
-				...state, windowView: {
-					mode: get(action, "view"),
-					isNomal: () => get(action, "view") === "NOMAL",
-					isMax: () => get(action, "view") === "MAX",
-					isMin: () => get(action, "view") === "MIN"
-				}
+				...state, windowView: get(action, "view")
 			}
 		}
 		case "SET_LOADING": {
@@ -93,12 +83,17 @@ function uiReducer(state: State, action: ACTION) {
 			return {
 				...state, currentUser: {
 					...action.user,
-					token: action.user?.token ? action.user?.token : ""
+					token: null
 				}
 			}
 		}
-		case "SET_CURRENT_DOCKER": {
-			return { ...state, currentDocker: action.docker }
+		case "SET_CURRENT_TOKEN": {
+			return {
+				...state, token: {
+					...action.token,
+					access_token: action.token?.access_token || ""
+				}
+			}
 		}
 		default: {
 			return state
@@ -107,35 +102,29 @@ function uiReducer(state: State, action: ACTION) {
 }
 export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContextProps) => {
 	const [state, dispatch]: Maybe<any> = useReducer<any>(uiReducer, initialState)
-	const [token, setToken] = useStorage("_pod_ext_token")
-	const [docker, setDocker] = useStorage("_pod_ext_docker")
-	const [windowMode, setWindowMode] = useStorage("_pod_ext_mode")
-
+	const [accessToken, setAccessToken] = useStorage("_pod_ext_access_token") // eslint-disable-line
+	const [refrestToken, setRefreshToken] = useStorage("_pod_ext_refresh_token") // eslint-disable-line
+	const [windowMode, setWindowMode] = useStorage("_pod_ext_mode") // eslint-disable-line
 	const setWindowView = (view: WINDOW_VIEWS) => {
 		dispatch({ type: "SET_WINDOW_VIEW", view })
 		setWindowMode(view)
 	}
 	const setAppLoading = (appLoading: boolean) => dispatch({ type: "SET_LOADING", appLoading })
 	const setPageRoute = (page: PAGE_ROUTES) => dispatch({ type: "SET_PAGE_ROUTE", page })
-	const setCurrentUser = (user: User) => {
-		dispatch({ type: "SET_CURRENT_USER", user })
-		setToken(get(user, "token", ""))
+	const setCurrentUser = (user: Auth) => dispatch({ type: "SET_CURRENT_USER", user })
+	const setToken = (token: AuthToken) => {
+		dispatch({ type: "SET_CURRENT_TOKEN", token })
+		setAccessToken(get(token, "access_token", ""))
+		setRefreshToken(get(token, "refresh_token", ""))
 	}
-	const setCurrentDocker = (docker: Docker) => {
-		dispatch({ type: "SET_CURRENT_DOCKER", docker })
-		setDocker(get(docker, "_id", ""))
-	}
-	const value = React.useMemo(
-		() => ({
-			...state,
-			setWindowView,
-			setAppLoading,
-			setPageRoute,
-			setCurrentUser,
-			setCurrentDocker
-		}),
-		[state]
-	)
+	const value = useMemo(() => ({
+		...state,
+		setWindowView,
+		setAppLoading,
+		setPageRoute,
+		setCurrentUser,
+		setToken
+	}), [state]) // eslint-disable-line
 	return <UIContext.Provider value={value} {...props} />
 }
 
@@ -153,15 +142,7 @@ export const ManagedUIContext: React.FC<UIManageContextProps> = ({ children }: U
 	return <UIProvider>{children}</UIProvider>
 }
 
-export function usePreviousValue(value: any) {
-	const ref = useRef();
-	useEffect(() => {
-		ref.current = value;
-	});
-	return ref.current;
-}
-
-export const useStorage = (key: string): [string | null | undefined, (val: Maybe<string>) => void] => {
+export const useStorage = (key: string): [string | null, (val: string) => void] => {
 	const [value, setValue] = useState<string | null>(null)
 	useEffect(() => {
 		try {
@@ -172,8 +153,7 @@ export const useStorage = (key: string): [string | null | undefined, (val: Maybe
 			const newVal = cookieGet(key)
 			setValue(newVal)
 		}
-
-	}, [])
+	}, []) // eslint-disable-line
 	useEffect(() => {
 		if (value !== null) {
 			try {
@@ -182,7 +162,7 @@ export const useStorage = (key: string): [string | null | undefined, (val: Maybe
 				cookieSet(key, value ? value : "")
 			}
 		}
-	}, [value])
+	}, [value]) // eslint-disable-line
 	const cookieGet = (cname: string) => {
 		const name = cname + "=";
 		const decodedCookie = decodeURIComponent(document.cookie);
@@ -209,22 +189,6 @@ export const useStorage = (key: string): [string | null | undefined, (val: Maybe
 	}
 	return [value, toggleValue]
 
-}
-
-function cookieGet(cname: string) {
-	const name = cname + "=";
-	const decodedCookie = decodeURIComponent(document.cookie);
-	const ca = decodedCookie.split(';');
-	for (let i = 0; i < ca.length; i++) {
-		let c = ca[i];
-		while (c.charAt(0) === ' ') {
-			c = c.substring(1);
-		}
-		if (c.indexOf(name) === 0) {
-			return c.substring(name.length, c.length) ? c.substring(name.length, c.length) : "";
-		}
-	}
-	return '';
 }
 
 const UiContext = {

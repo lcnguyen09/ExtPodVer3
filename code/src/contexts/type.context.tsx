@@ -1,6 +1,6 @@
 import {
-    Docker,
-    User
+    Auth,
+    AuthToken
 } from "./../graphql/graphql"
 
 export type WINDOW_VIEWS = "NOMAL"
@@ -25,9 +25,9 @@ export type ACTION =
     }
     | {
         type: "SET_CURRENT_USER"
-        user: User | null
+        user: Auth | null
     }
     | {
-        type: "SET_CURRENT_DOCKER"
-        docker: Docker | null
+        type: "SET_CURRENT_TOKEN"
+        token: AuthToken | null
     }

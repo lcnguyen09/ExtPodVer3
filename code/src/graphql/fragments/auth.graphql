@@ -16,7 +16,7 @@ fragment User on User {
     bonus_per_hour
 }
 
-fragment AuthResponse on Auth {
+fragment Auth on Auth {
     _id
     first_name
     last_name
@@ -25,12 +25,11 @@ fragment AuthResponse on Auth {
     permissions {
         ...Permission
     }
+    token {
+        ...AuthToken
+    }
 }
 
-fragment SignUpResponse on SignUpResponse {
-    success
-    message
-}
 fragment SignOutResponse on SignOutResponse {
     success
     message

@@ -7,6 +7,7 @@
 
 :root {
     --ext-width: 300px;
+    --ext-height: 300px;
 }
 
 html {
@@ -55,7 +56,7 @@ html {
             right: 0;
             bottom: 0;
             width: var(--ext-width);
-            height: initial;
+            height: 33px;
             transition: height 0.25s ease-in;
             z-index: 2147483600;
             line-height: initial !important;
@@ -64,14 +65,15 @@ html {
             color: #000;
 
             #podorder-ext-app-main {
+                border-bottom-left-radius: 0px;
+                border-bottom-right-radius: 0px;
+                border-top-right-radius: 0px;
                 #podorder-ext-app-body {
-                    height: 300px;
-                    min-height: 300px;
-                    position: relative;
-
+                    overflow: scroll;
                     .overlay-div {
                         z-index: 2147483647;
                         background-color: rgba(0, 0, 0, 0.5);
+                        backdrop-filter: grayscale(1);
                     }
                 }
             }
@@ -87,17 +89,13 @@ html {
                 display: none !important;
             }
 
-            #podorder-ext-app-body {
-                overflow-x: scroll;
-            }
-
             .form-control:focus {
                 box-shadow: initial;
                 font-size: initial;
             }
         }
 
-        .podorder-ext-app-max {
+        &.podorder-ext-app-max {
             margin-right: var(--ext-width);
 
             #podorder-ext-app {
@@ -106,11 +104,13 @@ html {
 
                 #podorder-ext-app-main {
                     border-radius: 0px;
-
-                    #podorder-ext-app-body {
-                        height: 100%;
-                    }
                 }
+            }
+        }
+        &.podorder-ext-app-nomal {
+            #podorder-ext-app {
+                height: var(--ext-height);
+                transition: height 0.25s ease-out;
             }
         }
     }
