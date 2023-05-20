@@ -1,6 +1,13 @@
 import ReactDOM from "react-dom/client"
 import App from "./App"
+import { DEV_MODE } from "./contexts/contants"
+import $ from "jquery"
 
 const rootElement = Object.assign(document.createElement('div'), { id: "podorder-ext-app" })
+if (DEV_MODE) {
+    rootElement.classList.add("dev-mode")
+}
 document.body.appendChild(rootElement)
-ReactDOM.createRoot(rootElement).render(<App />);
+$(document).ready(function () {
+    ReactDOM.createRoot(rootElement).render(<App />);
+});

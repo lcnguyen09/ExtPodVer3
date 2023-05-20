@@ -12,43 +12,34 @@ const routers = {
   MAIN: <Main />,
 }
 
-export default function Router() {
+export default function Router({ apolloClient }: {
+  apolloClient?: any
+}) {
   const {
     pageRoute,
     setAppLoading,
     setPageRoute,
     setCurrentUser,
-    token } = UiContext.UseUIContext()
-  const [fetchCurrentUserQuery] = useMeLazyQuery({
-    fetchPolicy: "network-only"
-  })
+    token,
+    setToken } = UiContext.UseUIContext()
+  const [fetchCurrentUserQuery] = useMeLazyQuery({ fetchPolicy: "network-only" })
   useEffect(() => {
-    if (token?.access_token) {
-      fetchCurrentUser()
-    } else {
+    fetchCurrentUser()
+  }, [apolloClient]) // eslint-disable-line
+
+  function fetchCurrentUser() {
+    if (!token?.access_token) return
+    fetchCurrentUserQuery({ fetchPolicy: "network-only" }).then(res => {
+      if (!res.data?.me?._id) throw new Error("Unauth")
+      setCurrentUser(res.data?.me)
+      setPageRoute("MAIN")
+      setAppLoading(false)
+    }).catch(() => {
+      setCurrentUser()
+      setToken()
       setPageRoute("LOGIN")
       setAppLoading(false)
-    }
-  }, [token?.access_token]) // eslint-disable-line
-
-  const failCurrentUser = () => {
-    setCurrentUser({})
-    setPageRoute("LOGIN")
-    setAppLoading(false)
-  }
-
-  const fetchCurrentUser = () => {
-    fetchCurrentUserQuery({
-      fetchPolicy: "network-only"
-    }).then(res => {
-      if (res.data?.me?._id) {
-        setCurrentUser(res.data?.me)
-        setPageRoute("MAIN")
-        setAppLoading(false)
-      } else {
-        failCurrentUser()
-      }
-    }).catch(failCurrentUser)
+    })
   }
   return <>
     {get(routers, pageRoute, <div className='d-flex justify-content-center align-items-center mt-5'>

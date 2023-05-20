@@ -1603,7 +1603,7 @@ export type InputQueryOrganization = {
 
 export type UserFragment = { __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, role: string, organization_id: string, created_at: any, working_hours_per_month: number, bonus_per_hour: number, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null };
 
-export type AuthFragment = { __typename?: 'Auth', _id: string, first_name: string, last_name: string, email: string, role: string, permissions?: Array<{ __typename?: 'Permission', id: string, name: string, accept: boolean }> | null, token?: { __typename?: 'AuthToken', access_token: string, refresh_token: string, token_type: string, expired_at: any } | null };
+export type AuthFragment = { __typename?: 'Auth', _id: string, first_name: string, last_name: string, email: string, role: string, created_at: any, permissions?: Array<{ __typename?: 'Permission', id: string, name: string, accept: boolean }> | null, token?: { __typename?: 'AuthToken', access_token: string, refresh_token: string, token_type: string, expired_at: any } | null };
 
 export type SignOutResponseFragment = { __typename?: 'SignOutResponse', success: boolean, message: string };
 
@@ -1632,7 +1632,7 @@ export type SignInMutationVariables = Exact<{
 }>;
 
 
-export type SignInMutation = { __typename?: 'Mutation', signIn: { __typename?: 'Auth', _id: string, first_name: string, last_name: string, email: string, role: string, permissions?: Array<{ __typename?: 'Permission', id: string, name: string, accept: boolean }> | null, token?: { __typename?: 'AuthToken', access_token: string, refresh_token: string, token_type: string, expired_at: any } | null } };
+export type SignInMutation = { __typename?: 'Mutation', signIn: { __typename?: 'Auth', _id: string, first_name: string, last_name: string, email: string, role: string, created_at: any, permissions?: Array<{ __typename?: 'Permission', id: string, name: string, accept: boolean }> | null, token?: { __typename?: 'AuthToken', access_token: string, refresh_token: string, token_type: string, expired_at: any } | null } };
 
 export type SignOutMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -1642,7 +1642,7 @@ export type SignOutMutation = { __typename?: 'Mutation', signOut: { __typename?:
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'Auth', _id: string, first_name: string, last_name: string, email: string, role: string, permissions?: Array<{ __typename?: 'Permission', id: string, name: string, accept: boolean }> | null, token?: { __typename?: 'AuthToken', access_token: string, refresh_token: string, token_type: string, expired_at: any } | null } | null, currentOrganization: { __typename?: 'Organization', _id: string, name: string, description: string, user_id: string, total_workspaces: number, total_tasks: number, created_at: any, updated_at?: any | null, user?: { __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, role: string, organization_id: string, created_at: any, working_hours_per_month: number, bonus_per_hour: number, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null } | null, members?: Array<{ __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, role: string, organization_id: string, created_at: any, working_hours_per_month: number, bonus_per_hour: number, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null }> | null }, meExtension?: { __typename?: 'Auth', _id: string, first_name: string, last_name: string, email: string, role: string, permissions?: Array<{ __typename?: 'Permission', id: string, name: string, accept: boolean }> | null, token?: { __typename?: 'AuthToken', access_token: string, refresh_token: string, token_type: string, expired_at: any } | null } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'Auth', _id: string, first_name: string, last_name: string, email: string, role: string, created_at: any, permissions?: Array<{ __typename?: 'Permission', id: string, name: string, accept: boolean }> | null, token?: { __typename?: 'AuthToken', access_token: string, refresh_token: string, token_type: string, expired_at: any } | null } | null, currentOrganization: { __typename?: 'Organization', _id: string, name: string, description: string, user_id: string, total_workspaces: number, total_tasks: number, created_at: any, updated_at?: any | null, user?: { __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, role: string, organization_id: string, created_at: any, working_hours_per_month: number, bonus_per_hour: number, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null } | null, members?: Array<{ __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, role: string, organization_id: string, created_at: any, working_hours_per_month: number, bonus_per_hour: number, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null }> | null }, meExtension?: { __typename?: 'Auth', _id: string, first_name: string, last_name: string, email: string, role: string, created_at: any, permissions?: Array<{ __typename?: 'Permission', id: string, name: string, accept: boolean }> | null, token?: { __typename?: 'AuthToken', access_token: string, refresh_token: string, token_type: string, expired_at: any } | null } | null };
 
 export type AuthTokenQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1692,6 +1692,7 @@ export const AuthFragmentDoc = gql`
   last_name
   email
   role
+  created_at
   permissions {
     ...Permission
   }

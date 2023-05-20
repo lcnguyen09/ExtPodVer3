@@ -42,4 +42,9 @@ module.exports = {
     filename: "content.js",
     path: path.resolve(__dirname, "..", "extension"),
   },
+  performance: {
+    hints: false,
+    maxEntrypointSize: 512000,
+    maxAssetSize: 512000
+}
 };

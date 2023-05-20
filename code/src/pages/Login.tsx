@@ -28,7 +28,7 @@ function Login() {
 	} = UiContext.UseUIContext()
 	const [signInMutation] = useSignInMutation({ fetchPolicy: "network-only" })
 
-	const handleSignIn = () => {
+	function handleSignIn() {
 		setAppLoading(true)
 		setErrorMsg("")
 		signInMutation({
@@ -44,12 +44,13 @@ function Login() {
 		}).then(res => {
 			if (res?.data?.signIn?._id) {
 				setCurrentUser(res?.data?.signIn)
-				setToken(res?.data?.signIn?.token)
-				setPageRoute("MAIN")
-				setAppLoading(false)
+				return setToken(res?.data?.signIn?.token)
 			} else {
-				setErrorMsg("Invalid account information")
+				throw new Error("Invalid account information")
 			}
+		}).then(() => {
+			setPageRoute("MAIN")
+			setAppLoading(false)
 		}).catch(error => {
 			setErrorMsg(error?.message)
 			setAppLoading(false)

@@ -26,7 +26,7 @@ export default function NavUser() {
         togglePopoverOpen(false)
     }, [])
 
-    const handleLogout = () => {
+    function handleLogout() {
         setCurrentUser()
         setToken()
         setPageRoute("LOGIN")

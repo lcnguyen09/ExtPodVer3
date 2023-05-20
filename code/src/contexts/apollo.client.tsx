@@ -4,7 +4,8 @@ import {
 	from,
 	HttpLink,
 	InMemoryCache,
-	NormalizedCacheObject} from '@apollo/client'
+	NormalizedCacheObject
+} from '@apollo/client'
 import unfetch from 'isomorphic-unfetch'
 import { onError } from '@apollo/client/link/error'
 import UiContext from './../contexts/ui.context'

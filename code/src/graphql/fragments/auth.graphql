@@ -22,6 +22,7 @@ fragment Auth on Auth {
     last_name
     email
     role
+    created_at
     permissions {
         ...Permission
     }

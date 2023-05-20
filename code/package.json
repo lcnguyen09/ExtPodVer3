@@ -30,6 +30,7 @@
   "scripts": {
     "start": "GENERATE_SOURCEMAP=false react-scripts start",
     "build": "webpack",
+    "dev": "webpack && GENERATE_SOURCEMAP=false react-scripts start",
     "codegen": "graphql-codegen --verbose --config codegen.json"
   },
   "eslintConfig": {

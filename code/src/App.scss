@@ -7,7 +7,7 @@
 
 :root {
     --ext-width: 300px;
-    --ext-height: 300px;
+    --ext-height: 350px;
 }
 
 html {
@@ -64,6 +64,13 @@ html {
             font-family: sans-serif !important;
             color: #000;
 
+            &.dev-mode {
+                right: var(--ext-width);
+                #podorder-ext-app-main {
+                    border-top-right-radius: var(--bs-card-border-radius);
+                }
+            }
+
             #podorder-ext-app-main {
                 border-bottom-left-radius: 0px;
                 border-bottom-right-radius: 0px;
@@ -92,6 +99,9 @@ html {
             .form-control:focus {
                 box-shadow: initial;
                 font-size: initial;
+            }
+            .cursor-pointer {
+                cursor: pointer !important;
             }
         }
 

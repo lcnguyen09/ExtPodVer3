@@ -6,9 +6,11 @@ import {
 export type WINDOW_VIEWS = "NOMAL"
     | "MAX"
     | "MIN"
+    | null
 export type PAGE_ROUTES = | "INIT"
     | "LOGIN"
     | "MAIN"
+    | null
 
 export type ACTION =
     | {
