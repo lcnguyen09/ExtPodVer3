@@ -16,8 +16,8 @@ export default function Layout({ children }: {
         token,
     } = UiContext.UseUIContext()
 
-    return <Card className="h-100 card-action card-reload mb-0" id="podorder-ext-app-main" animation="false">
-        <CardHeader className={`nav p-1 d-flex flex-row justify-content-between ${windowView === "MIN" ? "cursor-pointer" : ""}`} id="podorder-ext-app-header" onClick={(e) => (e.target as Element).id === "podorder-ext-app-header" && windowView !== "MAX" ? setWindowView(windowView === "MIN" ? "NOMAL" : "MIN") : false}>
+    return <Card className="h-100 card-action card-reload mb-0 d-flex flex-column" id="podorder-ext-app-main" animation="false">
+        <CardHeader className={`nav p-1 d-flex flex-row justify-content-between bg-light ${windowView === "MIN" ? "cursor-pointer" : ""}`} id="podorder-ext-app-header" onClick={(e) => (e.target as Element).id === "podorder-ext-app-header" && windowView !== "MAX" ? setWindowView(windowView === "MIN" ? "NOMAL" : "MIN") : false}>
             <CardTitle className='mb-0'>
                 <a href="https://task.onospod.com" target="_blank" rel="noreferrer" className='d-block'><div className='brand-logo' /></a>
             </CardTitle>
@@ -37,10 +37,15 @@ export default function Layout({ children }: {
                 }
             </div>
         </CardHeader>
-        <Collapse id="podorder-ext-app-body" className='position-relative h-100' isOpen={windowView !== "MIN"}>
+        <Collapse id="podorder-ext-app-body" className='position-relative d-flex flex-column' isOpen={windowView !== "MIN"}>
             {/* {currentUser?._id && <NavDocker />} */}
+            {
+                appLoading && <div className='position-absolute w-100 h-100 top-0 bottom-0 start-0 end-0 d-flex justify-content-center align-items-center overlay-div'>
+                    <Spinner color='primary' />
+                </div>
+            }
             <NavUser />
-            <CardBody>
+            <CardBody id="podorder-ext-app-body-card" className='p-1 mb-5'>
                 {
                     token?.access_token === null || token?.access_token === undefined || windowView === null
                         ? <div className='d-flex justify-content-center align-items-center mt-5'>
@@ -48,11 +53,7 @@ export default function Layout({ children }: {
                         </div>
                         : <>{children}</>
                 }
-                {
-                    appLoading && <div className='position-absolute w-100 h-100 top-0 bottom-0 start-0 end-0 d-flex justify-content-center align-items-center overlay-div'>
-                        <Spinner color='primary' />
-                    </div>
-                }
+
             </CardBody>
         </Collapse>
     </Card>

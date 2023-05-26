@@ -1,58 +1,333 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
-import { get, last, map, startsWith } from "lodash";
+import { chunk, filter, find, get, head, last, map, sortBy, split, startsWith } from "lodash";
 import $ from "jquery"
-import { Alert } from "reactstrap";
+import { Alert, Button, Card, CardBody, CardFooter, CardHeader, Col, Input, NavLink, Row, Spinner, Tooltip, UncontrolledTooltip } from "reactstrap";
+import { ChevronDown, Save } from "react-feather"
+import UiContext from './../../contexts/ui.context'
+import ItemInfoComponent from "./../../components/ItemInfo"
+import { DEV_MODE } from "./../../contexts/contants";
+import { useSavePersonalizeItemMutation } from "./../../graphql/graphql";
 
+const urlParams = new URLSearchParams(window.location.search);
+const myParam = urlParams.get('item');
+const urlItem = last(window.location.pathname?.split("/"))
+
+const itemSlug = myParam ? myParam : urlItem
+
+const shop = "great-family-shop.myshopify.com"
 
 export default function Wanderprints() {
-	const [errorMsg, setErrorMsg] = useState("")
-	const [itemTitle, setItemTitle] = useState("")
-	const [itemImages, setItemImages] = useState([])
+	const [Loading, setLoading] = useState<boolean>(true)
+	const [Page, setPage] = useState<any>(1)
+	const [ErrorMsg, setErrorMsg] = useState("")
+	const [SuccessMsg, setSuccessMsg] = useState("")
+	const [ItemInfo, setItemInfo] = useState<any>(null)
+	const [PersonalizedSetting, setPersonalizedSetting] = useState<any>(null)
+	const [PersonalizedSetOps, setPersonalizedSetOps] = useState<any>([])
+	const [PersonalizedProduct, setPersonalizedProduct] = useState<any>([])
+	const [ProductFullInfo, setProductFullInfo] = useState<any>(null)
+	const [savePersonalizeItem] = useSavePersonalizeItemMutation({ fetchPolicy: "network-only" })
+
 	useEffect(() => {
-		_dateGet()
+		_itemInfoFetch()
+		_itemPersonalizedFetch()
 	}, [])
 
-	function _dateGet() {
-		const itemSlug = last(window.location.pathname?.split("/"))
-		const myHeaders = new Headers();
-		myHeaders.append("authority", "wanderprints.com");
-		myHeaders.append("accept", "application/json, text/javascript, */*; q=0.01");
-		myHeaders.append("accept-language", "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7");
-		myHeaders.append("if-none-match", "W/\"cacheable:58c4cdedac6b11435d6357cece29f548\"");
-		myHeaders.append("referer", window.location.href);
-		myHeaders.append("sec-ch-ua", "\"Google Chrome\";v=\"113\", \"Chromium\";v=\"113\", \"Not-A.Brand\";v=\"24\"");
-		myHeaders.append("sec-ch-ua-mobile", "?0");
-		myHeaders.append("sec-ch-ua-platform", "\"macOS\"");
-		myHeaders.append("sec-fetch-dest", "empty");
-		myHeaders.append("sec-fetch-mode", "cors");
-		myHeaders.append("sec-fetch-site", "same-origin");
-		myHeaders.append("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36");
-		myHeaders.append("x-requested-with", "XMLHttpRequest");
-
-		fetch(`https://wanderprints.com/products/${itemSlug}.js`, { method: 'GET', headers: myHeaders }).then(response => response.json())
-			.then(item => {
-				setItemTitle(item?.title)
-				setItemImages(item?.images?.map((img: any) => {
-					return startsWith(img, "//") ? window.location.protocol + img : img
-				}).filter((img: any) => !startsWith(img, "data:image")))
-				
+	useEffect(() => {
+		if (PersonalizedSetting?.productConfig?.initial_product_id) {
+			_itemLibFetch(PersonalizedSetting?.productConfig?.initial_product_id).then(() => {
+				const allProductId: Array<any> = []
+				filter(PersonalizedSetOps, pOps => {
+					filter(get(pOps, "values"), value => {
+						if (get(value, "product_id")) {
+							allProductId.push(get(value, "product_id"))
+						}
+					})
+				})
+				Promise.all(map(allProductId, _itemLibFetch)).then(() => setLoading(false))
 			})
-			.catch(error => {
+		}
+	}, [PersonalizedSetting?.productConfig?.initial_product_id])
+
+	function _itemInfoFetch() {
+		$.ajax({ url: `https://wanderprints.com/products/${itemSlug}.js` }).done(response => {
+			try { response = typeof response === "string" ? JSON.parse(response) : response } catch (error) { }
+			setItemInfo(response)
+		}).fail(error => {
+			console.log('error: ', error);
+			setErrorMsg(error.toString())
+		})
+	}
+
+	function _itemPersonalizedFetch() {
+		$.ajax({ url: `https://sh.customily.com/api/settings/unified/${itemSlug}?shop=${shop}` }).done(response => {
+			try { response = typeof response === "string" ? JSON.parse(response) : response } catch (error) { }
+			setPersonalizedSetting(response)
+			setPersonalizedSetOps(sortBy(get(head(get(response, "sets", [])), "options", []), "sort_id"))
+		}).fail(error => {
+			console.log('error: ', error);
+			setErrorMsg(error.toString())
+		})
+	}
+
+	function _itemLibFetch(productId: any) {
+		if (!productId) return Promise.resolve(true)
+		return new Promise(resolve => {
+			$.ajax({ url: `https://app.customily.com/api/Product/GetProduct?productId=${productId}` }).done(response => {
+				try { response = typeof response === "string" ? JSON.parse(response) : response } catch (error) { }
+				setPersonalizedProduct([
+					...PersonalizedProduct,
+					response
+				])
+				resolve(true)
+			}).fail(error => {
 				console.log('error: ', error);
 				setErrorMsg(error.toString())
-			});
+				resolve(true)
+			})
+		})
 	}
-	return <div>
-		{
-			errorMsg && <Alert color="danger" className="text-center mt-1 p-2"><strong>*Error:</strong> <i>{errorMsg}.</i></Alert>
+
+	function handleSubmit() {
+		let images = filter(
+			map(get(ItemInfo, "images", []), img => startsWith(img, "//") ? window.location.protocol + img : img),
+			img => !startsWith(img, "data:image")
+		)
+
+		let url = startsWith(get(ItemInfo, "url", ""), "//")
+			? window.location.protocol + get(ItemInfo, "url", "")
+			: startsWith(get(ItemInfo, "url", ""), "/")
+				? window.location.origin + get(ItemInfo, "url", "")
+				: get(ItemInfo, "url", "")
+		if (!url) {
+			url = window.location.href
 		}
-		<div className="text-justify"><strong>{itemTitle}</strong></div>
-		<div className="d-flex flex-row justify-content-start flex-wrap mt-1">
-			{
-				itemImages.map(img => {
-					return <img src={img} width="33%" height="100%" />
-				})
+
+		const fullItemInfo = {
+			origin_id: get(ItemInfo, "id", ""),
+			title: get(ItemInfo, "title", ""),
+			slug: get(ItemInfo, "handle", ""),
+			description: get(ItemInfo, "description", ""),
+			images: images,
+			url: url,
+			initial_product_id: get(PersonalizedSetting, ["productConfig", "initial_product_id"]),
+			source: window.location.origin,
+			variations: map(get(PersonalizedSetting, ["productConfig", "variations"]), vrt => {
+				return {
+					origin_id: get(vrt, "id", ""),
+					name: get(vrt, "name", ""),
+					position: get(vrt, "position", ""),
+					values: map(get(vrt, "values"), value => {
+						return {
+							value: get(value, "value", ""),
+							image_id: get(value, "image_id", ""),
+						}
+					}),
+					functions: map(get(vrt, "functions"), fct => {
+						return {
+							origin_id: get(fct, "id", ""),
+							type: get(fct, "type", ""),
+							image_id: get(fct, "image_id", "")
+						}
+					}),
+				}
+			}),
+			personalized_option: map(PersonalizedSetOps, option => {
+				return {
+					origin_id: get(option, "id", ""),
+					type: get(option, "type", ""),
+					label: get(option, "label", ""),
+					sort_id: get(option, "sort_id", ""),
+					required: get(option, "required", false),
+					hide_visually: get(option, "hide_visually", false),
+					values: map(get(option, "values"), value => {
+						return {
+							origin_id: get(value, "id", ""),
+							value: get(value, "value", ""),
+							sort_id: get(value, "sort_id", ""),
+							image_id: get(value, "image_id", ""),
+							product_id: get(value, "product_id", ""),
+							thumb_image: get(value, "thumb_image", ""),
+						}
+					}),
+					functions: map(get(option, "functions"), fct => {
+						return {
+							origin_id: get(fct, "id", ""),
+							type: get(fct, "type", ""),
+							image_id: get(fct, "image_id", "")
+						}
+					}),
+					conditions: map(get(option, "conditions"), cdt => {
+						return {
+							origin_id: get(cdt, "id", ""),
+							action: get(cdt, "action", ""),
+							watch_option: get(cdt, "watch_option", ""),
+							desired_value: get(cdt, "desired_value", ""),
+							combination_operator: get(cdt, "combination_operator", ""),
+						}
+					}),
+				}
+			}),
+			personalized_library: map(PersonalizedProduct, PsnlProduct => {
+				return {
+					origin_id: get(PsnlProduct, "id", ""),
+					width: get(PsnlProduct, "width", ""),
+					height: get(PsnlProduct, "height", ""),
+					thumb_image: startsWith(get(PsnlProduct, "thumbnailPath", ""), "/")
+						? "https://app.customily.com" + get(PsnlProduct, "thumbnailPath", "")
+						: get(PsnlProduct, "thumbnailPath", ""),
+					preview: map(get(PsnlProduct, ["preview", "imagePlaceHoldersPreview"]), iphp => {
+						return {
+							origin_id: get(iphp, "id", ""),
+							uuid: get(iphp, "uuid", ""),
+							width: get(iphp, "width", ""),
+							height: get(iphp, "height", ""),
+							centerX: get(iphp, "centerX", ""),
+							centerY: get(iphp, "centerY", ""),
+							rotation: get(iphp, "rotation", ""),
+							opacity: get(iphp, "opacity", ""),
+							image_library_id: get(iphp, "imageLibraryId", ""),
+							z_index: get(iphp, "zIndex", ""),
+						}
+					})
+				}
+			})
+		}
+		console.log(fullItemInfo);
+		console.log(PersonalizedProduct);
+		console.log(PersonalizedSetOps)
+		setLoading(true)
+		setErrorMsg("")
+		setSuccessMsg("")
+		savePersonalizeItem({
+			variables: {
+				data: fullItemInfo
+			},
+			fetchPolicy: "network-only"
+		}).then(response => {
+			console.log('response: ', response);
+			setLoading(false)
+			setSuccessMsg("Save successfuly!")
+		}).catch(error => {
+			console.log('error: ', error);
+			setLoading(false)
+			setErrorMsg("Error, try again later!")
+		})
+	}
+
+	function findLibraryId(option: any) {
+		const opFunction = head(get(option, "functions", []))
+		if (!opFunction) return
+		let libraryId = null
+		filter(PersonalizedProduct, PsnlProduct => {
+			const imagePlaceHoldersPreviews = get(PsnlProduct, ["preview", "imagePlaceHoldersPreview"], [])
+			let cLibraryId = get(find(imagePlaceHoldersPreviews, imagePlaceHoldersPreview => {
+				return get(opFunction, "image_id", null) &&
+					get(imagePlaceHoldersPreview, "id", "") &&
+					String(get(imagePlaceHoldersPreview, "id", "")) === String(get(opFunction, "image_id", null))
+			}), "imageLibraryId", "")
+			if (cLibraryId) {
+				libraryId = cLibraryId
 			}
+		})
+		return libraryId
+	}
+
+	function renderOptions() {
+		const PsnlOpsChuck = chunk(PersonalizedSetOps, 10)
+		let PsnlOpsChuckForRender: any = []
+		for (let index = 0; index < parseInt(Page); index++) {
+			PsnlOpsChuckForRender = [
+				...PsnlOpsChuckForRender,
+				...get(PsnlOpsChuck, index, [])
+			]
+		}
+		return map(PsnlOpsChuckForRender, option => {
+			return <div key={get(option, "id", "")} className="mt-2">
+				<div><strong>{get(option, "label", "")}</strong></div>
+				<div className="container-fluid">{renderOption(option)}</div>
+			</div>
+		})
+	}
+
+
+	function renderOption(option: any) {
+		const opType = get(option, "type", "")
+		const values = sortBy(get(option, "values", []), "sort_id")
+		const id = get(option, "id")
+		switch (opType) {
+			case "Dropdown":
+				return <Input type="select" name={id}>
+					{
+						map(values, value => {
+							return <option key={get(value, "id", "")} value={get(value, "id", "")}>{get(value, "value", "")}</option>
+						})
+					}
+				</Input>
+			case "Text Input":
+				return <Input type="text" name={id} />
+			case "Swatch":
+				// if (get(option, "hide_visually")) return false
+				return <Row className={`flex-row flex-nowrap item-options-row ${Array.isArray(values) && values.length > 6 ? "ext-scroll" : ""}`}>
+					{
+						map(values, value => {
+							return <Col sm="2" key={get(value, "id", "")} className="text-center align-items-center justify-content-center p-0 item-options-col border"
+								style={{ backgroundColor: get(value, "bg_color", "") }}
+								onClick={() => {
+									const libraryId = findLibraryId(option)
+									if (!libraryId) return
+									console.log(`https://app.customily.com/api/Libraries/${libraryId}/Elements/Position/${get(value, "image_id", "")}`);
+									$.ajax({ url: `https://app.customily.com/api/Libraries/${libraryId}/Elements/Position/${get(value, "image_id", "")}` }).done(response => {
+										try { response = typeof response === "string" ? JSON.parse(response) : response } catch (error) { }
+										const imageName = last(split(response?.Path, "/"))
+										window.open(`https://cdn.customily.com/product-images/${imageName}`)
+									}).fail(error => {
+										console.log('error: ', error);
+										setErrorMsg(error.toString())
+									})
+								}} >
+								{get(value, "thumb_image", null) ? <img src={get(value, "thumb_image", "")} width="100%" height="auto" /> : false}
+							</Col>
+						})
+					}
+				</Row>
+			default:
+				break;
+		}
+	}
+
+	return itemSlug ? <div>
+		{
+			ErrorMsg && <Alert color="danger" className="text-center mt-1 p-2"><strong>*Error:</strong> <i>{ErrorMsg}.</i></Alert>
+		}
+		{
+			SuccessMsg && <Alert color="success" className="text-center mt-1 p-2"><i>{SuccessMsg}.</i></Alert>
+		}
+		{
+			Loading && <div className='position-absolute w-100 h-100 top-0 bottom-0 start-0 end-0 d-flex justify-content-center align-items-center overlay-div'>
+				<Spinner color='primary' />
+			</div>
+		}
+		<ItemInfoComponent title={get(ItemInfo, "title")} images={get(ItemInfo, "images", [])} />
+
+		<Card className="mt-3">
+			<CardHeader><strong>Personalized options</strong></CardHeader>
+			<CardBody>
+				{renderOptions()}
+				<div className="mt-3 d-flex flex-row justify-content-between">
+					<NavLink onClick={() => setPage(9999)} className='ml-1 d-flex flex-nowrap justify-content-end align-content-center align-items-center text-primary' style={{ cursor: "pointer" }}>
+						<span style={{ marginLeft: "3px" }} className='text-nowrap'>Show all</span>
+						<ChevronDown style={{ marginLeft: "3px" }} size={14} />
+					</NavLink>
+					<NavLink onClick={() => setPage(parseInt(Page) + 1)} className='ml-1 d-flex flex-nowrap justify-content-end align-content-center align-items-center text-primary' style={{ cursor: "pointer" }}>
+						<span style={{ marginLeft: "3px" }} className='text-nowrap'>Show more</span>
+						<ChevronDown style={{ marginLeft: "3px" }} size={14} />
+					</NavLink>
+				</div>
+			</CardBody>
+		</Card>
+		<div className="position-absolute start-0 bottom-0 end-0 bg-white d-flex justify-content-end align-items-right p-2 border-top footer-action">
+			<Button size="xs" color="success" className="py-1 d-flex justify-content-center align-items-center" onClick={handleSubmit}><Save size={14} /> <span style={{ marginLeft: "3px" }}>Save item</span></Button>
 		</div>
-	</div>
+	</div> : <>Item not found</>
 }

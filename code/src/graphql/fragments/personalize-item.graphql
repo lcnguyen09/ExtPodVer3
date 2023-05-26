@@ -1,0 +1,16 @@
+fragment PersonalizeItem on PersonalizeItem {
+    _id
+    origin_id
+    title
+    slug
+    description
+    images
+    url
+    initial_product_id
+    source
+}
+
+fragment PersonalizeItemResponse on PersonalizeItemResponse {
+    status
+    message
+}

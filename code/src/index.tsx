@@ -9,5 +9,9 @@ if (DEV_MODE) {
 }
 document.body.appendChild(rootElement)
 $(document).ready(function () {
-    ReactDOM.createRoot(rootElement).render(<App />);
+    // if (
+    //     ["localhost"].includes(window.location.hostname)
+    // ) {
+        ReactDOM.createRoot(rootElement).render(<App />)
+    // }
 });

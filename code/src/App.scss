@@ -64,8 +64,38 @@ html {
             font-family: sans-serif !important;
             color: #000;
 
+            /* width */
+            ::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+            }
+
+            /* Track */
+            ::-webkit-scrollbar-track {
+                background: var(--bs-gray-300);
+            }
+
+            /* Handle */
+            ::-webkit-scrollbar-thumb {
+                background: var(--bs-gray-600);
+                border-radius: 6px;
+            }
+
+            /* Handle on hover */
+            ::-webkit-scrollbar-thumb:hover {
+                background: var(--bs-gray-900);
+                width: 20px;
+                height: 20px;
+            }
+
+            &::-webkit-scrollbar:horizontal {
+                width: 0px;
+                height: 0px;
+            }
+
             &.dev-mode {
                 right: var(--ext-width);
+
                 #podorder-ext-app-main {
                     border-top-right-radius: var(--bs-card-border-radius);
                 }
@@ -75,12 +105,39 @@ html {
                 border-bottom-left-radius: 0px;
                 border-bottom-right-radius: 0px;
                 border-top-right-radius: 0px;
+
+                #podorder-ext-app-header {
+                    z-index: 2147483647;
+                    height: 35px;
+                }
+
                 #podorder-ext-app-body {
-                    overflow: scroll;
+                    height: calc(100% - 35px);
+                    overflow: hidden;
+                    &::-webkit-scrollbar:horizontal {
+                        width: 0px;
+                        height: 0px;
+                    }
+
                     .overlay-div {
                         z-index: 2147483647;
                         background-color: rgba(0, 0, 0, 0.5);
                         backdrop-filter: grayscale(1);
+                    }
+
+                    #podorder-ext-app-body-card {
+                        overflow-y: scroll;
+
+                        &::-webkit-scrollbar:horizontal {
+                            width: 0px;
+                            height: 0px;
+                        }
+
+                        .footer-action {
+                            button {
+                                font-size: 12px;
+                            }
+                        }
                     }
                 }
             }
@@ -100,8 +157,44 @@ html {
                 box-shadow: initial;
                 font-size: initial;
             }
+
             .cursor-pointer {
                 cursor: pointer !important;
+            }
+
+            .ext-square {
+                position: relative;
+                width: 25%;
+
+                .ext-square-content {
+                    position: absolute;
+                    width: 96%;
+                    height: 96%;
+                    left: 2%;
+                    top: 2%;
+                }
+            }
+
+            .ext-square:after {
+                content: "";
+                display: block;
+                padding-bottom: 100%;
+            }
+
+            .ext-scroll {
+                overflow: scroll;
+
+                &::-webkit-scrollbar:vertical {
+                    width: 0px;
+                    height: 0px;
+                }
+            }
+
+            .item-options-row {
+                .item-options-col {
+                    min-width: 38px;
+                    min-height: 38px;
+                }
             }
         }
 
@@ -117,6 +210,7 @@ html {
                 }
             }
         }
+
         &.podorder-ext-app-nomal {
             #podorder-ext-app {
                 height: var(--ext-height);

@@ -193,7 +193,7 @@ export type File = {
   _id: Scalars['String'];
   created_at: Scalars['Date'];
   filesize: Scalars['Float'];
-  height?: Maybe<Scalars['Float']>;
+  height: Scalars['Float'];
   mimetype: Scalars['String'];
   name: Scalars['String'];
   sizes?: Maybe<Array<FileSize>>;
@@ -201,7 +201,7 @@ export type File = {
   upload_id?: Maybe<Scalars['String']>;
   user: User;
   user_id: Scalars['String'];
-  width?: Maybe<Scalars['Float']>;
+  width: Scalars['Float'];
 };
 
 export type FileMutationResponse = {
@@ -292,8 +292,10 @@ export type InputMockup = {
 
 export type InputMockupImage = {
   _id: Scalars['ID'];
+  height: Scalars['Float'];
   image?: InputMaybe<InputFile>;
   prints?: InputMaybe<Array<InputMockupPrint>>;
+  width: Scalars['Float'];
 };
 
 export type InputMockupLayer = {
@@ -344,6 +346,84 @@ export type InputPermission = {
   accept: Scalars['Boolean'];
   id: Scalars['String'];
   name: Scalars['String'];
+};
+
+export type InputPersonalizeItem = {
+  description?: InputMaybe<Scalars['String']>;
+  images?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  initial_product_id?: InputMaybe<Scalars['String']>;
+  origin_id?: InputMaybe<Scalars['String']>;
+  personalized_library?: InputMaybe<Array<InputMaybe<InputPersonalizeItemLibrary>>>;
+  personalized_option?: InputMaybe<Array<InputMaybe<InputPersonalizeItemOption>>>;
+  slug?: InputMaybe<Scalars['String']>;
+  source?: InputMaybe<Scalars['String']>;
+  title?: InputMaybe<Scalars['String']>;
+  url?: InputMaybe<Scalars['String']>;
+  variations?: InputMaybe<Array<InputMaybe<InputPersonalizeItemVariation>>>;
+};
+
+export type InputPersonalizeItemCondition = {
+  action?: InputMaybe<Scalars['String']>;
+  combination_operator?: InputMaybe<Scalars['String']>;
+  desired_value?: InputMaybe<Scalars['String']>;
+  origin_id?: InputMaybe<Scalars['String']>;
+  watch_option?: InputMaybe<Scalars['String']>;
+};
+
+export type InputPersonalizeItemFunction = {
+  image_id?: InputMaybe<Scalars['String']>;
+  origin_id?: InputMaybe<Scalars['String']>;
+  type?: InputMaybe<Scalars['String']>;
+};
+
+export type InputPersonalizeItemLibrary = {
+  height?: InputMaybe<Scalars['String']>;
+  origin_id?: InputMaybe<Scalars['String']>;
+  preview?: InputMaybe<Array<InputMaybe<InputPersonalizeItemLibraryPreview>>>;
+  thumb_image?: InputMaybe<Scalars['String']>;
+  width?: InputMaybe<Scalars['String']>;
+};
+
+export type InputPersonalizeItemLibraryPreview = {
+  centerX?: InputMaybe<Scalars['String']>;
+  centerY?: InputMaybe<Scalars['String']>;
+  height?: InputMaybe<Scalars['String']>;
+  image_library_id?: InputMaybe<Scalars['String']>;
+  opacity?: InputMaybe<Scalars['String']>;
+  origin_id?: InputMaybe<Scalars['String']>;
+  rotation?: InputMaybe<Scalars['String']>;
+  uuid?: InputMaybe<Scalars['String']>;
+  width?: InputMaybe<Scalars['String']>;
+  z_index?: InputMaybe<Scalars['String']>;
+};
+
+export type InputPersonalizeItemOption = {
+  conditions?: InputMaybe<Array<InputMaybe<InputPersonalizeItemCondition>>>;
+  functions?: InputMaybe<Array<InputMaybe<InputPersonalizeItemFunction>>>;
+  hide_visually?: InputMaybe<Scalars['Boolean']>;
+  label?: InputMaybe<Scalars['String']>;
+  origin_id?: InputMaybe<Scalars['String']>;
+  required?: InputMaybe<Scalars['Boolean']>;
+  sort_id?: InputMaybe<Scalars['String']>;
+  type?: InputMaybe<Scalars['String']>;
+  values?: InputMaybe<Array<InputMaybe<InputPersonalizeItemValue>>>;
+};
+
+export type InputPersonalizeItemValue = {
+  image_id?: InputMaybe<Scalars['String']>;
+  origin_id?: InputMaybe<Scalars['ID']>;
+  product_id?: InputMaybe<Scalars['String']>;
+  sort_id?: InputMaybe<Scalars['String']>;
+  thumb_image?: InputMaybe<Scalars['String']>;
+  value?: InputMaybe<Scalars['String']>;
+};
+
+export type InputPersonalizeItemVariation = {
+  functions?: InputMaybe<Array<InputMaybe<InputPersonalizeItemFunction>>>;
+  name?: InputMaybe<Scalars['String']>;
+  origin_id?: InputMaybe<Scalars['String']>;
+  position?: InputMaybe<Scalars['String']>;
+  values?: InputMaybe<Array<InputMaybe<InputPersonalizeItemValue>>>;
 };
 
 export type InputSettingNameValue = {
@@ -502,6 +582,7 @@ export type Mockup = {
   name: Scalars['String'];
   product: Product;
   product_id: Scalars['ID'];
+  type: Scalars['String'];
   updated_at?: Maybe<Scalars['Date']>;
   user: User;
   user_id: Scalars['ID'];
@@ -520,10 +601,21 @@ export type MockupImage = {
 export type MockupLayer = {
   __typename?: 'MockupLayer';
   _id: Scalars['ID'];
+  height: Scalars['Float'];
+  image?: Maybe<File>;
+  is_bg: Scalars['Boolean'];
   layers?: Maybe<Array<MockupLayer>>;
   name: Scalars['String'];
+  rotation: Scalars['Float'];
+  scale_x: Scalars['Float'];
+  scale_y: Scalars['Float'];
   settings?: Maybe<Array<SettingNameValue>>;
+  skew_x: Scalars['Float'];
+  skew_y: Scalars['Float'];
   type: Scalars['String'];
+  width: Scalars['Float'];
+  x: Scalars['Float'];
+  y: Scalars['Float'];
 };
 
 export type MockupMutation = {
@@ -583,6 +675,7 @@ export type Mutation = {
   saveIP?: Maybe<Ip>;
   saveMockup?: Maybe<MockupMutation>;
   saveOrganization?: Maybe<OrganizationMutationResponse>;
+  savePersonalizeItem?: Maybe<PersonalizeItemResponse>;
   saveSiteConfig?: Maybe<SiteConfig>;
   saveTask?: Maybe<TaskMutationResponse>;
   saveUser: UserMutateResponse;
@@ -749,6 +842,11 @@ export type MutationSaveOrganizationArgs = {
 };
 
 
+export type MutationSavePersonalizeItemArgs = {
+  data?: InputMaybe<InputPersonalizeItem>;
+};
+
+
 export type MutationSaveSiteConfigArgs = {
   inputSiteConfig: InputSiteConfig;
 };
@@ -845,6 +943,7 @@ export type MutationUploadFileArgs = {
   id?: InputMaybe<Scalars['String']>;
   is_chunk: Scalars['Boolean'];
   is_end?: InputMaybe<Scalars['Boolean']>;
+  is_mockup_layer?: InputMaybe<Scalars['Boolean']>;
   mimetype: Scalars['String'];
   part_number?: InputMaybe<Scalars['Int']>;
 };
@@ -915,6 +1014,102 @@ export type Permission = {
   accept: Scalars['Boolean'];
   id: Scalars['String'];
   name: Scalars['String'];
+};
+
+export type PersonalizeItem = {
+  __typename?: 'PersonalizeItem';
+  _id: Scalars['ID'];
+  description: Scalars['String'];
+  images?: Maybe<Array<Scalars['String']>>;
+  initial_product_id: Scalars['String'];
+  origin_id: Scalars['String'];
+  personalized_library?: Maybe<Array<Maybe<PersonalizeItemLibrary>>>;
+  personalized_option?: Maybe<Array<Maybe<PersonalizeItemOption>>>;
+  slug: Scalars['String'];
+  source: Scalars['String'];
+  title: Scalars['String'];
+  url: Scalars['String'];
+  variations?: Maybe<Array<Maybe<PersonalizeItemVariation>>>;
+};
+
+export type PersonalizeItemCondition = {
+  __typename?: 'PersonalizeItemCondition';
+  action: Scalars['String'];
+  combination_operator: Scalars['String'];
+  desired_value: Scalars['String'];
+  origin_id: Scalars['String'];
+  watch_option: Scalars['String'];
+};
+
+export type PersonalizeItemFunction = {
+  __typename?: 'PersonalizeItemFunction';
+  image_id: Scalars['String'];
+  origin_id: Scalars['String'];
+  type: Scalars['String'];
+};
+
+export type PersonalizeItemLibrary = {
+  __typename?: 'PersonalizeItemLibrary';
+  _id: Scalars['ID'];
+  height: Scalars['String'];
+  origin_id: Scalars['String'];
+  preview?: Maybe<Array<Maybe<PersonalizeItemLibraryPreview>>>;
+  thumb_image: Scalars['String'];
+  width: Scalars['String'];
+};
+
+export type PersonalizeItemLibraryPreview = {
+  __typename?: 'PersonalizeItemLibraryPreview';
+  centerX: Scalars['String'];
+  centerY: Scalars['String'];
+  height: Scalars['String'];
+  image_library_id: Scalars['String'];
+  opacity: Scalars['String'];
+  origin_id: Scalars['String'];
+  rotation: Scalars['String'];
+  uuid: Scalars['String'];
+  width: Scalars['String'];
+  z_index: Scalars['String'];
+};
+
+export type PersonalizeItemOption = {
+  __typename?: 'PersonalizeItemOption';
+  _id: Scalars['ID'];
+  conditions?: Maybe<Array<Maybe<PersonalizeItemCondition>>>;
+  functions?: Maybe<Array<Maybe<PersonalizeItemFunction>>>;
+  hide_visually: Scalars['Boolean'];
+  label: Scalars['String'];
+  origin_id: Scalars['String'];
+  required: Scalars['Boolean'];
+  sort_id: Scalars['String'];
+  type: Scalars['String'];
+  values?: Maybe<Array<Maybe<PersonalizeItemValue>>>;
+};
+
+export type PersonalizeItemResponse = {
+  __typename?: 'PersonalizeItemResponse';
+  message: Scalars['String'];
+  status: Scalars['String'];
+};
+
+export type PersonalizeItemValue = {
+  __typename?: 'PersonalizeItemValue';
+  image_id: Scalars['String'];
+  origin_id: Scalars['String'];
+  product_id: Scalars['String'];
+  sort_id: Scalars['String'];
+  thumb_image: Scalars['String'];
+  value: Scalars['String'];
+};
+
+export type PersonalizeItemVariation = {
+  __typename?: 'PersonalizeItemVariation';
+  _id: Scalars['ID'];
+  functions?: Maybe<Array<Maybe<PersonalizeItemFunction>>>;
+  name: Scalars['String'];
+  origin_id: Scalars['String'];
+  position: Scalars['String'];
+  values?: Maybe<Array<Maybe<PersonalizeItemValue>>>;
 };
 
 export type Product = {
@@ -1064,6 +1259,7 @@ export type QueryDashboardSummaryArgs = {
 
 export type QueryFilesPaginateArgs = {
   accept?: InputMaybe<Scalars['String']>;
+  is_mockup_layer?: InputMaybe<Scalars['Boolean']>;
   page: Scalars['Int'];
   perpage: Scalars['Int'];
   search?: InputMaybe<Scalars['String']>;
@@ -1130,6 +1326,7 @@ export type QueryTasksArgs = {
 
 export type QueryTasksPaginateArgs = {
   account_id?: InputMaybe<Scalars['String']>;
+  assign_id?: InputMaybe<Scalars['ID']>;
   assignee_email: Scalars['String'];
   board_id?: InputMaybe<Scalars['String']>;
   due_end: Scalars['Date'];
@@ -1627,6 +1824,10 @@ export type OrganizationDetailFragment = { __typename?: 'Organization', _id: str
 
 export type OrganizationMutationResponseFragment = { __typename?: 'OrganizationMutationResponse', success?: boolean | null, message?: string | null, organization?: { __typename?: 'Organization', _id: string, name: string, description: string, user_id: string, total_workspaces: number, total_tasks: number, created_at: any, updated_at?: any | null, user?: { __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, role: string, organization_id: string, created_at: any, working_hours_per_month: number, bonus_per_hour: number, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null } | null, members?: Array<{ __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, role: string, organization_id: string, created_at: any, working_hours_per_month: number, bonus_per_hour: number, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null }> | null } | null, errorFields?: Array<{ __typename?: 'ErrorField', name: string, message: string }> | null };
 
+export type PersonalizeItemFragment = { __typename?: 'PersonalizeItem', _id: string, origin_id: string, title: string, slug: string, description: string, images?: Array<string> | null, url: string, initial_product_id: string, source: string };
+
+export type PersonalizeItemResponseFragment = { __typename?: 'PersonalizeItemResponse', status: string, message: string };
+
 export type SignInMutationVariables = Exact<{
   signInInput: SignInInput;
 }>;
@@ -1638,6 +1839,13 @@ export type SignOutMutationVariables = Exact<{ [key: string]: never; }>;
 
 
 export type SignOutMutation = { __typename?: 'Mutation', signOut: { __typename?: 'SignOutResponse', success: boolean, message: string } };
+
+export type SavePersonalizeItemMutationVariables = Exact<{
+  data: InputPersonalizeItem;
+}>;
+
+
+export type SavePersonalizeItemMutation = { __typename?: 'Mutation', savePersonalizeItem?: { __typename?: 'PersonalizeItemResponse', status: string, message: string } | null };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1807,6 +2015,25 @@ export const OrganizationMutationResponseFragmentDoc = gql`
 }
     ${OrganizationDetailFragmentDoc}
 ${ErrorFieldResponseFragmentDoc}`;
+export const PersonalizeItemFragmentDoc = gql`
+    fragment PersonalizeItem on PersonalizeItem {
+  _id
+  origin_id
+  title
+  slug
+  description
+  images
+  url
+  initial_product_id
+  source
+}
+    `;
+export const PersonalizeItemResponseFragmentDoc = gql`
+    fragment PersonalizeItemResponse on PersonalizeItemResponse {
+  status
+  message
+}
+    `;
 export const SignInDocument = gql`
     mutation SignIn($signInInput: SignInInput!) {
   signIn(signInInput: $signInInput) {
@@ -1872,6 +2099,39 @@ export function useSignOutMutation(baseOptions?: Apollo.MutationHookOptions<Sign
 export type SignOutMutationHookResult = ReturnType<typeof useSignOutMutation>;
 export type SignOutMutationResult = Apollo.MutationResult<SignOutMutation>;
 export type SignOutMutationOptions = Apollo.BaseMutationOptions<SignOutMutation, SignOutMutationVariables>;
+export const SavePersonalizeItemDocument = gql`
+    mutation SavePersonalizeItem($data: InputPersonalizeItem!) {
+  savePersonalizeItem(data: $data) {
+    ...PersonalizeItemResponse
+  }
+}
+    ${PersonalizeItemResponseFragmentDoc}`;
+export type SavePersonalizeItemMutationFn = Apollo.MutationFunction<SavePersonalizeItemMutation, SavePersonalizeItemMutationVariables>;
+
+/**
+ * __useSavePersonalizeItemMutation__
+ *
+ * To run a mutation, you first call `useSavePersonalizeItemMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSavePersonalizeItemMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [savePersonalizeItemMutation, { data, loading, error }] = useSavePersonalizeItemMutation({
+ *   variables: {
+ *      data: // value for 'data'
+ *   },
+ * });
+ */
+export function useSavePersonalizeItemMutation(baseOptions?: Apollo.MutationHookOptions<SavePersonalizeItemMutation, SavePersonalizeItemMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SavePersonalizeItemMutation, SavePersonalizeItemMutationVariables>(SavePersonalizeItemDocument, options);
+      }
+export type SavePersonalizeItemMutationHookResult = ReturnType<typeof useSavePersonalizeItemMutation>;
+export type SavePersonalizeItemMutationResult = Apollo.MutationResult<SavePersonalizeItemMutation>;
+export type SavePersonalizeItemMutationOptions = Apollo.BaseMutationOptions<SavePersonalizeItemMutation, SavePersonalizeItemMutationVariables>;
 export const MeDocument = gql`
     query Me {
   me {
