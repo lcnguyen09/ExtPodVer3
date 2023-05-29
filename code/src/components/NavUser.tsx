@@ -34,9 +34,11 @@ export default function NavUser() {
         <NavLink onClick={() => togglePopoverOpen(!popoverOpen)} className='d-flex flex-nowrap justify-content-end align-content-center align-items-center' style={{ cursor: "pointer" }}>
             <User style={{ marginLeft: "12px" }} size={18} />
             {
-                currentToken?.access_token === null || currentToken?.access_token === undefined || (currentToken?.access_token && !currentUser?._id)
+                currentToken?.access_token === null || currentToken?.access_token === undefined ||
+                currentToken?.token === null || currentToken?.token === undefined ||
+                currentUser === null
                     ? <span style={{ marginLeft: "3px" }} className='text-nowrap'><Spinner size="sm" /></span>
-                    : currentToken?.access_token === ""
+                    : !currentUser?._id
                         ? <span style={{ marginLeft: "3px" }} className='text-nowrap'>Login</span>
                         : <span style={{ marginLeft: "3px" }} className='text-nowrap'>{currentUser?.first_name} {currentUser?.last_name}</span>
             }

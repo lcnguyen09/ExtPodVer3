@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import {
     useMeQuery,
-} from './../graphql/graphql'
+} from './../graphql_task/graphql'
 import { find } from 'lodash'
 
 export function usePreviousValue(value: any) {

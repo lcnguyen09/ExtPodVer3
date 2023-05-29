@@ -1,4 +1,4 @@
-export const DEV_MODE = chrome.storage === undefined
+export const DEV_MODE = chrome.storage === undefined && false
 
 export const CONFIG_URL = "https://gist.githubusercontent.com/lcnguyen09/8e13773309c1bb9b260fb6629d3abf68/raw/pod-extension-config.json"
 

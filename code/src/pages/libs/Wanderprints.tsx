@@ -6,7 +6,7 @@ import { ChevronDown, Save } from "react-feather"
 import UiContext from './../../contexts/ui.context'
 import ItemInfoComponent from "./../../components/ItemInfo"
 import { DEV_MODE } from "./../../contexts/contants";
-import { useSavePersonalizeItemMutation } from "./../../graphql/graphql";
+import { useSavePersonalizeItemMutation } from "./../../graphql_task/graphql";
 
 const urlParams = new URLSearchParams(window.location.search);
 const myParam = urlParams.get('item');

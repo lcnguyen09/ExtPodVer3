@@ -12,7 +12,8 @@ import {
 	PAGE_ROUTES,
 	ACTION,
 	TOKEN,
-	CURRENT_USER
+	CURRENT_USER,
+	DOCKER
 } from "./type.context"
 import { get } from 'lodash'
 import $ from 'jquery'
@@ -34,7 +35,9 @@ const initialState = {
 	urlGraphql: URL_TASK_GRAPHQL,
 	pageRoute: "INIT",
 	currentUser: null,
-	currentToken: null
+	currentToken: null,
+	currentDocker: null,
+
 }
 
 export interface State {
@@ -46,6 +49,7 @@ export interface State {
 	pageRoute: PAGE_ROUTES,
 	currentUser: CURRENT_USER | null,
 	currentToken: TOKEN | null,
+	currentDocker: DOCKER | null
 }
 
 
@@ -61,7 +65,6 @@ function uiReducer(state: State, action: ACTION) {
 		case "SET_PAGE_ROUTE": { return { ...state, pageRoute: action.page } }
 		case "SET_CURRENT_USER": { return { ...state, currentUser: action.user || undefined } }
 		case "SET_CURRENT_TOKEN": {
-			
 			return {
 				...state, currentToken: {
 					...action.currentToken,
@@ -71,6 +74,9 @@ function uiReducer(state: State, action: ACTION) {
 				}
 			}
 		}
+		case "SET_CURRENT_DOCKER": {
+			return { ...state, currentDocker: action.currentDocker }
+		}
 		default: { return state }
 	}
 }
@@ -79,6 +85,8 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	const [accessToken, setAccessToken]: [string | null, (val: string) => void] = useStorage("_pod_ext_access_token") // eslint-disable-line
 	const [refreshToken, setRefreshToken]: [string | null, (val: string) => void] = useStorage("_pod_ext_refresh_token") // eslint-disable-line
 	const [token, setToken]: [string | null, (val: string) => void] = useStorage("_pod_ext_token") // eslint-disable-line
+	const [docker, setDocker]: [string | null, (val: string) => void] = useStorage("_pod_ext_docker") // eslint-disable-line
+
 	const [windowViewStorage, setWindowViewStorage]: [string | null, (val: string) => void] = useStorage("_pod_ext_view") // eslint-disable-line
 
 	const setAppLoading = (appLoading: boolean) => dispatch({ type: "SET_LOADING", appLoading })
@@ -89,7 +97,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	const setPageRoute = (page: PAGE_ROUTES) => dispatch({ type: "SET_PAGE_ROUTE", page })
 	const setCurrentUser = (user?: CURRENT_USER) => dispatch({ type: "SET_CURRENT_USER", user })
 	const setCurrentToken = (currentToken: TOKEN) => dispatch({ type: "SET_CURRENT_TOKEN", currentToken })
-
+	const setCurrentDocker = (currentDocker: DOCKER) => dispatch({ type: "SET_CURRENT_DOCKER", currentDocker })
 	const value = useMemo(() => ({
 		...state,
 		setAppLoading,
@@ -98,7 +106,8 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		setCurrentAppConfig,
 		setPageRoute,
 		setCurrentUser,
-		setCurrentToken
+		setCurrentToken,
+		setCurrentDocker
 	}), [state]) // eslint-disable-line
 
 	useEffect(() => {
@@ -137,6 +146,9 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		if (state.currentToken?.token !== undefined) {
 			setToken(state.currentToken?.token)
 		}
+		if (state.currentDocker?._id !== undefined) {
+			setDocker(state.currentDocker?._id)
+		}
 		switch (state.currentAppConfig?.mode) {
 			case "PersonalizeItemClaw":
 				if (state.currentToken?.access_token !== undefined && !!!state.currentToken?.access_token) {
@@ -156,7 +168,8 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		state.currentToken?.access_token, // eslint-disable-line
 		state.currentToken?.refresh_token, // eslint-disable-line
 		state.currentToken?.token, // eslint-disable-line
-		state.currentUser // eslint-disable-line
+		state.currentUser, // eslint-disable-line
+		state.currentDocker, // eslint-disable-line
 	]) // eslint-disable-line
 
 	useEffect(() => {

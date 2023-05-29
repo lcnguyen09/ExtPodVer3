@@ -4,7 +4,7 @@
 	"ts-node/register"
   ],
   "generates": {
-	"./src/graphql/graphql.tsx": {
+	"./src/graphql_task/graphql.tsx": {
 	  "schema": {
 		  "http://localhost:8085/graphql": {
 			"headers": {
@@ -14,7 +14,7 @@
 		  }
 	  },
 	  "documents": {
-		"./src/graphql/**/*.graphql": {
+		"./src/graphql_task/**/*.graphql": {
 		  "noRequire": true
 		}
 	  },

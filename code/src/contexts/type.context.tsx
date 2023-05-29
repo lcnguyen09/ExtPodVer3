@@ -1,17 +1,25 @@
 export type TOKEN = {
-    access_token?: String
-    refresh_token?: String
-    token_type?: String
-    expired_at?: String
-    token?: String
+    access_token?: string
+    refresh_token?: string
+    token_type?: string
+    expired_at?: string
+    token?: string
 }
 
 export type CURRENT_USER = {
-    _id: String
-    email: String
-    first_name: String
-    last_name: String
-    fullname: String
+    _id: string
+    email: string
+    first_name: string
+    last_name: string
+    fullname: string
+}
+
+export type DOCKER = {
+    _id: string
+    domain: string
+    label: string
+    server: string
+    sku: string
 }
 
 export type WINDOW_VIEWS = "NOMAL"
@@ -54,5 +62,5 @@ export type ACTION =
     }
     | {
         type: "SET_CURRENT_DOCKER"
-        docker: Docker | null
+        currentDocker: DOCKER | null
     }

@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import {
 	Button,
 	Form,
@@ -14,8 +14,9 @@ import {
 import UiContext from '../contexts/ui.context'
 import { Eye, EyeOff } from "react-feather"
 import $ from "jquery"
-import { useSignInMutation } from "./../graphql/graphql";
+import { useSignInMutation } from "./../graphql_task/graphql";
 import { URL_ACCOUNT_PODORDER } from "./../contexts/contants"
+import { drop, head, last } from "lodash";
 
 function Login() {
 	const [loading, setLoading]: [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(false)
@@ -31,6 +32,21 @@ function Login() {
 		currentAppConfig
 	} = UiContext.UseUIContext()
 	const [signInMutation] = useSignInMutation({ fetchPolicy: "network-only" })
+
+	useEffect(() => {
+		switch (currentAppConfig?.mode) {
+			case "PersonalizeItemClaw":
+				setEmail("lechinguyen09@gmail.com")
+				setPassword("lEchiguyE(!!93")
+				break;
+			case "SimpleItemClaw":
+				setEmail("lechinguyen09@gmail.com")
+				setPassword("abc123")
+				break;
+			default:
+				break;
+		}
+	}, [])
 
 	function signInTask() {
 		signInMutation({
@@ -71,12 +87,13 @@ function Login() {
 				password: password,
 			}
 		}).done(function (res) {
+			console.log('res: ', res);
 			if (res?._id) {
 				setCurrentUser({
 					_id: res?._id,
 					email: res?.email,
-					first_name: "",
-					last_name: "",
+					first_name: head(res?.name.split(" ")),
+					last_name: drop(res?.name.split(" ")).join(" "),
 					fullname: res?.name,
 				})
 				setCurrentToken({
