@@ -52,3 +52,7 @@ export type ACTION =
         type: "SET_CURRENT_TOKEN"
         currentToken: TOKEN | null
     }
+    | {
+        type: "SET_CURRENT_DOCKER"
+        docker: Docker | null
+    }
