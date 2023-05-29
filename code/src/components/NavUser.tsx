@@ -101,11 +101,11 @@ export default function NavUser() {
                             setCurrentDocker(find(currentUser?.docker, docker => docker?._id === get(data, "id", "")))
                         }}
                         value={
-                            get(currentDocker, "_id", "") ? {
-                                id: get(currentDocker, "_id", ""),
-                                value: get(currentDocker, "label", "") + " - " + get(currentDocker, "domain", "") + "." + get(currentDocker, "server", ""),
-                                label: <div className='d-flex flex-column'><strong>{get(currentDocker, "label", "")}</strong><i>{get(currentDocker, "domain", "") + "." + get(currentDocker, "server", "")}</i></div>
-                            } : {}
+                            {
+                                id: currentDocker?._id,
+                                value: currentDocker?._id ? get(currentDocker, "label", "") + " - " + get(currentDocker, "domain", "") + "." + get(currentDocker, "server", "") : "",
+                                label: currentDocker?._id ? <div className='d-flex flex-column'><strong>{get(currentDocker, "label", "")}</strong><i>{get(currentDocker, "domain", "") + "." + get(currentDocker, "server", "")}</i></div> : <></>
+                            }
                         }
                     />
                 </div> : false
