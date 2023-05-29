@@ -29,8 +29,10 @@ export default function Wanderprints() {
 	const [savePersonalizeItem] = useSavePersonalizeItemMutation({ fetchPolicy: "network-only" })
 
 	useEffect(() => {
-		_itemInfoFetch()
-		_itemPersonalizedFetch()
+		if (itemSlug) {
+			_itemInfoFetch()
+			_itemPersonalizedFetch()
+		}
 	}, [])
 
 	useEffect(() => {

@@ -1,69 +1,59 @@
 fragment User on User {
-    _id
-    first_name
-    last_name
-    email
-    role
-    organization_id
-    organization {
-        ... on OrganizationShortcut {
-            _id
-            name
-        }
-    }
-    created_at
-    working_hours_per_month
-    bonus_per_hour
+	_id
+	first_name
+	last_name
+	email
+	organization {
+		... on OrganizationShortcut {
+			_id
+			name
+		}
+	}
 }
 
 fragment Auth on Auth {
-    _id
-    first_name
-    last_name
-    email
-    role
-    created_at
-    permissions {
-        ...Permission
-    }
-    token {
-        ...AuthToken
-    }
+	_id
+	first_name
+	last_name
+	email
+	token {
+		...AuthToken
+	}
 }
 
 fragment SignOutResponse on SignOutResponse {
-    success
-    message
+	success
+	message
 }
 
 fragment AuthToken on AuthToken {
-    access_token
-    refresh_token
-    token_type
-    expired_at
+	access_token
+	refresh_token
+	token_type
+	expired_at
 }
 
 fragment UserMutateResponse on UserMutateResponse {
-    success
-    user {
-        ...User
-    }
-    message
-    errorFields {
-        ...ErrorFieldResponse
-    }
+	success
+	user {
+		...User
+	}
+	message
+	errorFields {
+		...ErrorFieldResponse
+	}
 }
 
 fragment RolePermission on RolePermission {
-    id
-    name
-    permissions {
-        ...Permission
-    }
+	id
+	name
+	permissions {
+		...Permission
+	}
 }
 
 fragment Permission on Permission {
-    id
-    name
-    accept
+	id
+	name
+	accept
 }

@@ -5,7 +5,7 @@ import UiContext from '../contexts/ui.context'
 
 
 export default function NavUser() {
-    const { currentUser, setCurrentUser, token, setToken, setPageRoute } = UiContext.UseUIContext()
+    const { currentUser, setCurrentUser, currentToken, setCurrentToken } = UiContext.UseUIContext()
     const [popoverOpen, togglePopoverOpen] = useState<boolean>(false)
     const wrapperRef = useRef<any>(null);
     useEffect(() => {
@@ -27,17 +27,16 @@ export default function NavUser() {
     }, [])
 
     function handleLogout() {
+        setCurrentToken()
         setCurrentUser()
-        setToken()
-        setPageRoute("LOGIN")
     }
     return (<div ref={wrapperRef} className='d-flex flex-column justify-content-end p-1 position-relative bg-light' style={{ borderBottom: "1px solid rgba(0, 0, 0, 0.075)" }}>
         <NavLink onClick={() => togglePopoverOpen(!popoverOpen)} className='d-flex flex-nowrap justify-content-end align-content-center align-items-center' style={{ cursor: "pointer" }}>
             <User style={{ marginLeft: "12px" }} size={18} />
             {
-                token?.access_token === null || token?.access_token === undefined || (token?.access_token && !currentUser?._id)
+                currentToken?.access_token === null || currentToken?.access_token === undefined || (currentToken?.access_token && !currentUser?._id)
                     ? <span style={{ marginLeft: "3px" }} className='text-nowrap'><Spinner size="sm" /></span>
-                    : token?.access_token === ""
+                    : currentToken?.access_token === ""
                         ? <span style={{ marginLeft: "3px" }} className='text-nowrap'>Login</span>
                         : <span style={{ marginLeft: "3px" }} className='text-nowrap'>{currentUser?.first_name} {currentUser?.last_name}</span>
             }

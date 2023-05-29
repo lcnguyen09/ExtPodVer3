@@ -10,41 +10,42 @@ import React, {
 import {
 	WINDOW_VIEWS,
 	PAGE_ROUTES,
-	ACTION
+	ACTION,
+	TOKEN,
+	CURRENT_USER
 } from "./type.context"
-import {
-	Maybe,
-	Auth,
-	AuthToken,
-} from "./../graphql/graphql"
 import { get } from 'lodash'
 import $ from 'jquery'
 import {
-	URL_GRAPHQL,
+	CONFIG_URL,
+	URL_TASK_GRAPHQL,
 } from "./contants"
 
 interface UIManageContextProps {
-	children?: ReactNode,
-	[name: string]: Maybe<any>
+	children?: ReactNode
 }
 
 
 const initialState = {
 	appLoading: true,
 	windowView: null,
-	urlGraphql: URL_GRAPHQL,
+	appConfig: null,
+	currentAppConfig: null,
+	urlGraphql: URL_TASK_GRAPHQL,
 	pageRoute: "INIT",
 	currentUser: null,
-	token: null
+	currentToken: null
 }
 
 export interface State {
 	appLoading: boolean,
 	windowView: WINDOW_VIEWS,
+	appConfig: any,
+	currentAppConfig: any,
 	urlGraphql: string,
 	pageRoute: PAGE_ROUTES,
-	currentUser: Auth | null,
-	token: AuthToken | null,
+	currentUser: CURRENT_USER | null,
+	currentToken: TOKEN | null,
 }
 
 
@@ -53,45 +54,51 @@ UIContext.displayName = "UIContext"
 
 function uiReducer(state: State, action: ACTION) {
 	switch (action.type) {
-		case "SET_WINDOW_VIEW": {
-			return { ...state, windowView: get(action, "view") }
-		}
-		case "SET_LOADING": {
-			return { ...state, appLoading: !!action.appLoading }
-		}
-		case "SET_PAGE_ROUTE": {
-			return { ...state, pageRoute: action.page }
-		}
-		case "SET_CURRENT_USER": {
-			return { ...state, currentUser: { ...action.user, token: null } }
-		}
+		case "SET_LOADING": { return { ...state, appLoading: !!action.appLoading } }
+		case "SET_WINDOW_VIEW": { return { ...state, windowView: get(action, "view") } }
+		case "SET_APP_CONFIG": { return { ...state, appConfig: action.appConfig } }
+		case "SET_CURRENT_APP_CONFIG": { return { ...state, currentAppConfig: action.currentAppConfig } }
+		case "SET_PAGE_ROUTE": { return { ...state, pageRoute: action.page } }
+		case "SET_CURRENT_USER": { return { ...state, currentUser: action.user || undefined } }
 		case "SET_CURRENT_TOKEN": {
-			return { ...state, token: { ...action.token, access_token: action.token?.access_token || "" } }
+			
+			return {
+				...state, currentToken: {
+					...action.currentToken,
+					access_token: action.currentToken?.access_token || "",
+					refresh_token: action.currentToken?.refresh_token || "",
+					token: action.currentToken?.token || "",
+				}
+			}
 		}
-		default: {
-			return state
-		}
+		default: { return state }
 	}
 }
 export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContextProps) => {
-	const [state, dispatch]: Maybe<any> = useReducer<any>(uiReducer, initialState)
+	const [state, dispatch]: any = useReducer<any>(uiReducer, initialState)
 	const [accessToken, setAccessToken]: [string | null, (val: string) => void] = useStorage("_pod_ext_access_token") // eslint-disable-line
 	const [refreshToken, setRefreshToken]: [string | null, (val: string) => void] = useStorage("_pod_ext_refresh_token") // eslint-disable-line
-	const [windowViewStorage, setWindowViewStorage]: [string | null, (val: string) => void] = useStorage("_pod_ext_mode") // eslint-disable-line
+	const [token, setToken]: [string | null, (val: string) => void] = useStorage("_pod_ext_token") // eslint-disable-line
+	const [windowViewStorage, setWindowViewStorage]: [string | null, (val: string) => void] = useStorage("_pod_ext_view") // eslint-disable-line
 
-	const setWindowView = (view: WINDOW_VIEWS | string) => dispatch({ type: "SET_WINDOW_VIEW", view })
 	const setAppLoading = (appLoading: boolean) => dispatch({ type: "SET_LOADING", appLoading })
+	const setWindowView = (view: WINDOW_VIEWS | string) => dispatch({ type: "SET_WINDOW_VIEW", view })
+	const setAppConfig = (appConfig: any) => dispatch({ type: "SET_APP_CONFIG", appConfig })
+	const setCurrentAppConfig = (currentAppConfig: any) => dispatch({ type: "SET_CURRENT_APP_CONFIG", currentAppConfig })
+	// const setUrlGraphql
 	const setPageRoute = (page: PAGE_ROUTES) => dispatch({ type: "SET_PAGE_ROUTE", page })
-	const setCurrentUser = (user: Auth) => dispatch({ type: "SET_CURRENT_USER", user })
-	const setToken = (token: AuthToken) => dispatch({ type: "SET_CURRENT_TOKEN", token })
+	const setCurrentUser = (user?: CURRENT_USER) => dispatch({ type: "SET_CURRENT_USER", user })
+	const setCurrentToken = (currentToken: TOKEN) => dispatch({ type: "SET_CURRENT_TOKEN", currentToken })
 
 	const value = useMemo(() => ({
 		...state,
-		setWindowView,
 		setAppLoading,
+		setWindowView,
+		setAppConfig,
+		setCurrentAppConfig,
 		setPageRoute,
 		setCurrentUser,
-		setToken
+		setCurrentToken
 	}), [state]) // eslint-disable-line
 
 	useEffect(() => {
@@ -120,26 +127,75 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	}, [windowViewStorage]) // eslint-disable-line
 
 	useEffect(() => {
-		if (state.token?.access_token !== undefined) {
-			setAccessToken(state.token?.access_token)
-			setRefreshToken(state.token?.refresh_token)
-			if (!state.token?.access_token) {
-				setPageRoute("LOGIN")
-				setAppLoading(false)
-			}
+		setAppLoading(state.currentToken?.access_token === undefined || state.currentAppConfig === null || state.currentUser === null)
+		if (state.currentToken?.access_token !== undefined) {
+			setAccessToken(state.currentToken?.access_token)
 		}
-	}, [state.token?.access_token, state.token?.refresh_token]) // eslint-disable-line
+		if (state.currentToken?.refresh_token !== undefined) {
+			setRefreshToken(state.currentToken?.refresh_token)
+		}
+		if (state.currentToken?.token !== undefined) {
+			setToken(state.currentToken?.token)
+		}
+		switch (state.currentAppConfig?.mode) {
+			case "PersonalizeItemClaw":
+				if (state.currentToken?.access_token !== undefined && !!!state.currentToken?.access_token) {
+					setPageRoute("LOGIN")
+				}
+				break;
+			case "SimpleItemClaw":
+				if (state.currentToken?.token !== undefined && !!!state.currentToken?.token) {
+					setPageRoute("LOGIN")
+				}
+				break;
+			default:
+				break;
+		}
+	}, [ // eslint-disable-line
+		state.currentAppConfig, // eslint-disable-line
+		state.currentToken?.access_token, // eslint-disable-line
+		state.currentToken?.refresh_token, // eslint-disable-line
+		state.currentToken?.token, // eslint-disable-line
+		state.currentUser // eslint-disable-line
+	]) // eslint-disable-line
 
 	useEffect(() => {
-		if (accessToken !== null) {
-			setToken({
+		if (accessToken !== null && refreshToken !== null && token !== null) {
+			setCurrentToken({
 				access_token: accessToken,
 				refresh_token: refreshToken || "",
 				expired_at: "",
-				token_type: "Bearer"
+				token_type: "Bearer",
+				token: token
 			})
 		}
-	}, [accessToken, refreshToken]) // eslint-disable-line
+	}, [accessToken, refreshToken, token]) // eslint-disable-line
+
+	useEffect(() => {
+		// $.ajax({ url: CONFIG_URL }).done(response => {
+		// 	try { response = JSON.parse(response) } catch (error) { response = {} }
+		// 	setAppConfig(response)
+		// }).fail(error => {
+		// 	setAppConfig({})
+		// 	console.log('init config error: ', error);
+		// })
+		setAppConfig({
+			"site_mode": {
+				"localhost": {
+					"mode": "SimpleItemClaw"
+					// "mode": "PersonalizeItemClaw"
+				},
+				"wanderprints.com": {
+					"mode": "PersonalizeItemClaw"
+				}
+			}
+		})
+	}, []) // eslint-disable-line
+
+	useEffect(() => {
+		setCurrentAppConfig(get(state.appConfig, ["site_mode", window.location.hostname], {}))
+	}, [window.location.hostname, state.appConfig]) // eslint-disable-line
+
 
 	return <UIContext.Provider value={value} {...props} />
 }
@@ -212,7 +268,7 @@ export const useStorage = (key: string): [string | null, (val: string) => void] 
 			}
 		})
 	}
-	function toggleValue(val: Maybe<string>): void {
+	function toggleValue(val: string): void {
 		setValue(val)
 	}
 	return [value, toggleValue]

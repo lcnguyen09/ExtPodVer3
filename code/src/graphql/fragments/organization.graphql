@@ -2,17 +2,6 @@ fragment Organization on Organization {
     _id
     name
     description
-    user_id
-    user {
-        ...User
-    }
-    members {
-        ...User
-    }
-    total_workspaces
-    total_tasks
-    created_at
-    updated_at
 }
 
 fragment OrganizationDetail on Organization {

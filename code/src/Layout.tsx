@@ -3,18 +3,29 @@ import { Card, CardBody, CardHeader, CardTitle, Collapse, Spinner } from 'reacts
 import { Maximize2, Minimize2, ChevronsDown, ChevronsUp } from "react-feather"
 import UiContext from './contexts/ui.context'
 import { DEV_MODE } from './contexts/contants'
-
 import NavUser from './components/NavUser'
 
 export default function Layout({ children }: {
     children: ReactNode
 }) {
     const {
+        appLoading,
         windowView,
         setWindowView,
-        appLoading,
-        token,
+        currentAppConfig,
+        currentToken,
     } = UiContext.UseUIContext()
+
+    function renderCurrentAppMode() {
+        switch (currentAppConfig?.mode) {
+            case "PersonalizeItemClaw":
+                return <strong className='text-info text-decoration-underline'>Personalize Clawer</strong>
+            case "SimpleItemClaw":
+                return <strong className='text-info text-decoration-underline'>Item Clawer</strong>
+            default:
+                break;
+        }
+    }
 
     return <Card className="h-100 card-action card-reload mb-0 d-flex flex-column" id="podorder-ext-app-main" animation="false">
         <CardHeader className={`nav p-1 d-flex flex-row justify-content-between bg-light ${windowView === "MIN" ? "cursor-pointer" : ""}`} id="podorder-ext-app-header" onClick={(e) => (e.target as Element).id === "podorder-ext-app-header" && windowView !== "MAX" ? setWindowView(windowView === "MIN" ? "NOMAL" : "MIN") : false}>
@@ -23,7 +34,7 @@ export default function Layout({ children }: {
             </CardTitle>
             <div className="actions d-flex justify-content-end align-items-center">
                 {
-                    DEV_MODE && <strong className='text-info text-decoration-underline'>DEV MODE</strong>
+                    renderCurrentAppMode()
                 }
                 {
                     windowView === "MAX"
@@ -47,13 +58,12 @@ export default function Layout({ children }: {
             <NavUser />
             <CardBody id="podorder-ext-app-body-card" className='p-1 mb-5'>
                 {
-                    token?.access_token === null || token?.access_token === undefined || windowView === null
+                    currentToken?.access_token === null || currentToken?.access_token === undefined || windowView === null
                         ? <div className='d-flex justify-content-center align-items-center mt-5'>
                             <div className='brand-logo' />
                         </div>
                         : <>{children}</>
                 }
-
             </CardBody>
         </Collapse>
     </Card>

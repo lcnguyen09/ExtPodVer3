@@ -8,29 +8,31 @@ import {
 	InputGroupAddon,
 	InputGroupText,
 	Input,
-	Alert
+	Alert,
+	Spinner
 } from "reactstrap"
 import UiContext from '../contexts/ui.context'
 import { Eye, EyeOff } from "react-feather"
+import $ from "jquery"
 import { useSignInMutation } from "./../graphql/graphql";
+import { URL_ACCOUNT_PODORDER } from "./../contexts/contants"
 
 function Login() {
+	const [loading, setLoading]: [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(false)
 	const [email, setEmail]: [string, Dispatch<SetStateAction<string>>] = useState<string>("")
 	const [password, setPassword]: [string, Dispatch<SetStateAction<string>>] = useState<string>("")
 	const [errorMsg, setErrorMsg]: [string, Dispatch<SetStateAction<string>>] = useState<string>("")
 	const [pwdVisible, setPwdVisible]: [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(false)
 	const {
 		setPageRoute,
-		appLoading,
-		setAppLoading,
 		setCurrentUser,
-		setToken
+		currentToken,
+		setCurrentToken,
+		currentAppConfig
 	} = UiContext.UseUIContext()
 	const [signInMutation] = useSignInMutation({ fetchPolicy: "network-only" })
 
-	function handleSignIn() {
-		setAppLoading(true)
-		setErrorMsg("")
+	function signInTask() {
 		signInMutation({
 			variables: {
 				signInInput: {
@@ -44,20 +46,78 @@ function Login() {
 		}).then(res => {
 			if (res?.data?.signIn?._id) {
 				setCurrentUser(res?.data?.signIn)
-				return setToken(res?.data?.signIn?.token)
+				return setCurrentToken({
+					...res?.data?.signIn?.token,
+					token: currentToken?.token,
+				})
 			} else {
 				throw new Error("Invalid account information")
 			}
 		}).then(() => {
 			setPageRoute("MAIN")
-			setAppLoading(false)
+			setLoading(false)
 		}).catch(error => {
 			setErrorMsg(error?.message)
-			setAppLoading(false)
+			setLoading(false)
 		})
 	}
 
+	function signInPodOrder() {
+		$.ajax({
+			url: URL_ACCOUNT_PODORDER,
+			method: "POST",
+			data: {
+				email: email,
+				password: password,
+			}
+		}).done(function (res) {
+			if (res?._id) {
+				setCurrentUser({
+					_id: res?._id,
+					email: res?.email,
+					first_name: "",
+					last_name: "",
+					fullname: res?.name,
+				})
+				setCurrentToken({
+					token: res?.token,
+					access_token: currentToken?.access_token || "",
+					refresh_token: currentToken?.refresh_token || "",
+				})
+				setPageRoute("MAIN")
+				setLoading(false)
+			} else {
+				throw new Error("Invalid account information")
+			}
+		}).fail(error => {
+			setErrorMsg(error?.responseText || "Invalid account information")
+			setLoading(false)
+		})
+	}
+
+	function handleSignIn() {
+		setLoading(true)
+		setErrorMsg("")
+		switch (currentAppConfig?.mode) {
+			case "PersonalizeItemClaw":
+				signInTask()
+				break;
+			case "SimpleItemClaw":
+				signInPodOrder()
+				break;
+			default:
+				setLoading(false)
+				setErrorMsg("try again later")
+				break;
+		}
+	}
+
 	return <>
+		{
+			loading && <div className='position-absolute w-100 h-100 top-0 bottom-0 start-0 end-0 d-flex justify-content-center align-items-center overlay-div'>
+				<Spinner color='primary' />
+			</div>
+		}
 		<h6 className="font-weight-bold mb-1"><strong>Welcome to POD Orders! 👋</strong></h6>
 		<p className="mb-0 card-text"><i>Please sign-in to your account and start the adventure</i></p>
 		<Form className="auth-login-form mt-2">
@@ -71,7 +131,7 @@ function Login() {
 					required={true}
 					onChange={e => setEmail(e.target.value)}
 					valid={false}
-					disabled={appLoading}
+					disabled={loading}
 				/>
 			</FormGroup>
 			<FormGroup className="mb-0 mt-1">
@@ -85,7 +145,7 @@ function Login() {
 						required={true}
 						onChange={e => setPassword(e.target.value)}
 						valid={false}
-						disabled={appLoading}
+						disabled={loading}
 					/>
 					<InputGroupAddon className="cursor-pointer" addonType='append' onClick={() => setPwdVisible(!pwdVisible)}>
 						<InputGroupText className="h-100">
@@ -97,7 +157,7 @@ function Login() {
 			{
 				errorMsg && <Alert color="danger" className="text-center mt-1 p-2"><strong>*Error:</strong> <i>{errorMsg}.</i></Alert>
 			}
-			<Button color="primary" type="submit" className="btn btn-primary btn-block w-100 mt-2" disabled={appLoading} onClick={handleSignIn}>Sign in</Button>
+			<Button color="primary" type="submit" className="btn btn-primary btn-block w-100 mt-2" disabled={loading} onClick={handleSignIn}>Sign in</Button>
 		</Form>
 	</>
 }

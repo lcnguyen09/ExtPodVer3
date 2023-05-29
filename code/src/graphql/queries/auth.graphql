@@ -2,13 +2,8 @@ query Me {
     me {
         ...Auth
     }
-
     currentOrganization {
         ...Organization
-    }
-
-    meExtension {
-        ...Auth
     }
 }
 

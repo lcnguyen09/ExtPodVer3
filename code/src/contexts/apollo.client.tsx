@@ -10,7 +10,7 @@ import unfetch from 'isomorphic-unfetch'
 import { onError } from '@apollo/client/link/error'
 import UiContext from './../contexts/ui.context'
 import {
-	URL_GRAPHQL
+	URL_TASK_GRAPHQL
 } from "./contants"
 
 const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__'
@@ -21,7 +21,7 @@ interface IApolloStateProps {
 	[APOLLO_STATE_PROP_NAME]?: NormalizedCacheObject
 }
 
-function initializeApollo({ headers, targetUrl }: { headers?: Record<string, string>, targetUrl?: string } = { headers: {}, targetUrl: URL_GRAPHQL }) {
+function initializeApollo({ headers, targetUrl }: { headers?: Record<string, string>, targetUrl?: string } = { headers: {}, targetUrl: "" }) {
 	const _apolloClient = apolloClient ?? new ApolloClient({
 		ssrMode: typeof window === 'undefined',
 		link: from([
@@ -64,14 +64,14 @@ export function addApolloState(
 }
 
 export function useApollo() {
-	const { urlGraphql, token } = UiContext.UseUIContext()
+	const { urlGraphql, currentToken } = UiContext.UseUIContext()
 	const store = useMemo(() => {
 		return initializeApollo({
 			headers: {
-				"Authorization": `Bearer ${token?.access_token}`
+				"Authorization": `Bearer ${currentToken?.access_token}`
 			},
 			targetUrl: urlGraphql
 		})
-	}, [urlGraphql, token?.access_token])
+	}, [urlGraphql, currentToken?.access_token])
 	return store
 }

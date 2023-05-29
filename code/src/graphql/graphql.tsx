@@ -592,6 +592,7 @@ export type Mockup = {
 export type MockupImage = {
   __typename?: 'MockupImage';
   _id: Scalars['ID'];
+  color: Scalars['String'];
   height: Scalars['Float'];
   image?: Maybe<File>;
   prints?: Maybe<Array<MockupPrint>>;
@@ -1798,15 +1799,15 @@ export type InputQueryOrganization = {
   start: Scalars['Date'];
 };
 
-export type UserFragment = { __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, role: string, organization_id: string, created_at: any, working_hours_per_month: number, bonus_per_hour: number, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null };
+export type UserFragment = { __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null };
 
-export type AuthFragment = { __typename?: 'Auth', _id: string, first_name: string, last_name: string, email: string, role: string, created_at: any, permissions?: Array<{ __typename?: 'Permission', id: string, name: string, accept: boolean }> | null, token?: { __typename?: 'AuthToken', access_token: string, refresh_token: string, token_type: string, expired_at: any } | null };
+export type AuthFragment = { __typename?: 'Auth', _id: string, first_name: string, last_name: string, email: string, token?: { __typename?: 'AuthToken', access_token: string, refresh_token: string, token_type: string, expired_at: any } | null };
 
 export type SignOutResponseFragment = { __typename?: 'SignOutResponse', success: boolean, message: string };
 
 export type AuthTokenFragment = { __typename?: 'AuthToken', access_token: string, refresh_token: string, token_type: string, expired_at: any };
 
-export type UserMutateResponseFragment = { __typename?: 'UserMutateResponse', success: boolean, message?: string | null, user?: { __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, role: string, organization_id: string, created_at: any, working_hours_per_month: number, bonus_per_hour: number, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null } | null, errorFields?: Array<{ __typename?: 'ErrorField', name: string, message: string }> | null };
+export type UserMutateResponseFragment = { __typename?: 'UserMutateResponse', success: boolean, message?: string | null, user?: { __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null } | null, errorFields?: Array<{ __typename?: 'ErrorField', name: string, message: string }> | null };
 
 export type RolePermissionFragment = { __typename?: 'RolePermission', id: string, name: string, permissions?: Array<{ __typename?: 'Permission', id: string, name: string, accept: boolean }> | null };
 
@@ -1818,11 +1819,11 @@ export type PaginateFragment = { __typename?: 'Paginate', total_items?: number |
 
 export type SearchResultFragment = { __typename?: 'SearchResult', media?: string | null, category: string, title: string, description?: string | null, url: string };
 
-export type OrganizationFragment = { __typename?: 'Organization', _id: string, name: string, description: string, user_id: string, total_workspaces: number, total_tasks: number, created_at: any, updated_at?: any | null, user?: { __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, role: string, organization_id: string, created_at: any, working_hours_per_month: number, bonus_per_hour: number, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null } | null, members?: Array<{ __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, role: string, organization_id: string, created_at: any, working_hours_per_month: number, bonus_per_hour: number, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null }> | null };
+export type OrganizationFragment = { __typename?: 'Organization', _id: string, name: string, description: string };
 
-export type OrganizationDetailFragment = { __typename?: 'Organization', _id: string, name: string, description: string, user_id: string, total_workspaces: number, total_tasks: number, created_at: any, updated_at?: any | null, user?: { __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, role: string, organization_id: string, created_at: any, working_hours_per_month: number, bonus_per_hour: number, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null } | null, members?: Array<{ __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, role: string, organization_id: string, created_at: any, working_hours_per_month: number, bonus_per_hour: number, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null }> | null };
+export type OrganizationDetailFragment = { __typename?: 'Organization', _id: string, name: string, description: string };
 
-export type OrganizationMutationResponseFragment = { __typename?: 'OrganizationMutationResponse', success?: boolean | null, message?: string | null, organization?: { __typename?: 'Organization', _id: string, name: string, description: string, user_id: string, total_workspaces: number, total_tasks: number, created_at: any, updated_at?: any | null, user?: { __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, role: string, organization_id: string, created_at: any, working_hours_per_month: number, bonus_per_hour: number, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null } | null, members?: Array<{ __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, role: string, organization_id: string, created_at: any, working_hours_per_month: number, bonus_per_hour: number, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null }> | null } | null, errorFields?: Array<{ __typename?: 'ErrorField', name: string, message: string }> | null };
+export type OrganizationMutationResponseFragment = { __typename?: 'OrganizationMutationResponse', success?: boolean | null, message?: string | null, organization?: { __typename?: 'Organization', _id: string, name: string, description: string } | null, errorFields?: Array<{ __typename?: 'ErrorField', name: string, message: string }> | null };
 
 export type PersonalizeItemFragment = { __typename?: 'PersonalizeItem', _id: string, origin_id: string, title: string, slug: string, description: string, images?: Array<string> | null, url: string, initial_product_id: string, source: string };
 
@@ -1833,7 +1834,7 @@ export type SignInMutationVariables = Exact<{
 }>;
 
 
-export type SignInMutation = { __typename?: 'Mutation', signIn: { __typename?: 'Auth', _id: string, first_name: string, last_name: string, email: string, role: string, created_at: any, permissions?: Array<{ __typename?: 'Permission', id: string, name: string, accept: boolean }> | null, token?: { __typename?: 'AuthToken', access_token: string, refresh_token: string, token_type: string, expired_at: any } | null } };
+export type SignInMutation = { __typename?: 'Mutation', signIn: { __typename?: 'Auth', _id: string, first_name: string, last_name: string, email: string, token?: { __typename?: 'AuthToken', access_token: string, refresh_token: string, token_type: string, expired_at: any } | null } };
 
 export type SignOutMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -1850,7 +1851,7 @@ export type SavePersonalizeItemMutation = { __typename?: 'Mutation', savePersona
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'Auth', _id: string, first_name: string, last_name: string, email: string, role: string, created_at: any, permissions?: Array<{ __typename?: 'Permission', id: string, name: string, accept: boolean }> | null, token?: { __typename?: 'AuthToken', access_token: string, refresh_token: string, token_type: string, expired_at: any } | null } | null, currentOrganization: { __typename?: 'Organization', _id: string, name: string, description: string, user_id: string, total_workspaces: number, total_tasks: number, created_at: any, updated_at?: any | null, user?: { __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, role: string, organization_id: string, created_at: any, working_hours_per_month: number, bonus_per_hour: number, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null } | null, members?: Array<{ __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, role: string, organization_id: string, created_at: any, working_hours_per_month: number, bonus_per_hour: number, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null }> | null }, meExtension?: { __typename?: 'Auth', _id: string, first_name: string, last_name: string, email: string, role: string, created_at: any, permissions?: Array<{ __typename?: 'Permission', id: string, name: string, accept: boolean }> | null, token?: { __typename?: 'AuthToken', access_token: string, refresh_token: string, token_type: string, expired_at: any } | null } | null };
+export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'Auth', _id: string, first_name: string, last_name: string, email: string, token?: { __typename?: 'AuthToken', access_token: string, refresh_token: string, token_type: string, expired_at: any } | null } | null, currentOrganization: { __typename?: 'Organization', _id: string, name: string, description: string } };
 
 export type AuthTokenQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1862,7 +1863,7 @@ export type UsersQueryVariables = Exact<{
 }>;
 
 
-export type UsersQuery = { __typename?: 'Query', users: Array<{ __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, role: string, organization_id: string, created_at: any, working_hours_per_month: number, bonus_per_hour: number, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null }> };
+export type UsersQuery = { __typename?: 'Query', users: Array<{ __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null }> };
 
 export type RolePermissionsQueryVariables = Exact<{
   role: Scalars['String'];
@@ -1878,13 +1879,6 @@ export type UserPermissionsQueryVariables = Exact<{
 
 export type UserPermissionsQuery = { __typename?: 'Query', userPermissions?: Array<{ __typename?: 'Permission', id: string, name: string, accept: boolean }> | null };
 
-export const PermissionFragmentDoc = gql`
-    fragment Permission on Permission {
-  id
-  name
-  accept
-}
-    `;
 export const AuthTokenFragmentDoc = gql`
     fragment AuthToken on AuthToken {
   access_token
@@ -1899,17 +1893,11 @@ export const AuthFragmentDoc = gql`
   first_name
   last_name
   email
-  role
-  created_at
-  permissions {
-    ...Permission
-  }
   token {
     ...AuthToken
   }
 }
-    ${PermissionFragmentDoc}
-${AuthTokenFragmentDoc}`;
+    ${AuthTokenFragmentDoc}`;
 export const SignOutResponseFragmentDoc = gql`
     fragment SignOutResponse on SignOutResponse {
   success
@@ -1922,17 +1910,12 @@ export const UserFragmentDoc = gql`
   first_name
   last_name
   email
-  role
-  organization_id
   organization {
     ... on OrganizationShortcut {
       _id
       name
     }
   }
-  created_at
-  working_hours_per_month
-  bonus_per_hour
 }
     `;
 export const ErrorFieldResponseFragmentDoc = gql`
@@ -1954,6 +1937,13 @@ export const UserMutateResponseFragmentDoc = gql`
 }
     ${UserFragmentDoc}
 ${ErrorFieldResponseFragmentDoc}`;
+export const PermissionFragmentDoc = gql`
+    fragment Permission on Permission {
+  id
+  name
+  accept
+}
+    `;
 export const RolePermissionFragmentDoc = gql`
     fragment RolePermission on RolePermission {
   id
@@ -1984,19 +1974,8 @@ export const OrganizationFragmentDoc = gql`
   _id
   name
   description
-  user_id
-  user {
-    ...User
-  }
-  members {
-    ...User
-  }
-  total_workspaces
-  total_tasks
-  created_at
-  updated_at
 }
-    ${UserFragmentDoc}`;
+    `;
 export const OrganizationDetailFragmentDoc = gql`
     fragment OrganizationDetail on Organization {
   ...Organization
@@ -2139,9 +2118,6 @@ export const MeDocument = gql`
   }
   currentOrganization {
     ...Organization
-  }
-  meExtension {
-    ...Auth
   }
 }
     ${AuthFragmentDoc}
