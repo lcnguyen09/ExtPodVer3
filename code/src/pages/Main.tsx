@@ -4,7 +4,8 @@ import { DEV_MODE } from "./../contexts/contants";
 import Wanderprints from "./libs/Wanderprints"
 
 const sitesLib = {
-	"not_support": DEV_MODE ? <Wanderprints /> : <div className="text-center">This site is not support</div>,
+	"not_support": <div className="text-center">This site is not support</div>,
+	"localhost:3000": <Wanderprints />,
 	"wanderprints.com": <Wanderprints />,
 }
 

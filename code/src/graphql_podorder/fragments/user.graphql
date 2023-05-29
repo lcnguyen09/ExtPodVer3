@@ -1,0 +1,20 @@
+fragment User on User {
+    _id
+    email
+    name
+    identity
+    identity_label
+    role
+    created_at
+    token
+    auth_docker {
+        ...AuthDocker
+    }
+}
+
+fragment AuthDocker on AuthDocker {
+    docker_id
+    docker {
+        ...Docker
+    }
+}

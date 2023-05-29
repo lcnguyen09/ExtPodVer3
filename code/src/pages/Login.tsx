@@ -16,7 +16,7 @@ import { Eye, EyeOff } from "react-feather"
 import $ from "jquery"
 import { useSignInMutation } from "./../graphql_task/graphql";
 import { URL_ACCOUNT_PODORDER } from "./../contexts/contants"
-import { drop, head, last } from "lodash";
+import { drop, head, last, map } from "lodash";
 
 function Login() {
 	const [loading, setLoading]: [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(false)
@@ -95,6 +95,15 @@ function Login() {
 					first_name: head(res?.name.split(" ")),
 					last_name: drop(res?.name.split(" ")).join(" "),
 					fullname: res?.name,
+					docker: map(res?.auth_docker, auth_docker => {
+						return {
+							_id: auth_docker?.docker?._id,
+							domain: auth_docker?.docker?.domain,
+							label: auth_docker?.docker?.label,
+							server: auth_docker?.docker?.server,
+							sku: auth_docker?.docker?.sku,
+						}
+					})
 				})
 				setCurrentToken({
 					token: res?.token,

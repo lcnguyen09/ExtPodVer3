@@ -2,10 +2,13 @@ import { useEffect } from 'react'
 import UiContext from './contexts/ui.context'
 import Login from "./pages/Login"
 import Main from "./pages/Main"
-import { get } from "lodash"
+import { drop, get, head, map } from "lodash"
 import {
   useMeLazyQuery
 } from "./graphql_task/graphql"
+import {
+  useCUserLazyQuery
+} from "./graphql_podorder/graphql"
 
 const routers = {
   LOGIN: <Login />,
@@ -22,7 +25,8 @@ export default function Router({ apolloClient }: {
     currentToken,
     setCurrentToken,
     currentAppConfig } = UiContext.UseUIContext()
-  const [fetchCurrentUserQuery] = useMeLazyQuery({ fetchPolicy: "network-only" })
+  const [fetchMeLazyQuery] = useMeLazyQuery({ fetchPolicy: "network-only" })
+  const [fetchCUserLazyQuery] = useCUserLazyQuery({ fetchPolicy: "network-only" })
   useEffect(() => {
     fetchCurrentUser()
   }, [apolloClient]) // eslint-disable-line
@@ -31,9 +35,10 @@ export default function Router({ apolloClient }: {
     if (!currentToken?.access_token) {
       return setCurrentUser()
     }
-    fetchCurrentUserQuery({ fetchPolicy: "network-only" }).then(res => {
-      if (!res.data?.me?._id) throw new Error("Unauth")
-      setTimeout(() => setCurrentUser(res.data?.me), 0)
+    fetchMeLazyQuery({ fetchPolicy: "network-only" }).then(res => {
+      const me = res.data?.me
+      if (!me?._id) throw new Error("Unauth")
+      setTimeout(() => setCurrentUser(me), 0)
       setPageRoute("MAIN")
     }).catch(() => {
       setCurrentUser()
@@ -45,35 +50,32 @@ export default function Router({ apolloClient }: {
     if (!currentToken?.token) {
       return setCurrentUser()
     }
-    var settings = {
-      "url": "https://api-account.podorders.store/graphql",
-      "method": "POST",
-      "timeout": 0,
-      "headers": {
-        "authority": "api-account.podorders.store",
-        "accept": "application/json, text/plain, */*",
-        "accept-language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7",
-        "authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImxlY2hpbmd1eWVuMDlAZ21haWwuY29tIiwicGFzc3dvcmQiOiJhYmMxMjMiLCJ2YWxpZCI6bnVsbH0.H35smLgIHOOp0l21kIfSFU0HzVFCa-h9pbhKSTDou40",
-        "content-type": "application/json;charset=UTF-8",
-        "origin": "https://account.podorders.store",
-        "referer": "https://account.podorders.store/",
-        "sec-ch-ua": "\"Google Chrome\";v=\"113\", \"Chromium\";v=\"113\", \"Not-A.Brand\";v=\"24\"",
-        "sec-ch-ua-mobile": "?0",
-        "sec-ch-ua-platform": "\"macOS\"",
-        "sec-fetch-dest": "empty",
-        "sec-fetch-mode": "cors",
-        "sec-fetch-site": "same-site",
-        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
-        "x-page": "1",
-        "x-per-page": "20",
-        "x-requested-with": "XMLHttpRequest"
-      },
-      "data": "{\"query\":\"query { cUser   { _id,identity,identity_label,email,role,groups,token,name,h, group   { _id,name }, permission   { module,title, access   { view,add,update,delete } },status,last_login,created_at,updated_at, customizer   { theme,sidebarCollapsed,navbarColor,navbarType,footerType,menuTheme,hideScrollToTop },total_credit,vip,max_hub,ship_by_seller,phone_number,sale_plan,facebook,skype,ffm_sku,ffm_sku_label, auth_docker   { auth_id,docker_id,groups,author, docker   { domain,server,status,label,plan,annually, plan_log   { plan,payment_at,expires_at } } },max_hub,plan,annually, plan_log   { plan,payment_at,expires_at },sku,sku_label,onos_email }}\"}",
-    };
-
-    $.ajax(settings).done(function (response) {
-      console.log('response: ', response);
-    });
+    fetchCUserLazyQuery({ fetchPolicy: "network-only" }).then(res => {
+      const me = res.data?.cUser
+      if (!me?._id) throw new Error("Unauth")
+      setTimeout(() => {
+        setCurrentUser({
+          _id: me?._id,
+          email: me?.email,
+          first_name: head((me?.name || "").split(" ")),
+          last_name: drop((me?.name || "").split(" ")).join(" "),
+          fullname: (me?.name || ""),
+          docker: map(me?.auth_docker, auth_docker => {
+            return {
+              _id: auth_docker?.docker?._id,
+              domain: auth_docker?.docker?.domain,
+              label: auth_docker?.docker?.label,
+              server: auth_docker?.docker?.server,
+              sku: auth_docker?.docker?.sku,
+            }
+          })
+        })
+      }, 0)
+      setPageRoute("MAIN")
+    }).catch(() => {
+      setCurrentUser()
+      setCurrentToken()
+    })
   }
 
   function fetchCurrentUser() {

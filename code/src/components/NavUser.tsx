@@ -1,11 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
-import { NavLink, Collapse, Spinner } from 'reactstrap'
-import { User, LogOut, ChevronDown, ChevronUp } from "react-feather"
+import { NavLink, Collapse, Spinner, Label } from 'reactstrap'
+import { User, LogOut, ChevronDown, ChevronUp, Server } from "react-feather"
 import UiContext from '../contexts/ui.context'
+import Select, { StylesConfig } from 'react-select';
+import { map, get, find } from 'lodash'
 
+const colourStyles: StylesConfig = {
+    control: (styles) => ({ ...styles, backgroundColor: 'white' }),
+    menu: (styles) => ({ ...styles, maxHeight: '150px', overflow: "hidden", padding: '0 6px' }),
+    option: (styles) => ({ ...styles, maxHeight: "150px" })
+};
 
 export default function NavUser() {
-    const { currentUser, setCurrentUser, currentToken, setCurrentToken } = UiContext.UseUIContext()
+    const { currentUser, setCurrentUser, currentToken, setCurrentToken, currentDocker, setCurrentDocker, currentAppConfig } = UiContext.UseUIContext()
     const [popoverOpen, togglePopoverOpen] = useState<boolean>(false)
     const wrapperRef = useRef<any>(null);
     useEffect(() => {
@@ -26,27 +33,85 @@ export default function NavUser() {
         togglePopoverOpen(false)
     }, [])
 
+    useEffect(() => {
+        if (currentDocker?._id && currentUser?.docker) {
+            setCurrentDocker(find(currentUser?.docker, docker => String(docker?._id) === String(currentDocker?._id)))
+        }
+    }, [currentDocker?._id, currentUser?.docker])
+
     function handleLogout() {
         setCurrentToken()
         setCurrentUser()
+        setCurrentDocker({ _id: "" })
     }
+
+
+
     return (<div ref={wrapperRef} className='d-flex flex-column justify-content-end p-1 position-relative bg-light' style={{ borderBottom: "1px solid rgba(0, 0, 0, 0.075)" }}>
-        <NavLink onClick={() => togglePopoverOpen(!popoverOpen)} className='d-flex flex-nowrap justify-content-end align-content-center align-items-center' style={{ cursor: "pointer" }}>
-            <User style={{ marginLeft: "12px" }} size={18} />
+        <NavLink onClick={() => togglePopoverOpen(!popoverOpen)} className={`d-flex flex-nowrap ${currentAppConfig?.mode === "SimpleItemClaw" ? "justify-content-between" : "justify-content-end"} align-content-center align-items-center`} style={{ cursor: "pointer" }}>
             {
-                currentToken?.access_token === null || currentToken?.access_token === undefined ||
-                currentToken?.token === null || currentToken?.token === undefined ||
-                currentUser === null
-                    ? <span style={{ marginLeft: "3px" }} className='text-nowrap'><Spinner size="sm" /></span>
-                    : !currentUser?._id
-                        ? <span style={{ marginLeft: "3px" }} className='text-nowrap'>Login</span>
-                        : <span style={{ marginLeft: "3px" }} className='text-nowrap'>{currentUser?.first_name} {currentUser?.last_name}</span>
+                currentAppConfig?.mode === "SimpleItemClaw" ? <div className='d-flex flex-wrap justify-content-start align-content-center align-items-center'>
+                    <Server size={14} />
+                    <span style={{ marginLeft: "3px" }} className={`text-nowrap ${!currentDocker?._id ?? "text-warning"}`}>
+                        {
+                            currentDocker?._id ? (currentDocker?.label ? currentDocker?.label : currentDocker?.domain) : "Pick your hub"
+                        }
+                    </span>
+                </div> : false
             }
-            {
-                popoverOpen && currentUser?._id ? <ChevronUp style={{ marginLeft: "3px" }} size={14} /> : <ChevronDown style={{ marginLeft: "3px" }} size={18} />
-            }
+
+            <div className='d-flex flex-wrap justify-content-end align-content-center align-items-center'>
+
+                <User style={{ marginLeft: "12px" }} size={18} />
+                {
+                    currentToken?.access_token === null || currentToken?.access_token === undefined ||
+                        currentToken?.token === null || currentToken?.token === undefined ||
+                        currentUser === null
+                        ? <span style={{ marginLeft: "3px" }} className='text-nowrap'><Spinner size="sm" /></span>
+                        : !currentUser?._id
+                            ? <span style={{ marginLeft: "3px" }} className='text-nowrap'>Login</span>
+                            : <span style={{ marginLeft: "3px" }} className='text-nowrap'>{currentUser?.first_name} {currentUser?.last_name}</span>
+                }
+                {
+                    popoverOpen && currentUser?._id ? <ChevronUp style={{ marginLeft: "3px" }} size={14} /> : <ChevronDown style={{ marginLeft: "3px" }} size={18} />
+                }
+            </div>
         </NavLink>
         <Collapse isOpen={popoverOpen && !!currentUser?._id} className='mt-3'>
+            {
+                currentAppConfig?.mode === "SimpleItemClaw" ? <div className='mb-3'>
+                    <Label>Hub: </Label>
+                    <Select
+                        className="basic-single w-100"
+                        classNamePrefix="select"
+                        placeholder="Select your hub"
+                        isClearable={false}
+                        isLoading={currentUser?.docker === null || currentUser?.docker == undefined}
+                        isSearchable={true}
+                        name="color"
+                        options={map(currentUser?.docker, docker => {
+                            return {
+                                id: get(docker, "_id", ""),
+                                value: get(docker, "label", "") + " - " + get(docker, "domain", "") + "." + get(docker, "server", ""),
+                                label: <div className='d-flex flex-column'><strong>{get(docker, "label", "")}</strong><i>{get(docker, "domain", "") + "." + get(docker, "server", "")}</i></div>
+                            }
+                        })}
+                        styles={colourStyles}
+                        onChange={(data) => {
+                            setCurrentDocker(find(currentUser?.docker, docker => docker?._id === get(data, "id", "")))
+                        }}
+                        value={
+                            get(currentDocker, "_id", "") ? {
+                                id: get(currentDocker, "_id", ""),
+                                value: get(currentDocker, "label", "") + " - " + get(currentDocker, "domain", "") + "." + get(currentDocker, "server", ""),
+                                label: <div className='d-flex flex-column'><strong>{get(currentDocker, "label", "")}</strong><i>{get(currentDocker, "domain", "") + "." + get(currentDocker, "server", "")}</i></div>
+                            } : {}
+                        }
+                    />
+                </div> : false
+            }
+
+
             <div className='d-inline-flex flex-wrap justify-content-end align-items-center w-100 mb-2'>
                 <NavLink className='d-inline-flex flex-wrap justify-content-end align-content-center align-items-center' style={{ cursor: "pointer", paddingRight: "0px" }} onClick={handleLogout}>
                     <LogOut size={14} />

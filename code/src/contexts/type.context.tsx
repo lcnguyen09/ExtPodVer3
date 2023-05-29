@@ -12,14 +12,15 @@ export type CURRENT_USER = {
     first_name: string
     last_name: string
     fullname: string
+    docker?: [DOCKER]
 }
 
 export type DOCKER = {
     _id: string
-    domain: string
-    label: string
-    server: string
-    sku: string
+    domain?: string
+    label?: string
+    server?: string
+    sku?: string
 }
 
 export type WINDOW_VIEWS = "NOMAL"
@@ -63,4 +64,8 @@ export type ACTION =
     | {
         type: "SET_CURRENT_DOCKER"
         currentDocker: DOCKER | null
+    }
+    | {
+        type: "SET_URL_GRAPHQL"
+        urlGraphql: string
     }

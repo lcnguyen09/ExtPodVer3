@@ -1,0 +1,14 @@
+fragment Docker on Docker {
+    _id
+    domain
+    label
+    server
+    sku
+}
+
+fragment DockerAuth on DockerAuth {
+    auth_id
+    user {
+        ...User
+    }
+}

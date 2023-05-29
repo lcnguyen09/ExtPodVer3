@@ -9,9 +9,6 @@ import {
 import unfetch from 'isomorphic-unfetch'
 import { onError } from '@apollo/client/link/error'
 import UiContext from './../contexts/ui.context'
-import {
-	URL_TASK_GRAPHQL
-} from "./contants"
 
 const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__'
 
@@ -64,14 +61,25 @@ export function addApolloState(
 }
 
 export function useApollo() {
-	const { urlGraphql, currentToken } = UiContext.UseUIContext()
+	const { urlGraphql, currentToken, currentAppConfig } = UiContext.UseUIContext()
 	const store = useMemo(() => {
+		let token = ""
+		switch (currentAppConfig?.mode) {
+			case "PersonalizeItemClaw":
+				token = currentToken?.access_token
+				break;
+			case "SimpleItemClaw":
+				token = currentToken?.token
+				break;
+			default:
+				break;
+		}
 		return initializeApollo({
 			headers: {
-				"Authorization": `Bearer ${currentToken?.access_token}`
+				"Authorization": `Bearer ${token}`
 			},
 			targetUrl: urlGraphql
 		})
-	}, [urlGraphql, currentToken?.access_token])
+	}, [urlGraphql, currentToken?.access_token, currentToken?.token, currentAppConfig?.mode])
 	return store
 }

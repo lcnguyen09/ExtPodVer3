@@ -18,8 +18,8 @@ import {
 import { get } from 'lodash'
 import $ from 'jquery'
 import {
-	CONFIG_URL,
 	URL_TASK_GRAPHQL,
+	URL_ACCOUNT_GRAPHQL
 } from "./contants"
 
 interface UIManageContextProps {
@@ -32,7 +32,7 @@ const initialState = {
 	windowView: null,
 	appConfig: null,
 	currentAppConfig: null,
-	urlGraphql: URL_TASK_GRAPHQL,
+	urlGraphql: "",
 	pageRoute: "INIT",
 	currentUser: null,
 	currentToken: null,
@@ -77,11 +77,15 @@ function uiReducer(state: State, action: ACTION) {
 		case "SET_CURRENT_DOCKER": {
 			return { ...state, currentDocker: action.currentDocker }
 		}
+		case "SET_URL_GRAPHQL": {
+			return { ...state, urlGraphql: action.urlGraphql }
+		}
 		default: { return state }
 	}
 }
 export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContextProps) => {
 	const [state, dispatch]: any = useReducer<any>(uiReducer, initialState)
+	const [init, setInit]: [boolean, (val: boolean) => void] = useState(false)
 	const [accessToken, setAccessToken]: [string | null, (val: string) => void] = useStorage("_pod_ext_access_token") // eslint-disable-line
 	const [refreshToken, setRefreshToken]: [string | null, (val: string) => void] = useStorage("_pod_ext_refresh_token") // eslint-disable-line
 	const [token, setToken]: [string | null, (val: string) => void] = useStorage("_pod_ext_token") // eslint-disable-line
@@ -93,17 +97,19 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	const setWindowView = (view: WINDOW_VIEWS | string) => dispatch({ type: "SET_WINDOW_VIEW", view })
 	const setAppConfig = (appConfig: any) => dispatch({ type: "SET_APP_CONFIG", appConfig })
 	const setCurrentAppConfig = (currentAppConfig: any) => dispatch({ type: "SET_CURRENT_APP_CONFIG", currentAppConfig })
-	// const setUrlGraphql
+	const setUrlGraphql = (urlGraphql: string) => dispatch({ type: "SET_URL_GRAPHQL", urlGraphql })
 	const setPageRoute = (page: PAGE_ROUTES) => dispatch({ type: "SET_PAGE_ROUTE", page })
 	const setCurrentUser = (user?: CURRENT_USER) => dispatch({ type: "SET_CURRENT_USER", user })
 	const setCurrentToken = (currentToken: TOKEN) => dispatch({ type: "SET_CURRENT_TOKEN", currentToken })
-	const setCurrentDocker = (currentDocker: DOCKER) => dispatch({ type: "SET_CURRENT_DOCKER", currentDocker })
+	const setCurrentDocker = (currentDocker?: DOCKER) => dispatch({ type: "SET_CURRENT_DOCKER", currentDocker })
+
 	const value = useMemo(() => ({
 		...state,
 		setAppLoading,
 		setWindowView,
 		setAppConfig,
 		setCurrentAppConfig,
+		setUrlGraphql,
 		setPageRoute,
 		setCurrentUser,
 		setCurrentToken,
@@ -130,12 +136,6 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	}, [state.windowView]) // eslint-disable-line
 
 	useEffect(() => {
-		if (windowViewStorage !== null) {
-			setWindowView(windowViewStorage)
-		}
-	}, [windowViewStorage]) // eslint-disable-line
-
-	useEffect(() => {
 		setAppLoading(state.currentToken?.access_token === undefined || state.currentAppConfig === null || state.currentUser === null)
 		if (state.currentToken?.access_token !== undefined) {
 			setAccessToken(state.currentToken?.access_token)
@@ -151,14 +151,12 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		}
 		switch (state.currentAppConfig?.mode) {
 			case "PersonalizeItemClaw":
-				if (state.currentToken?.access_token !== undefined && !!!state.currentToken?.access_token) {
-					setPageRoute("LOGIN")
-				}
+				setUrlGraphql(URL_TASK_GRAPHQL)
+				if (state.currentToken?.access_token !== undefined && !!!state.currentToken?.access_token) setPageRoute("LOGIN")
 				break;
 			case "SimpleItemClaw":
-				if (state.currentToken?.token !== undefined && !!!state.currentToken?.token) {
-					setPageRoute("LOGIN")
-				}
+				setUrlGraphql(URL_ACCOUNT_GRAPHQL)
+				if (state.currentToken?.token !== undefined && !!!state.currentToken?.token) setPageRoute("LOGIN")
 				break;
 			default:
 				break;
@@ -169,20 +167,36 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		state.currentToken?.refresh_token, // eslint-disable-line
 		state.currentToken?.token, // eslint-disable-line
 		state.currentUser, // eslint-disable-line
-		state.currentDocker, // eslint-disable-line
+		state.currentDocker?._id, // eslint-disable-line
 	]) // eslint-disable-line
 
 	useEffect(() => {
-		if (accessToken !== null && refreshToken !== null && token !== null) {
-			setCurrentToken({
+		if (init) {
+			if (accessToken !== null && refreshToken !== null && token !== null) setCurrentToken({
 				access_token: accessToken,
 				refresh_token: refreshToken || "",
 				expired_at: "",
 				token_type: "Bearer",
 				token: token
 			})
+			if (windowViewStorage !== null) setWindowView(windowViewStorage)
+			if (docker !== null) setCurrentDocker({_id: docker})
 		}
-	}, [accessToken, refreshToken, token]) // eslint-disable-line
+	}, [init]) // eslint-disable-line
+
+	useEffect(() => {
+		if (accessToken !== null &&
+			refreshToken !== null &&
+			token !== null &&
+			docker !== null &&
+			windowViewStorage !== null) setInit(true)
+	}, [ // eslint-disable-line
+		accessToken, // eslint-disable-line
+		refreshToken, // eslint-disable-line
+		token, // eslint-disable-line
+		docker, // eslint-disable-line
+		windowViewStorage // eslint-disable-line
+	]) // eslint-disable-line
 
 	useEffect(() => {
 		// $.ajax({ url: CONFIG_URL }).done(response => {
@@ -209,19 +223,12 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		setCurrentAppConfig(get(state.appConfig, ["site_mode", window.location.hostname], {}))
 	}, [window.location.hostname, state.appConfig]) // eslint-disable-line
 
-
-	return <UIContext.Provider value={value} {...props} />
+	return <>
+		{
+			init ? <UIContext.Provider value={value} {...props} /> : false
+		}
+	</>
 }
-
-export const UseUIContext = () => {
-	const context = useContext(UIContext)
-
-	if (context === undefined) {
-		throw new Error(`useUIContext must be used within a UIProvider`)
-	}
-	return context
-}
-
 
 export const ManagedUIContext: React.FC<UIManageContextProps> = ({ children }: UIManageContextProps) => {
 	return <UIProvider>{children}</UIProvider>
@@ -290,7 +297,13 @@ export const useStorage = (key: string): [string | null, (val: string) => void] 
 
 const UiContext = {
 	ManagedUIContext: ManagedUIContext,
-	UseUIContext: UseUIContext
+	UseUIContext: () => {
+		const context = useContext(UIContext)
+		if (context === undefined) {
+			throw new Error(`useUIContext must be used within a UIProvider`)
+		}
+		return context
+	}
 }
 
 export default UiContext
