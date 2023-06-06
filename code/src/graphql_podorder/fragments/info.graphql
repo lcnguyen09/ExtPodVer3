@@ -1,0 +1,19 @@
+fragment Info on Info {
+    extension_rule {
+        ...ExtensionRule
+    }
+}
+
+fragment ExtensionRule on ExtensionRule {
+    name
+    images {
+        ...ExtensionRuleImage
+    }
+}
+
+fragment ExtensionRuleImage on ExtensionRuleImage {
+    block
+    loop
+    main_attr
+    extra_attr
+}

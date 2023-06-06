@@ -2,7 +2,6 @@ import { ReactNode } from 'react'
 import { Card, CardBody, CardHeader, CardTitle, Collapse, Spinner } from 'reactstrap'
 import { Maximize2, Minimize2, ChevronsDown, ChevronsUp } from "react-feather"
 import UiContext from './contexts/ui.context'
-import { DEV_MODE } from './contexts/contants'
 import NavUser from './components/NavUser'
 
 export default function Layout({ children }: {

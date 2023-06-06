@@ -16,7 +16,7 @@ import { Eye, EyeOff } from "react-feather"
 import $ from "jquery"
 import { useSignInMutation } from "./../graphql_task/graphql";
 import { URL_ACCOUNT_PODORDER } from "./../contexts/contants"
-import { drop, head, last, map } from "lodash";
+import { drop, head, map } from "lodash";
 
 function Login() {
 	const [loading, setLoading]: [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(false)
@@ -46,7 +46,7 @@ function Login() {
 			default:
 				break;
 		}
-	}, [])
+	}, [currentAppConfig?.mode]) // eslint-disable-line
 
 	function signInTask() {
 		signInMutation({
@@ -87,7 +87,6 @@ function Login() {
 				password: password,
 			}
 		}).done(function (res) {
-			console.log('res: ', res);
 			if (res?._id) {
 				setCurrentUser({
 					_id: res?._id,

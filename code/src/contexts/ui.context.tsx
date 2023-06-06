@@ -204,13 +204,12 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		// 	setAppConfig(response)
 		// }).fail(error => {
 		// 	setAppConfig({})
-		// 	console.log('init config error: ', error);
 		// })
 		setAppConfig({
 			"site_mode": {
 				"localhost": {
-					"mode": "SimpleItemClaw"
-					// "mode": "PersonalizeItemClaw"
+					// "mode": "SimpleItemClaw"
+					"mode": "PersonalizeItemClaw"
 				},
 				"wanderprints.com": {
 					"mode": "PersonalizeItemClaw"
@@ -220,7 +219,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	}, []) // eslint-disable-line
 
 	useEffect(() => {
-		setCurrentAppConfig(get(state.appConfig, ["site_mode", window.location.hostname], {}))
+		setCurrentAppConfig(get(state.appConfig, ["site_mode", window.location.hostname], {"mode": "SimpleItemClaw"}))
 	}, [window.location.hostname, state.appConfig]) // eslint-disable-line
 
 	return <>

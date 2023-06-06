@@ -18,8 +18,20 @@
         "<all_urls>"
       ],
       "js": [
+        "inject.js",
         "content.js"
       ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "resources": [
+        "inject-script.js"
+      ],
+      "extension_ids": []
     }
   ]
 }

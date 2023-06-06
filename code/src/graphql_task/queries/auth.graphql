@@ -13,12 +13,6 @@ query AuthToken {
     }
 }
 
-query Users($search: String) {
-    users(search: $search) {
-        ...User
-    }
-}
-
 query RolePermissions($role: String!) {
     rolePermissions(role: $role) {
         ...RolePermission

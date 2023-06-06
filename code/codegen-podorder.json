@@ -6,7 +6,7 @@
   "generates": {
 	"./src/graphql_podorder/graphql.tsx": {
 	  "schema": {
-		  "http://localhost:3001/graphql": {
+		  "http://localhost:3201/graphql": {
 			  "method": "POST"
 		  }
 	  },

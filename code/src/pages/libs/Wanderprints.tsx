@@ -1,11 +1,9 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { chunk, filter, find, get, head, last, map, sortBy, split, startsWith } from "lodash";
 import $ from "jquery"
-import { Alert, Button, Card, CardBody, CardFooter, CardHeader, Col, Input, NavLink, Row, Spinner, Tooltip, UncontrolledTooltip } from "reactstrap";
+import { Alert, Button, Card, CardBody, CardHeader, Col, Input, NavLink, Row, Spinner } from "reactstrap";
 import { ChevronDown, Save } from "react-feather"
-import UiContext from './../../contexts/ui.context'
 import ItemInfoComponent from "./../../components/ItemInfo"
-import { DEV_MODE } from "./../../contexts/contants";
 import { useSavePersonalizeItemMutation } from "./../../graphql_task/graphql";
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -25,7 +23,7 @@ export default function Wanderprints() {
 	const [PersonalizedSetting, setPersonalizedSetting] = useState<any>(null)
 	const [PersonalizedSetOps, setPersonalizedSetOps] = useState<any>([])
 	const [PersonalizedProduct, setPersonalizedProduct] = useState<any>([])
-	const [ProductFullInfo, setProductFullInfo] = useState<any>(null)
+	// const [ProductFullInfo, setProductFullInfo] = useState<any>(null)
 	const [savePersonalizeItem] = useSavePersonalizeItemMutation({ fetchPolicy: "network-only" })
 
 	useEffect(() => {
@@ -49,25 +47,23 @@ export default function Wanderprints() {
 				Promise.all(map(allProductId, _itemLibFetch)).then(() => setLoading(false))
 			})
 		}
-	}, [PersonalizedSetting?.productConfig?.initial_product_id])
+	}, [PersonalizedSetting?.productConfig?.initial_product_id]) // eslint-disable-line
 
 	function _itemInfoFetch() {
 		$.ajax({ url: `https://wanderprints.com/products/${itemSlug}.js` }).done(response => {
 			try { response = typeof response === "string" ? JSON.parse(response) : response } catch (error) { }
 			setItemInfo(response)
 		}).fail(error => {
-			console.log('error: ', error);
 			setErrorMsg(error.toString())
 		})
 	}
 
 	function _itemPersonalizedFetch() {
-		$.ajax({ url: `https://sh.customily.com/api/settings/unified/${itemSlug}?shop=${shop}` }).done(response => {
+		$.ajax({ url: `https://sh.customily.com/api/settings/unified/${itemSlug}?shop=${shop}`, headers: { SameSite: "None" } }).done(response => {
 			try { response = typeof response === "string" ? JSON.parse(response) : response } catch (error) { }
 			setPersonalizedSetting(response)
 			setPersonalizedSetOps(sortBy(get(head(get(response, "sets", [])), "options", []), "sort_id"))
 		}).fail(error => {
-			console.log('error: ', error);
 			setErrorMsg(error.toString())
 		})
 	}
@@ -75,7 +71,7 @@ export default function Wanderprints() {
 	function _itemLibFetch(productId: any) {
 		if (!productId) return Promise.resolve(true)
 		return new Promise(resolve => {
-			$.ajax({ url: `https://app.customily.com/api/Product/GetProduct?productId=${productId}` }).done(response => {
+			$.ajax({ url: `https://app.customily.com/api/Product/GetProduct?productId=${productId}`, headers: { SameSite: "None" } }).done(response => {
 				try { response = typeof response === "string" ? JSON.parse(response) : response } catch (error) { }
 				setPersonalizedProduct([
 					...PersonalizedProduct,
@@ -83,7 +79,6 @@ export default function Wanderprints() {
 				])
 				resolve(true)
 			}).fail(error => {
-				console.log('error: ', error);
 				setErrorMsg(error.toString())
 				resolve(true)
 			})
@@ -104,7 +99,7 @@ export default function Wanderprints() {
 		if (!url) {
 			url = window.location.href
 		}
-
+		console.log(PersonalizedProduct);
 		const fullItemInfo = {
 			origin_id: get(ItemInfo, "id", ""),
 			title: get(ItemInfo, "title", ""),
@@ -134,7 +129,7 @@ export default function Wanderprints() {
 					}),
 				}
 			}),
-			personalized_option: map(PersonalizedSetOps, option => {
+			options: map(PersonalizedSetOps, option => {
 				return {
 					origin_id: get(option, "id", ""),
 					type: get(option, "type", ""),
@@ -146,6 +141,9 @@ export default function Wanderprints() {
 						return {
 							origin_id: get(value, "id", ""),
 							value: get(value, "value", ""),
+							tooltip: get(value, "tooltip", ""),
+							bg_color: get(value, "bg_color", ""),
+							bg_color_alpha: get(value, "bg_color_alpha", ""),
 							sort_id: get(value, "sort_id", ""),
 							image_id: get(value, "image_id", ""),
 							product_id: get(value, "product_id", ""),
@@ -170,7 +168,7 @@ export default function Wanderprints() {
 					}),
 				}
 			}),
-			personalized_library: map(PersonalizedProduct, PsnlProduct => {
+			libraries: map(PersonalizedProduct, PsnlProduct => {
 				return {
 					origin_id: get(PsnlProduct, "id", ""),
 					width: get(PsnlProduct, "width", ""),
@@ -195,9 +193,6 @@ export default function Wanderprints() {
 				}
 			})
 		}
-		console.log(fullItemInfo);
-		console.log(PersonalizedProduct);
-		console.log(PersonalizedSetOps)
 		setLoading(true)
 		setErrorMsg("")
 		setSuccessMsg("")
@@ -207,11 +202,11 @@ export default function Wanderprints() {
 			},
 			fetchPolicy: "network-only"
 		}).then(response => {
-			console.log('response: ', response);
+
 			setLoading(false)
 			setSuccessMsg("Save successfuly!")
 		}).catch(error => {
-			console.log('error: ', error);
+
 			setLoading(false)
 			setErrorMsg("Error, try again later!")
 		})
@@ -278,17 +273,17 @@ export default function Wanderprints() {
 								onClick={() => {
 									const libraryId = findLibraryId(option)
 									if (!libraryId) return
-									console.log(`https://app.customily.com/api/Libraries/${libraryId}/Elements/Position/${get(value, "image_id", "")}`);
-									$.ajax({ url: `https://app.customily.com/api/Libraries/${libraryId}/Elements/Position/${get(value, "image_id", "")}` }).done(response => {
+
+									$.ajax({ url: `https://app.customily.com/api/Libraries/${libraryId}/Elements/Position/${get(value, "image_id", "")}`, headers: { SameSite: "None" } }).done(response => {
 										try { response = typeof response === "string" ? JSON.parse(response) : response } catch (error) { }
 										const imageName = last(split(response?.Path, "/"))
 										window.open(`https://cdn.customily.com/product-images/${imageName}`)
 									}).fail(error => {
-										console.log('error: ', error);
+
 										setErrorMsg(error.toString())
 									})
 								}} >
-								{get(value, "thumb_image", null) ? <img src={get(value, "thumb_image", "")} width="100%" height="auto" /> : false}
+								{get(value, "thumb_image", null) ? <img src={get(value, "thumb_image", "")} alt={get(value, "id", "")} width="100%" height="auto" /> : false}
 							</Col>
 						})
 					}
@@ -312,7 +307,7 @@ export default function Wanderprints() {
 		}
 		<ItemInfoComponent title={get(ItemInfo, "title")} images={get(ItemInfo, "images", [])} />
 
-		<Card className="mt-3">
+		<Card className="mt-3 mb-3">
 			<CardHeader><strong>Personalized options</strong></CardHeader>
 			<CardBody>
 				{renderOptions()}

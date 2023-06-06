@@ -114,6 +114,7 @@ html {
                 #podorder-ext-app-body {
                     height: calc(100% - 35px);
                     overflow: hidden;
+
                     &::-webkit-scrollbar:horizontal {
                         width: 0px;
                         height: 0px;

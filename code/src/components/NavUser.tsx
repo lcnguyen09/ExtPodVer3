@@ -37,7 +37,7 @@ export default function NavUser() {
         if (currentDocker?._id && currentUser?.docker) {
             setCurrentDocker(find(currentUser?.docker, docker => String(docker?._id) === String(currentDocker?._id)))
         }
-    }, [currentDocker?._id, currentUser?.docker])
+    }, [currentDocker?._id, currentUser?.docker]) // eslint-disable-line
 
     function handleLogout() {
         setCurrentToken()
@@ -86,7 +86,7 @@ export default function NavUser() {
                         classNamePrefix="select"
                         placeholder="Select your hub"
                         isClearable={false}
-                        isLoading={currentUser?.docker === null || currentUser?.docker == undefined}
+                        isLoading={currentUser?.docker === null || currentUser?.docker === undefined}
                         isSearchable={true}
                         name="color"
                         options={map(currentUser?.docker, docker => {

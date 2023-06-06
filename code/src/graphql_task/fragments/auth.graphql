@@ -1,16 +1,3 @@
-fragment User on User {
-	_id
-	first_name
-	last_name
-	email
-	organization {
-		... on OrganizationShortcut {
-			_id
-			name
-		}
-	}
-}
-
 fragment Auth on Auth {
 	_id
 	first_name
@@ -31,17 +18,6 @@ fragment AuthToken on AuthToken {
 	refresh_token
 	token_type
 	expired_at
-}
-
-fragment UserMutateResponse on UserMutateResponse {
-	success
-	user {
-		...User
-	}
-	message
-	errorFields {
-		...ErrorFieldResponse
-	}
 }
 
 fragment RolePermission on RolePermission {

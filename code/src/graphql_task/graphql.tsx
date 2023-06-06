@@ -261,6 +261,7 @@ export type InputFile = {
   name?: InputMaybe<Scalars['String']>;
   sizes?: InputMaybe<Array<InputMaybe<InputFileSize>>>;
   src?: InputMaybe<Scalars['String']>;
+  upload_id?: InputMaybe<Scalars['String']>;
   user_id?: InputMaybe<Scalars['String']>;
   width?: InputMaybe<Scalars['String']>;
 };
@@ -286,24 +287,52 @@ export type InputInvite = {
 export type InputMockup = {
   _id: Scalars['ID'];
   collection_id: Scalars['ID'];
+  height: Scalars['Float'];
   images?: InputMaybe<Array<InputMockupImage>>;
   mockup_id: Scalars['String'];
+  name: Scalars['String'];
+  offset_height: Scalars['Float'];
+  offset_width: Scalars['Float'];
+  offset_x: Scalars['Float'];
+  offset_y: Scalars['Float'];
+  product_id: Scalars['ID'];
+  type: Scalars['String'];
+  width: Scalars['Float'];
 };
 
 export type InputMockupImage = {
   _id: Scalars['ID'];
+  color?: InputMaybe<Scalars['String']>;
   height: Scalars['Float'];
   image?: InputMaybe<InputFile>;
+  offset_height: Scalars['Float'];
+  offset_width: Scalars['Float'];
+  offset_x: Scalars['Float'];
+  offset_y: Scalars['Float'];
   prints?: InputMaybe<Array<InputMockupPrint>>;
   width: Scalars['Float'];
 };
 
 export type InputMockupLayer = {
   _id: Scalars['ID'];
+  height?: InputMaybe<Scalars['Float']>;
+  image?: InputMaybe<InputFile>;
+  is_bg?: InputMaybe<Scalars['Boolean']>;
   layers?: InputMaybe<Array<InputMockupLayer>>;
   name: Scalars['String'];
+  offset_x?: InputMaybe<Scalars['Float']>;
+  offset_y?: InputMaybe<Scalars['Float']>;
+  opacity?: InputMaybe<Scalars['Float']>;
+  rotation?: InputMaybe<Scalars['Float']>;
+  scale_x?: InputMaybe<Scalars['Float']>;
+  scale_y?: InputMaybe<Scalars['Float']>;
   settings?: InputMaybe<Array<InputSettingNameValue>>;
+  skew_x?: InputMaybe<Scalars['Float']>;
+  skew_y?: InputMaybe<Scalars['Float']>;
   type: Scalars['String'];
+  width?: InputMaybe<Scalars['Float']>;
+  x?: InputMaybe<Scalars['Float']>;
+  y?: InputMaybe<Scalars['Float']>;
 };
 
 export type InputMockupPaginate = {
@@ -318,15 +347,20 @@ export type InputMockupPrint = {
   _id: Scalars['ID'];
   height: Scalars['Float'];
   layers?: InputMaybe<Array<InputMockupLayer>>;
+  offset_height?: InputMaybe<Scalars['Float']>;
+  offset_width?: InputMaybe<Scalars['Float']>;
+  offset_x?: InputMaybe<Scalars['Float']>;
+  offset_y?: InputMaybe<Scalars['Float']>;
+  opacity?: InputMaybe<Scalars['Float']>;
   print_id: Scalars['String'];
-  rotation: Scalars['Float'];
-  scale_x: Scalars['Float'];
-  scale_y: Scalars['Float'];
-  skew_x: Scalars['Float'];
-  skew_y: Scalars['Float'];
+  rotation?: InputMaybe<Scalars['Float']>;
+  scale_x?: InputMaybe<Scalars['Float']>;
+  scale_y?: InputMaybe<Scalars['Float']>;
+  skew_x?: InputMaybe<Scalars['Float']>;
+  skew_y?: InputMaybe<Scalars['Float']>;
   width: Scalars['Float'];
-  x: Scalars['Float'];
-  y: Scalars['Float'];
+  x?: InputMaybe<Scalars['Float']>;
+  y?: InputMaybe<Scalars['Float']>;
 };
 
 export type InputOrganization = {
@@ -342,6 +376,11 @@ export type InputOrganizationTelegram = {
   group?: InputMaybe<InputTelegramChat>;
 };
 
+export type InputPaginate = {
+  page: Scalars['Int'];
+  perpage: Scalars['Int'];
+};
+
 export type InputPermission = {
   accept: Scalars['Boolean'];
   id: Scalars['String'];
@@ -352,9 +391,9 @@ export type InputPersonalizeItem = {
   description?: InputMaybe<Scalars['String']>;
   images?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   initial_product_id?: InputMaybe<Scalars['String']>;
+  libraries?: InputMaybe<Array<InputMaybe<InputPersonalizeItemLibrary>>>;
+  options?: InputMaybe<Array<InputMaybe<InputPersonalizeItemOption>>>;
   origin_id?: InputMaybe<Scalars['String']>;
-  personalized_library?: InputMaybe<Array<InputMaybe<InputPersonalizeItemLibrary>>>;
-  personalized_option?: InputMaybe<Array<InputMaybe<InputPersonalizeItemOption>>>;
   slug?: InputMaybe<Scalars['String']>;
   source?: InputMaybe<Scalars['String']>;
   title?: InputMaybe<Scalars['String']>;
@@ -368,6 +407,11 @@ export type InputPersonalizeItemCondition = {
   desired_value?: InputMaybe<Scalars['String']>;
   origin_id?: InputMaybe<Scalars['String']>;
   watch_option?: InputMaybe<Scalars['String']>;
+};
+
+export type InputPersonalizeItemFilter = {
+  origin_id?: InputMaybe<Scalars['String']>;
+  title?: InputMaybe<Scalars['String']>;
 };
 
 export type InputPersonalizeItemFunction = {
@@ -409,12 +453,20 @@ export type InputPersonalizeItemOption = {
   values?: InputMaybe<Array<InputMaybe<InputPersonalizeItemValue>>>;
 };
 
+export type InputPersonalizeItemPaginate = {
+  filter?: InputMaybe<InputPersonalizeItemFilter>;
+  paginate?: InputMaybe<InputPaginate>;
+};
+
 export type InputPersonalizeItemValue = {
+  bg_color?: InputMaybe<Scalars['String']>;
+  bg_color_alpha?: InputMaybe<Scalars['String']>;
   image_id?: InputMaybe<Scalars['String']>;
-  origin_id?: InputMaybe<Scalars['ID']>;
+  origin_id?: InputMaybe<Scalars['String']>;
   product_id?: InputMaybe<Scalars['String']>;
   sort_id?: InputMaybe<Scalars['String']>;
   thumb_image?: InputMaybe<Scalars['String']>;
+  tooltip?: InputMaybe<Scalars['String']>;
   value?: InputMaybe<Scalars['String']>;
 };
 
@@ -589,12 +641,23 @@ export type Mockup = {
   width: Scalars['Float'];
 };
 
+export type MockupDownload = {
+  __typename?: 'MockupDownload';
+  mockup: Mockup;
+  src?: Maybe<Scalars['String']>;
+  success: Scalars['Boolean'];
+};
+
 export type MockupImage = {
   __typename?: 'MockupImage';
   _id: Scalars['ID'];
   color: Scalars['String'];
   height: Scalars['Float'];
   image?: Maybe<File>;
+  offset_height: Scalars['Float'];
+  offset_width: Scalars['Float'];
+  offset_x: Scalars['Float'];
+  offset_y: Scalars['Float'];
   prints?: Maybe<Array<MockupPrint>>;
   width: Scalars['Float'];
 };
@@ -607,6 +670,9 @@ export type MockupLayer = {
   is_bg: Scalars['Boolean'];
   layers?: Maybe<Array<MockupLayer>>;
   name: Scalars['String'];
+  offset_x?: Maybe<Scalars['Float']>;
+  offset_y?: Maybe<Scalars['Float']>;
+  opacity?: Maybe<Scalars['Float']>;
   rotation: Scalars['Float'];
   scale_x: Scalars['Float'];
   scale_y: Scalars['Float'];
@@ -637,6 +703,11 @@ export type MockupPrint = {
   _id: Scalars['ID'];
   height: Scalars['Float'];
   layers?: Maybe<Array<MockupLayer>>;
+  offset_height: Scalars['Float'];
+  offset_width: Scalars['Float'];
+  offset_x: Scalars['Float'];
+  offset_y: Scalars['Float'];
+  opacity: Scalars['Float'];
   print_id: Scalars['String'];
   rotation: Scalars['Float'];
   scale_x: Scalars['Float'];
@@ -665,6 +736,8 @@ export type Mutation = {
   deleteTask?: Maybe<TaskMutationResponse>;
   deleteUser: UserMutateResponse;
   deleteWorkspace: WorkspaceMutationResponse;
+  downloadMockupBulkImage?: Maybe<MockupDownload>;
+  downloadMockupImage?: Maybe<MockupDownload>;
   leaveOfAbsenceTimekeeping?: Maybe<Timekeeping>;
   maskCompleteTask?: Maybe<TaskMutationResponse>;
   moveTaskToWorkspace?: Maybe<TaskMutationResponse>;
@@ -775,6 +848,21 @@ export type MutationDeleteUserArgs = {
 
 export type MutationDeleteWorkspaceArgs = {
   id: Scalars['String'];
+};
+
+
+export type MutationDownloadMockupBulkImageArgs = {
+  filename?: InputMaybe<Scalars['String']>;
+  mimetype?: InputMaybe<Scalars['String']>;
+  mockupId: Scalars['ID'];
+};
+
+
+export type MutationDownloadMockupImageArgs = {
+  filename?: InputMaybe<Scalars['String']>;
+  imageId: Scalars['ID'];
+  mimetype?: InputMaybe<Scalars['String']>;
+  mockupId: Scalars['ID'];
 };
 
 
@@ -1023,9 +1111,9 @@ export type PersonalizeItem = {
   description: Scalars['String'];
   images?: Maybe<Array<Scalars['String']>>;
   initial_product_id: Scalars['String'];
+  libraries?: Maybe<Array<Maybe<PersonalizeItemLibrary>>>;
+  options?: Maybe<Array<Maybe<PersonalizeItemOption>>>;
   origin_id: Scalars['String'];
-  personalized_library?: Maybe<Array<Maybe<PersonalizeItemLibrary>>>;
-  personalized_option?: Maybe<Array<Maybe<PersonalizeItemOption>>>;
   slug: Scalars['String'];
   source: Scalars['String'];
   title: Scalars['String'];
@@ -1087,6 +1175,12 @@ export type PersonalizeItemOption = {
   values?: Maybe<Array<Maybe<PersonalizeItemValue>>>;
 };
 
+export type PersonalizeItemPaginate = {
+  __typename?: 'PersonalizeItemPaginate';
+  items?: Maybe<Array<PersonalizeItem>>;
+  paginate: Paginate;
+};
+
 export type PersonalizeItemResponse = {
   __typename?: 'PersonalizeItemResponse';
   message: Scalars['String'];
@@ -1095,11 +1189,14 @@ export type PersonalizeItemResponse = {
 
 export type PersonalizeItemValue = {
   __typename?: 'PersonalizeItemValue';
+  bg_color: Scalars['String'];
+  bg_color_alpha: Scalars['String'];
   image_id: Scalars['String'];
   origin_id: Scalars['String'];
   product_id: Scalars['String'];
   sort_id: Scalars['String'];
   thumb_image: Scalars['String'];
+  tooltip: Scalars['String'];
   value: Scalars['String'];
 };
 
@@ -1171,6 +1268,7 @@ export type Query = {
   organization: Organization;
   organizationPaginate?: Maybe<OrganizationPaginate>;
   organizations?: Maybe<Array<Organization>>;
+  personalizeItemPaginate?: Maybe<PersonalizeItemPaginate>;
   productPaginate: ProductPaginate;
   rolePermissions?: Maybe<Array<RolePermission>>;
   search?: Maybe<Array<SearchResult>>;
@@ -1284,6 +1382,11 @@ export type QueryOrganizationArgs = {
 
 export type QueryOrganizationPaginateArgs = {
   inputQuery: InputQueryOrganization;
+};
+
+
+export type QueryPersonalizeItemPaginateArgs = {
+  data: InputPersonalizeItemPaginate;
 };
 
 
@@ -1421,6 +1524,7 @@ export type QueryUsersArgs = {
 
 
 export type QueryUsersPaginateArgs = {
+  organization?: InputMaybe<Scalars['ID']>;
   page: Scalars['Int'];
   perpage: Scalars['Int'];
   search: Scalars['String'];
@@ -1799,15 +1903,11 @@ export type InputQueryOrganization = {
   start: Scalars['Date'];
 };
 
-export type UserFragment = { __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null };
-
 export type AuthFragment = { __typename?: 'Auth', _id: string, first_name: string, last_name: string, email: string, token?: { __typename?: 'AuthToken', access_token: string, refresh_token: string, token_type: string, expired_at: any } | null };
 
 export type SignOutResponseFragment = { __typename?: 'SignOutResponse', success: boolean, message: string };
 
 export type AuthTokenFragment = { __typename?: 'AuthToken', access_token: string, refresh_token: string, token_type: string, expired_at: any };
-
-export type UserMutateResponseFragment = { __typename?: 'UserMutateResponse', success: boolean, message?: string | null, user?: { __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null } | null, errorFields?: Array<{ __typename?: 'ErrorField', name: string, message: string }> | null };
 
 export type RolePermissionFragment = { __typename?: 'RolePermission', id: string, name: string, permissions?: Array<{ __typename?: 'Permission', id: string, name: string, accept: boolean }> | null };
 
@@ -1858,13 +1958,6 @@ export type AuthTokenQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type AuthTokenQuery = { __typename?: 'Query', authToken: { __typename?: 'AuthToken', access_token: string, refresh_token: string, token_type: string, expired_at: any } };
 
-export type UsersQueryVariables = Exact<{
-  search?: InputMaybe<Scalars['String']>;
-}>;
-
-
-export type UsersQuery = { __typename?: 'Query', users: Array<{ __typename?: 'User', _id: string, first_name: string, last_name: string, email: string, organization?: { __typename?: 'OrganizationShortcut', _id: string, name: string } | null }> };
-
 export type RolePermissionsQueryVariables = Exact<{
   role: Scalars['String'];
 }>;
@@ -1904,39 +1997,6 @@ export const SignOutResponseFragmentDoc = gql`
   message
 }
     `;
-export const UserFragmentDoc = gql`
-    fragment User on User {
-  _id
-  first_name
-  last_name
-  email
-  organization {
-    ... on OrganizationShortcut {
-      _id
-      name
-    }
-  }
-}
-    `;
-export const ErrorFieldResponseFragmentDoc = gql`
-    fragment ErrorFieldResponse on ErrorField {
-  name
-  message
-}
-    `;
-export const UserMutateResponseFragmentDoc = gql`
-    fragment UserMutateResponse on UserMutateResponse {
-  success
-  user {
-    ...User
-  }
-  message
-  errorFields {
-    ...ErrorFieldResponse
-  }
-}
-    ${UserFragmentDoc}
-${ErrorFieldResponseFragmentDoc}`;
 export const PermissionFragmentDoc = gql`
     fragment Permission on Permission {
   id
@@ -1981,6 +2041,12 @@ export const OrganizationDetailFragmentDoc = gql`
   ...Organization
 }
     ${OrganizationFragmentDoc}`;
+export const ErrorFieldResponseFragmentDoc = gql`
+    fragment ErrorFieldResponse on ErrorField {
+  name
+  message
+}
+    `;
 export const OrganizationMutationResponseFragmentDoc = gql`
     fragment OrganizationMutationResponse on OrganizationMutationResponse {
   success
@@ -2183,41 +2249,6 @@ export function useAuthTokenLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<
 export type AuthTokenQueryHookResult = ReturnType<typeof useAuthTokenQuery>;
 export type AuthTokenLazyQueryHookResult = ReturnType<typeof useAuthTokenLazyQuery>;
 export type AuthTokenQueryResult = Apollo.QueryResult<AuthTokenQuery, AuthTokenQueryVariables>;
-export const UsersDocument = gql`
-    query Users($search: String) {
-  users(search: $search) {
-    ...User
-  }
-}
-    ${UserFragmentDoc}`;
-
-/**
- * __useUsersQuery__
- *
- * To run a query within a React component, call `useUsersQuery` and pass it any options that fit your needs.
- * When your component renders, `useUsersQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useUsersQuery({
- *   variables: {
- *      search: // value for 'search'
- *   },
- * });
- */
-export function useUsersQuery(baseOptions?: Apollo.QueryHookOptions<UsersQuery, UsersQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<UsersQuery, UsersQueryVariables>(UsersDocument, options);
-      }
-export function useUsersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UsersQuery, UsersQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<UsersQuery, UsersQueryVariables>(UsersDocument, options);
-        }
-export type UsersQueryHookResult = ReturnType<typeof useUsersQuery>;
-export type UsersLazyQueryHookResult = ReturnType<typeof useUsersLazyQuery>;
-export type UsersQueryResult = Apollo.QueryResult<UsersQuery, UsersQueryVariables>;
 export const RolePermissionsDocument = gql`
     query RolePermissions($role: String!) {
   rolePermissions(role: $role) {

@@ -18,8 +18,8 @@ interface IApolloStateProps {
 	[APOLLO_STATE_PROP_NAME]?: NormalizedCacheObject
 }
 
-function initializeApollo({ headers, targetUrl }: { headers?: Record<string, string>, targetUrl?: string } = { headers: {}, targetUrl: "" }) {
-	const _apolloClient = apolloClient ?? new ApolloClient({
+function newApollo({ headers, targetUrl }: { headers?: Record<string, string>, targetUrl?: string } = { headers: {}, targetUrl: "" }) {
+	return new ApolloClient({
 		ssrMode: typeof window === 'undefined',
 		link: from([
 			onError(errors => {
@@ -40,12 +40,14 @@ function initializeApollo({ headers, targetUrl }: { headers?: Record<string, str
 		]),
 		cache: new InMemoryCache(),
 	})
+}
 
+function initializeApollo({ headers, targetUrl }: { headers?: Record<string, string>, targetUrl?: string } = { headers: {}, targetUrl: "" }) {
+	const _apolloClient = apolloClient ?? newApollo({headers: headers, targetUrl: targetUrl})
 	// For SSG and SSR always create a new Apollo Client
 	if (typeof window === 'undefined') return _apolloClient
 	// Create the Apollo Client once in the client
 	if (!apolloClient) apolloClient = _apolloClient
-
 	return _apolloClient
 }
 
@@ -60,26 +62,37 @@ export function addApolloState(
 	return pageProps
 }
 
-export function useApollo() {
+export function useApollo(url?: string | null) {
 	const { urlGraphql, currentToken, currentAppConfig } = UiContext.UseUIContext()
+	const graphqlUrl = url ?? urlGraphql
 	const store = useMemo(() => {
 		let token = ""
 		switch (currentAppConfig?.mode) {
 			case "PersonalizeItemClaw":
 				token = currentToken?.access_token
-				break;
+				return initializeApollo({
+					headers: {
+						"Authorization": `Bearer ${token}`
+					},
+					targetUrl: graphqlUrl
+				})
 			case "SimpleItemClaw":
 				token = currentToken?.token
-				break;
+				return newApollo({
+					headers: {
+						"Authorization": `Bearer ${token}`
+					},
+					targetUrl: graphqlUrl
+				})
 			default:
-				break;
+				return initializeApollo({
+					headers: {
+						"Authorization": `Bearer ${token}`
+					},
+					targetUrl: graphqlUrl
+				})
 		}
-		return initializeApollo({
-			headers: {
-				"Authorization": `Bearer ${token}`
-			},
-			targetUrl: urlGraphql
-		})
-	}, [urlGraphql, currentToken?.access_token, currentToken?.token, currentAppConfig?.mode])
+		
+	}, [graphqlUrl, currentToken?.access_token, currentToken?.token, currentAppConfig?.mode])
 	return store
 }
