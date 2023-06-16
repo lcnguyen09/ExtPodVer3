@@ -1,4 +1,4 @@
-import { Children, ReactNode, cloneElement, isValidElement } from 'react'
+import { Children, ReactNode, cloneElement, isValidElement, useEffect } from 'react'
 import { ApolloProvider } from '@apollo/client'
 import { useApollo } from './contexts/apollo.client'
 

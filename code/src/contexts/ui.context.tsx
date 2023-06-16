@@ -21,6 +21,7 @@ import {
 	URL_TASK_GRAPHQL,
 	URL_ACCOUNT_GRAPHQL
 } from "./contants"
+import { Spinner } from 'reactstrap'
 
 interface UIManageContextProps {
 	children?: ReactNode
@@ -28,7 +29,9 @@ interface UIManageContextProps {
 
 
 const initialState = {
+	appInit: true,
 	appLoading: true,
+	appHide: false,
 	windowView: null,
 	appConfig: null,
 	currentAppConfig: null,
@@ -37,11 +40,14 @@ const initialState = {
 	currentUser: null,
 	currentToken: null,
 	currentDocker: null,
+	templateId: null,
 
 }
 
 export interface State {
+	appInit: boolean,
 	appLoading: boolean,
+	appHide: boolean,
 	windowView: WINDOW_VIEWS,
 	appConfig: any,
 	currentAppConfig: any,
@@ -50,6 +56,7 @@ export interface State {
 	currentUser: CURRENT_USER | null,
 	currentToken: TOKEN | null,
 	currentDocker: DOCKER | null
+	templateId: string | null
 }
 
 
@@ -58,7 +65,9 @@ UIContext.displayName = "UIContext"
 
 function uiReducer(state: State, action: ACTION) {
 	switch (action.type) {
+		case "SET_INIT": { return { ...state, appInit: !!action.appInit } }
 		case "SET_LOADING": { return { ...state, appLoading: !!action.appLoading } }
+		case "SET_APP_HIDE": { return { ...state, appHide: !!action.appHide } }
 		case "SET_WINDOW_VIEW": { return { ...state, windowView: get(action, "view") } }
 		case "SET_APP_CONFIG": { return { ...state, appConfig: action.appConfig } }
 		case "SET_CURRENT_APP_CONFIG": { return { ...state, currentAppConfig: action.currentAppConfig } }
@@ -77,6 +86,9 @@ function uiReducer(state: State, action: ACTION) {
 		case "SET_CURRENT_DOCKER": {
 			return { ...state, currentDocker: action.currentDocker }
 		}
+		case "SET_TEMPLATE_ID": {
+			return { ...state, templateId: action.templateId }
+		}
 		case "SET_URL_GRAPHQL": {
 			return { ...state, urlGraphql: action.urlGraphql }
 		}
@@ -86,35 +98,76 @@ function uiReducer(state: State, action: ACTION) {
 export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContextProps) => {
 	const [state, dispatch]: any = useReducer<any>(uiReducer, initialState)
 	const [init, setInit]: [boolean, (val: boolean) => void] = useState(false)
+
 	const [accessToken, setAccessToken]: [string | null, (val: string) => void] = useStorage("_pod_ext_access_token") // eslint-disable-line
 	const [refreshToken, setRefreshToken]: [string | null, (val: string) => void] = useStorage("_pod_ext_refresh_token") // eslint-disable-line
 	const [token, setToken]: [string | null, (val: string) => void] = useStorage("_pod_ext_token") // eslint-disable-line
 	const [docker, setDocker]: [string | null, (val: string) => void] = useStorage("_pod_ext_docker") // eslint-disable-line
-
 	const [windowViewStorage, setWindowViewStorage]: [string | null, (val: string) => void] = useStorage("_pod_ext_view") // eslint-disable-line
+	const [templateIdStorage, setTemplateIdStorage]: [string | null, (val: string) => void] = useStorage("_pod_template_id") // eslint-disable-line
 
-	const setAppLoading = (appLoading: boolean) => dispatch({ type: "SET_LOADING", appLoading })
-	const setWindowView = (view: WINDOW_VIEWS | string) => dispatch({ type: "SET_WINDOW_VIEW", view })
-	const setAppConfig = (appConfig: any) => dispatch({ type: "SET_APP_CONFIG", appConfig })
-	const setCurrentAppConfig = (currentAppConfig: any) => dispatch({ type: "SET_CURRENT_APP_CONFIG", currentAppConfig })
-	const setUrlGraphql = (urlGraphql: string) => dispatch({ type: "SET_URL_GRAPHQL", urlGraphql })
-	const setPageRoute = (page: PAGE_ROUTES) => dispatch({ type: "SET_PAGE_ROUTE", page })
-	const setCurrentUser = (user?: CURRENT_USER) => dispatch({ type: "SET_CURRENT_USER", user })
-	const setCurrentToken = (currentToken: TOKEN) => dispatch({ type: "SET_CURRENT_TOKEN", currentToken })
-	const setCurrentDocker = (currentDocker?: DOCKER) => dispatch({ type: "SET_CURRENT_DOCKER", currentDocker })
+	useEffect(() => {
+		if (
+			accessToken !== null &&
+			refreshToken !== null &&
+			token !== null &&
+			docker !== null &&
+			windowViewStorage !== null &&
+			state.appConfig !== null &&
+			templateIdStorage !== null
+		) {
+			setInit(true)
+		}
+	}, [ // eslint-disable-line
+		accessToken, // eslint-disable-line
+		refreshToken, // eslint-disable-line
+		token, // eslint-disable-line
+		docker, // eslint-disable-line
+		windowViewStorage, // eslint-disable-line
+		state.appConfig, // eslint-disable-line
+		templateIdStorage // eslint-disable-line
+	]) // eslint-disable-line
 
-	const value = useMemo(() => ({
-		...state,
-		setAppLoading,
-		setWindowView,
-		setAppConfig,
-		setCurrentAppConfig,
-		setUrlGraphql,
-		setPageRoute,
-		setCurrentUser,
-		setCurrentToken,
-		setCurrentDocker
-	}), [state]) // eslint-disable-line
+	useEffect(() => {
+		if (init) {
+			if (accessToken !== null && refreshToken !== null && token !== null) setCurrentToken({
+				access_token: accessToken,
+				refresh_token: refreshToken || "",
+				expired_at: "",
+				token_type: "Bearer",
+				token: token
+			})
+			if (windowViewStorage !== null) setWindowView(windowViewStorage)
+			if (docker !== null) setCurrentDocker({ _id: docker })
+			if (templateIdStorage !== null) setTemplateId(templateIdStorage)
+		}
+	}, [init]) // eslint-disable-line
+
+	useEffect(() => {
+		// $.ajax({ url: CONFIG_URL }).done(response => {
+		// 	try { response = JSON.parse(response) } catch (error) { response = {} }
+		// 	setAppConfig(response)
+		// }).fail(error => {
+		// 	setAppConfig({})
+		// })
+		setTimeout(() => {
+			setAppConfig({
+				"site_mode": {
+					"localhost": {
+						"mode": "SimpleItemClaw"
+						// "mode": "PersonalizeItemClaw"
+					},
+					"wanderprints.com": {
+						"mode": "PersonalizeItemClaw"
+					}
+				}
+			})
+		}, 1000)
+	}, []) // eslint-disable-line
+
+	useEffect(() => {
+		setCurrentAppConfig(get(state.appConfig, ["site_mode", window.location.hostname], { "mode": "SimpleItemClaw" }))
+	}, [window.location.hostname, state.appConfig]) // eslint-disable-line
 
 	useEffect(() => {
 		if (state.windowView === "MIN") {
@@ -171,62 +224,41 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	]) // eslint-disable-line
 
 	useEffect(() => {
-		if (init) {
-			if (accessToken !== null && refreshToken !== null && token !== null) setCurrentToken({
-				access_token: accessToken,
-				refresh_token: refreshToken || "",
-				expired_at: "",
-				token_type: "Bearer",
-				token: token
-			})
-			if (windowViewStorage !== null) setWindowView(windowViewStorage)
-			if (docker !== null) setCurrentDocker({_id: docker})
-		}
-	}, [init]) // eslint-disable-line
+		setTemplateIdStorage(state.templateId)
+	}, [state.templateId]) // eslint-disable-line
 
-	useEffect(() => {
-		if (accessToken !== null &&
-			refreshToken !== null &&
-			token !== null &&
-			docker !== null &&
-			windowViewStorage !== null) setInit(true)
-	}, [ // eslint-disable-line
-		accessToken, // eslint-disable-line
-		refreshToken, // eslint-disable-line
-		token, // eslint-disable-line
-		docker, // eslint-disable-line
-		windowViewStorage // eslint-disable-line
-	]) // eslint-disable-line
+	const setAppInit = (appInit: boolean) => dispatch({ type: "SET_INIT", appInit })
+	const setAppLoading = (appLoading: boolean) => dispatch({ type: "SET_LOADING", appLoading })
+	const setAppHide = (appHide: boolean) => dispatch({ type: "SET_APP_HIDE", appHide })
+	const setWindowView = (view: WINDOW_VIEWS | string) => dispatch({ type: "SET_WINDOW_VIEW", view })
+	const setAppConfig = (appConfig: any) => dispatch({ type: "SET_APP_CONFIG", appConfig })
+	const setCurrentAppConfig = (currentAppConfig: any) => dispatch({ type: "SET_CURRENT_APP_CONFIG", currentAppConfig })
+	const setUrlGraphql = (urlGraphql: string) => dispatch({ type: "SET_URL_GRAPHQL", urlGraphql })
+	const setPageRoute = (page: PAGE_ROUTES) => dispatch({ type: "SET_PAGE_ROUTE", page })
+	const setCurrentUser = (user?: CURRENT_USER) => dispatch({ type: "SET_CURRENT_USER", user })
+	const setCurrentToken = (currentToken: TOKEN) => dispatch({ type: "SET_CURRENT_TOKEN", currentToken })
+	const setCurrentDocker = (currentDocker?: DOCKER) => dispatch({ type: "SET_CURRENT_DOCKER", currentDocker })
+	const setTemplateId = (templateId?: string) => dispatch({ type: "SET_TEMPLATE_ID", templateId })
 
-	useEffect(() => {
-		// $.ajax({ url: CONFIG_URL }).done(response => {
-		// 	try { response = JSON.parse(response) } catch (error) { response = {} }
-		// 	setAppConfig(response)
-		// }).fail(error => {
-		// 	setAppConfig({})
-		// })
-		setAppConfig({
-			"site_mode": {
-				"localhost": {
-					// "mode": "SimpleItemClaw"
-					"mode": "PersonalizeItemClaw"
-				},
-				"wanderprints.com": {
-					"mode": "PersonalizeItemClaw"
-				}
-			}
-		})
-	}, []) // eslint-disable-line
+	const value = useMemo(() => ({
+		...state,
+		setAppInit,
+		setAppLoading,
+		setAppHide,
+		setWindowView,
+		setAppConfig,
+		setCurrentAppConfig,
+		setUrlGraphql,
+		setPageRoute,
+		setCurrentUser,
+		setCurrentToken,
+		setCurrentDocker,
+		setTemplateId
+	}), [state]) // eslint-disable-line
 
-	useEffect(() => {
-		setCurrentAppConfig(get(state.appConfig, ["site_mode", window.location.hostname], {"mode": "SimpleItemClaw"}))
-	}, [window.location.hostname, state.appConfig]) // eslint-disable-line
-
-	return <>
-		{
-			init ? <UIContext.Provider value={value} {...props} /> : false
-		}
-	</>
+	return init
+		? <UIContext.Provider value={value} {...props} />
+		: <div style={{ position: "fixed", bottom: "3px", right: "6px" }}><Spinner color='info' size="sm" /></div>
 }
 
 export const ManagedUIContext: React.FC<UIManageContextProps> = ({ children }: UIManageContextProps) => {

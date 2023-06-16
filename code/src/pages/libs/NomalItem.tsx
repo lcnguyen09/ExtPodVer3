@@ -1,18 +1,14 @@
-import { useEffect, useState } from "react"
-import { Alert, Button, Card, CardBody, CardHeader, Spinner } from "reactstrap";
+import { Dispatch, SetStateAction, useEffect, useState } from "react"
+import { Alert, Button, Col, Row, Spinner } from "reactstrap";
 import { Save } from "react-feather"
-import { ApolloProvider } from '@apollo/client'
-import { useApollo } from './../../contexts/apollo.client'
 import UiContext from './../../contexts/ui.context'
 import { useInfoLazyQuery } from "./../../graphql_podorder/graphql";
+import Notification from "./../../components/Notification"
 import $ from "jquery"
-import { filter, get, head, map, split, trim, union } from "lodash";
-import ItemInfoComponent from "./../../components/ItemInfo"
-
+import { clone, filter, get, head, includes, map, remove, split, startsWith, trim, union } from "lodash";
 
 export default function NomalItem() {
-    const { currentDocker } = UiContext.UseUIContext()
-    const apolloClient = useApollo(currentDocker?.domain ? `https://api-${currentDocker?.domain}.${currentDocker?.server}/graphql` : null)
+	const { appHide, setAppHide, setAppInit } = UiContext.UseUIContext()
     const [infoQuery] = useInfoLazyQuery({ fetchPolicy: "network-only" })
 
     const [Loading, setLoading] = useState<boolean>(true)
@@ -24,6 +20,7 @@ export default function NomalItem() {
     const [__INITIAL_STATE__, setInitialState] = useState<any>({})
     const [ItemTitle, setItemTitle] = useState("")
     const [ItemImages, setItemImages] = useState<Array<string>>([])
+    const [ItemImagesSelected, setItemImagesSelected] = useState<Array<string>>([])
     useEffect(() => {
         getRule()
         try {
@@ -53,7 +50,6 @@ export default function NomalItem() {
     }
 
     function getItemName() {
-        console.log(__NEXT_DATA__);
         return __INITIAL_STATE__?.product?.product?.title
             ? __INITIAL_STATE__?.product?.product?.title
             : __NEXT_DATA__?.props?.pageProps?.product?.title
@@ -84,35 +80,98 @@ export default function NomalItem() {
     }
 
 
-    return <ApolloProvider client={apolloClient}>
-        {
-            ErrorMsg && <Alert color="danger" className="text-center mt-1 p-2"><strong>*Error:</strong> <i>{ErrorMsg}.</i></Alert>
-        }
-        {
-            SuccessMsg && <Alert color="success" className="text-center mt-1 p-2"><i>{SuccessMsg}.</i></Alert>
-        }
-        {
-            Loading && <div className='position-absolute w-100 h-100 top-0 bottom-0 start-0 end-0 d-flex justify-content-center align-items-center overlay-div'>
-                <Spinner color='primary' />
-            </div>
-        }
-        <ItemInfoComponent title={ItemTitle} images={ItemImages} />
-        <div className="position-absolute start-0 bottom-0 end-0 bg-white d-flex justify-content-end align-items-right p-2 border-top footer-action">
-            <NomalItemSave />
+    return <>
+        <Notification ErrorMsg={ErrorMsg} SuccessMsg={SuccessMsg} Loading={Loading} />
+        <h3 className="text-center">Item Info</h3>
+
+        <div className="container-fluid mt-2">
+            <Row>
+                <Col sm={12}><strong>Name:</strong></Col>
+                <Col sm={12}>{ItemTitle}</Col>
+            </Row>
+            <Row>
+                <Col sm={12} className="mt-2"><strong>Images:</strong></Col>
+                {
+                    map(
+                        filter(
+                            map(ItemImages, img => startsWith(img, "//") ? window.location.protocol + img : img),
+                            img => !startsWith(img, "data:image")
+                        ),
+                        (img, index) => {
+                            return <Col sm={4} className="mb-2 px-1" key={index}><img src={img} alt={img} width="100%" height="100%" className={`cursor-pointer border rounded border-3 ${includes(ItemImagesSelected, img) ? "border-success" : ""}`} onClick={e => {
+                                if (includes(ItemImagesSelected, img)) {
+                                    const oldItemImagesSelected = clone(ItemImagesSelected)
+                                    remove(oldItemImagesSelected, i => i === img)
+                                    setItemImagesSelected(oldItemImagesSelected)
+                                } else {
+                                    setItemImagesSelected(union([
+                                        ...ItemImagesSelected,
+                                        img
+                                    ]))
+                                }
+
+                            }} /></Col>
+                        }
+                    )
+                }
+            </Row>
         </div>
-    </ApolloProvider>
+        <div className="position-absolute start-0 bottom-0 end-0 bg-white d-flex justify-content-end align-items-right p-2 border-top footer-action">
+            <NomalItemSave setLoading={setLoading} ItemTitle={ItemTitle} ItemImages={ItemImagesSelected} setSuccessMsg={setSuccessMsg} setErrorMsg={setErrorMsg} />
+        </div>
+    </>
 }
 
-function NomalItemSave() {
-    const [infoQuery] = useInfoLazyQuery({ fetchPolicy: "network-only" })
+function NomalItemSave({ setLoading, ItemTitle, ItemImages, setSuccessMsg, setErrorMsg }: {
+    setLoading: Dispatch<SetStateAction<boolean>>,
+    ItemTitle: string,
+    ItemImages: Array<string>,
+    setSuccessMsg: Dispatch<SetStateAction<string>>,
+    setErrorMsg: Dispatch<SetStateAction<string>>,
+}) {
+    const { currentDocker, currentToken, templateId } = UiContext.UseUIContext()
 
-    useEffect(() => {
-        getRule()
-    }, [])
-    function getRule() {
-        infoQuery({ fetchPolicy: "network-only" }).then(response => {
-            console.log('response: ', response);
+    function handleSave() {
+        console.log('handleSave: ');
+        setLoading(true)
+        var settings = {
+            "url": `${currentDocker?.domain ? `https://api-${currentDocker?.domain}.${currentDocker?.server}/api/v1/item-clone` : "/api/v1/item-clone"}`,
+            "data": {
+                id: templateId,
+                name: ItemTitle,
+                images: ItemImages,
+                // origin_id: originId
+            },
+            "method": "GET",
+            "timeout": 0,
+            "headers": {
+                "Authorization": `Bearer ${currentToken.token}`
+            },
+        };
+
+        $.ajax(settings).done(function (response) {
+            const data = response?.data
+            setLoading(false)
+            setSuccessMsg("")
+            setErrorMsg("")
+            if (typeof data === "string") {
+                if (data && data.includes("OK, New Identity is")) {
+                    setSuccessMsg("Item saved successfully!")
+                } else {
+                    if (data.includes("Item not found!")) {
+                        setErrorMsg("Template item ID not setup!")
+                    } else {
+                        setErrorMsg(data)
+                    }
+                }
+            } else {
+                setErrorMsg("Try again later!")
+            }
+
+        }).fail(e => {
+            console.log('e: ', e);
+            setLoading(false)
         })
     }
-    return <Button size="xs" color="success" className="py-1 d-flex justify-content-center align-items-center" onClick={() => false}><Save size={14} /> <span style={{ marginLeft: "3px" }}>Save</span></Button>
+    return <Button disabled={!ItemImages.length} size="xs" color="success" className="py-1 d-flex justify-content-center align-items-center" onClick={handleSave}><Save size={14} /> <span style={{ marginLeft: "3px" }}>Save</span></Button>
 }

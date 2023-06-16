@@ -3,11 +3,12 @@ import { chunk, filter, find, fromPairs, get, head, keyBy, last, map, set, sortB
 import $ from "jquery"
 import { Alert, Badge, Button, Card, CardBody, CardHeader, Col, FormGroup, Input, Label, NavLink, Row, Spinner, Table } from "reactstrap";
 import { ChevronDown, Save } from "react-feather"
-import EtsyNewOrder from "./../../data/etsy_new_order.json"
-import EtsyOldOrder from "./../../data/etsy_old_order.json"
+import Notification from "./../../components/Notification"
+import EtsyNewOrder from "../../data/etsy_new_order.json"
+import EtsyOldOrder from "../../data/etsy_old_order.json"
 
-
-export default function EtsyOrder() {
+// https://www.etsy.com/your/orders/sold?ref=seller-platform-mcnav
+export default function EtsySite() {
     const [Loading, setLoading] = useState<boolean>(true)
     const [CheckAll, setCheckAll] = useState<boolean>(false)
     const [CheckOrder, setCheckOrder] = useState<any>({})
@@ -50,17 +51,7 @@ export default function EtsyOrder() {
 
 
     return <div>
-        {
-            ErrorMsg && <Alert color="danger" className="text-center mt-1 p-2"><strong>*Error:</strong> <i>{ErrorMsg}.</i></Alert>
-        }
-        {
-            SuccessMsg && <Alert color="success" className="text-center mt-1 p-2"><i>{SuccessMsg}.</i></Alert>
-        }
-        {
-            Loading && <div className='position-absolute w-100 h-100 top-0 bottom-0 start-0 end-0 d-flex justify-content-center align-items-center overlay-div'>
-                <Spinner color='primary' />
-            </div>
-        }
+        <Notification ErrorMsg={ErrorMsg} SuccessMsg={SuccessMsg} Loading={Loading} />
         <Card className="mt-3 mb-3">
             <CardHeader><strong>Orders</strong></CardHeader>
             <CardBody className="p-0">

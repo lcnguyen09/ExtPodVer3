@@ -32,7 +32,6 @@ export default function ItemInfo({
                             img => !startsWith(img, "data:image")
                         ),
                         (img, index) => {
-                            console.log('img: ', img);
                             return <Col sm={4} className="mb-2 px-1" key={index}><img src={img} alt={img} width="100%" height="100%" /></Col>
                         }
                     )

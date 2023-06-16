@@ -4,6 +4,7 @@ import $ from "jquery"
 import { Alert, Button, Card, CardBody, CardHeader, Col, Input, NavLink, Row, Spinner } from "reactstrap";
 import { ChevronDown, Save } from "react-feather"
 import ItemInfoComponent from "./../../components/ItemInfo"
+import Notification from "./../../components/Notification"
 import { useSavePersonalizeItemMutation } from "./../../graphql_task/graphql";
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -99,7 +100,6 @@ export default function Wanderprints() {
 		if (!url) {
 			url = window.location.href
 		}
-		console.log(PersonalizedProduct);
 		const fullItemInfo = {
 			origin_id: get(ItemInfo, "id", ""),
 			title: get(ItemInfo, "title", ""),
@@ -294,17 +294,7 @@ export default function Wanderprints() {
 	}
 
 	return itemSlug ? <div>
-		{
-			ErrorMsg && <Alert color="danger" className="text-center mt-1 p-2"><strong>*Error:</strong> <i>{ErrorMsg}.</i></Alert>
-		}
-		{
-			SuccessMsg && <Alert color="success" className="text-center mt-1 p-2"><i>{SuccessMsg}.</i></Alert>
-		}
-		{
-			Loading && <div className='position-absolute w-100 h-100 top-0 bottom-0 start-0 end-0 d-flex justify-content-center align-items-center overlay-div'>
-				<Spinner color='primary' />
-			</div>
-		}
+        <Notification ErrorMsg={ErrorMsg} SuccessMsg={SuccessMsg} Loading={Loading} />
 		<ItemInfoComponent title={get(ItemInfo, "title")} images={get(ItemInfo, "images", [])} />
 
 		<Card className="mt-3 mb-3">

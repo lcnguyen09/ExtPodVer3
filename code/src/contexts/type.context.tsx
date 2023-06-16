@@ -34,8 +34,16 @@ export type PAGE_ROUTES = | "INIT"
 
 export type ACTION =
     | {
+        type: "SET_INIT"
+        appInit: boolean
+    }
+    | {
         type: "SET_LOADING"
         appLoading: boolean
+    }
+    | {
+        type: "SET_APP_HIDE"
+        appHide: boolean
     }
     | {
         type: "SET_WINDOW_VIEW"
@@ -64,6 +72,10 @@ export type ACTION =
     | {
         type: "SET_CURRENT_DOCKER"
         currentDocker: DOCKER | null
+    }
+    | {
+        type: "SET_TEMPLATE_ID"
+        templateId: string | null
     }
     | {
         type: "SET_URL_GRAPHQL"

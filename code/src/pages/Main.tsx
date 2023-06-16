@@ -3,19 +3,20 @@ import { useEffect, useState } from "react"
 import UiContext from './../contexts/ui.context'
 import NomalItem from "./libs/NomalItem"
 import Wanderprints from "./libs/Wanderprints"
-import EtsyOrder from "./libs/EtsyOrder"
+import EtsySite from "./libs/EtsySite"
 
 
-const sitesLib = {
+const sitesLibPersonalizeItem = {
 	"not_support": <div className="text-center">This site is not support</div>,
 	"localhost:3333": <Wanderprints />,
 	"wanderprints.com": <Wanderprints />,
 }
 
-const sitesLibOrder = {
+const sitesLibItem = {
 	"not_support": <NomalItem />,
-	// "localhost:3333": <EtsyOrder />,
-	"etsy.com": <EtsyOrder />,
+	// "localhost:3333": <NomalItem />,
+	// "localhost:3333": <EtsySite />,
+	// "etsy.com": <EtsySite />,
 }
 
 export default function Main() {
@@ -28,9 +29,9 @@ export default function Main() {
 
 	switch (currentAppConfig?.mode) {
 		case "PersonalizeItemClaw":
-			return <>{get(sitesLib, site, sitesLib.not_support)}</>
+			return <>{get(sitesLibPersonalizeItem, site, sitesLibPersonalizeItem.not_support)}</>
 		case "SimpleItemClaw":
-			return <>{get(sitesLibOrder, site, sitesLibOrder.not_support)}</>
+			return <>{get(sitesLibItem, site, sitesLibItem.not_support)}</>
 		default:
 			return <></>
 	}

@@ -9,9 +9,13 @@ if (DEV_MODE) {
 }
 document.body.appendChild(rootElement)
 $(document).ready(function () {
+    try {
+        ReactDOM.createRoot(rootElement).render(<App />)
+    } catch (error) {
+        console.log('Error: ', error);
+    }
     // if (
     //     ["localhost"].includes(window.location.hostname)
     // ) {
-        ReactDOM.createRoot(rootElement).render(<App />)
     // }
 });

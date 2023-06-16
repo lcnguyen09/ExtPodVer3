@@ -43,7 +43,7 @@ function newApollo({ headers, targetUrl }: { headers?: Record<string, string>, t
 }
 
 function initializeApollo({ headers, targetUrl }: { headers?: Record<string, string>, targetUrl?: string } = { headers: {}, targetUrl: "" }) {
-	const _apolloClient = apolloClient ?? newApollo({headers: headers, targetUrl: targetUrl})
+	const _apolloClient = apolloClient ?? newApollo({ headers: headers, targetUrl: targetUrl })
 	// For SSG and SSR always create a new Apollo Client
 	if (typeof window === 'undefined') return _apolloClient
 	// Create the Apollo Client once in the client
@@ -62,37 +62,38 @@ export function addApolloState(
 	return pageProps
 }
 
-export function useApollo(url?: string | null) {
+export function useApollo() {
 	const { urlGraphql, currentToken, currentAppConfig } = UiContext.UseUIContext()
-	const graphqlUrl = url ?? urlGraphql
 	const store = useMemo(() => {
+		const apolloStore = initializeApollo()
+		let apolloOnError = (errors: any) => {
+			if (errors.graphQLErrors &&
+				errors.graphQLErrors[0].extensions?.code === 'UNAUTHENTICATED' &&
+				errors.response) { errors.response.errors = undefined }
+		}
 		let token = ""
 		switch (currentAppConfig?.mode) {
 			case "PersonalizeItemClaw":
 				token = currentToken?.access_token
-				return initializeApollo({
-					headers: {
-						"Authorization": `Bearer ${token}`
-					},
-					targetUrl: graphqlUrl
-				})
+				break;
 			case "SimpleItemClaw":
 				token = currentToken?.token
-				return newApollo({
-					headers: {
-						"Authorization": `Bearer ${token}`
-					},
-					targetUrl: graphqlUrl
-				})
+				break;
 			default:
-				return initializeApollo({
-					headers: {
-						"Authorization": `Bearer ${token}`
-					},
-					targetUrl: graphqlUrl
-				})
+				break;
 		}
-		
-	}, [graphqlUrl, currentToken?.access_token, currentToken?.token, currentAppConfig?.mode])
+		apolloStore.setLink(from([
+			onError(apolloOnError),
+			new HttpLink({
+				uri: urlGraphql,
+				headers: { "Authorization": `Bearer ${token}` },
+				fetch: (url: RequestInfo, init: RequestInit) => unfetch(url, {
+					...init,
+					headers: init.headers
+				})
+			})
+		]))
+		return apolloStore
+	}, [urlGraphql, currentToken?.access_token, currentToken?.token, currentAppConfig?.mode])
 	return store
 }

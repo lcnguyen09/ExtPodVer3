@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { NavLink, Collapse, Spinner, Label } from 'reactstrap'
+import { NavLink, Collapse, Spinner, Label, Input } from 'reactstrap'
 import { User, LogOut, ChevronDown, ChevronUp, Server } from "react-feather"
 import UiContext from '../contexts/ui.context'
 import Select, { StylesConfig } from 'react-select';
@@ -12,7 +12,7 @@ const colourStyles: StylesConfig = {
 };
 
 export default function NavUser() {
-    const { currentUser, setCurrentUser, currentToken, setCurrentToken, currentDocker, setCurrentDocker, currentAppConfig } = UiContext.UseUIContext()
+    const { currentUser, setCurrentUser, currentToken, setCurrentToken, currentDocker, setCurrentDocker, templateId, setTemplateId, currentAppConfig } = UiContext.UseUIContext()
     const [popoverOpen, togglePopoverOpen] = useState<boolean>(false)
     const wrapperRef = useRef<any>(null);
     useEffect(() => {
@@ -110,7 +110,21 @@ export default function NavUser() {
                     />
                 </div> : false
             }
-
+            {
+                currentAppConfig?.mode === "SimpleItemClaw" ? <div className='mb-3'>
+                    <Label>Template ID: </Label>
+                    <Input
+                        type="text"
+                        placeholder="IT-01234-56789"
+                        className="bg-white text-black"
+                        value={templateId || ""}
+                        required={true}
+                        onChange={e => setTemplateId(e.target.value)}
+                        valid={false}
+                        style={{ fontSize: "initial" }}
+                    />
+                </div> : false
+            }
 
             <div className='d-inline-flex flex-wrap justify-content-end align-items-center w-100 mb-2'>
                 <NavLink className='d-inline-flex flex-wrap justify-content-end align-content-center align-items-center' style={{ cursor: "pointer", paddingRight: "0px" }} onClick={handleLogout}>
