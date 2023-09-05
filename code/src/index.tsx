@@ -1,5 +1,5 @@
 import ReactDOM from "react-dom/client"
-import App from "./App"
+import App from "./1_App"
 import { DEV_MODE } from "./contexts/contants"
 import $ from "jquery"
 
@@ -9,13 +9,10 @@ if (DEV_MODE) {
 }
 document.body.appendChild(rootElement)
 $(document).ready(function () {
+    console.log("Extension Ver30 loaded");
     try {
         ReactDOM.createRoot(rootElement).render(<App />)
     } catch (error) {
         console.log('Error: ', error);
     }
-    // if (
-    //     ["localhost"].includes(window.location.hostname)
-    // ) {
-    // }
 });

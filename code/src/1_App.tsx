@@ -1,7 +1,7 @@
 import UiContext from './contexts/ui.context'
-import Layout from "./Layout"
-import Apollo from "./Apollo"
-import Route from "./Route"
+import Layout from "./2_Layout"
+import Apollo from "./3_Apollo"
+import Route from "./4_Route"
 import "./App.scss"
 
 export default function App() {
