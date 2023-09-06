@@ -4,17 +4,14 @@
 	"ts-node/register"
   ],
   "generates": {
-	"./src/graphql_task/graphql.tsx": {
+	"./src/graphql/graphql.tsx": {
 	  "schema": {
-		  "http://localhost:8085/graphql": {
-			"headers": {
-				  "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDIyYjFkODFjNzhkYjFhZDNkYWYxMzkiLCJlbWFpbCI6InRhc2tAb25vc3BvZC5jb20iLCJleHAiOjE2ODQxMTQxMzV9.E8gY0pxOvEG1GltCtb_nYeHSltvPKpqJwBGuLnoefEk"
-			  },
+		  "http://localhost:3001/graphql": {
 			  "method": "POST"
 		  }
 	  },
 	  "documents": {
-		"./src/graphql_task/**/*.graphql": {
+		"./src/graphql/**/*.graphql": {
 		  "noRequire": true
 		}
 	  },

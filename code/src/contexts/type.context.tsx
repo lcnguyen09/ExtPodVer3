@@ -1,8 +1,4 @@
 export type TOKEN = {
-    access_token?: string
-    refresh_token?: string
-    token_type?: string
-    expired_at?: string
     token?: string
 }
 
@@ -34,10 +30,6 @@ export type PAGE_ROUTES = | "INIT"
 
 export type ACTION =
     | {
-        type: "SET_INIT"
-        appInit: boolean
-    }
-    | {
         type: "SET_LOADING"
         appLoading: boolean
     }
@@ -48,14 +40,6 @@ export type ACTION =
     | {
         type: "SET_WINDOW_VIEW"
         view: WINDOW_VIEWS
-    }
-    | {
-        type: "SET_APP_CONFIG"
-        appConfig: any
-    }
-    | {
-        type: "SET_CURRENT_APP_CONFIG"
-        currentAppConfig: any
     }
     | {
         type: "SET_PAGE_ROUTE"

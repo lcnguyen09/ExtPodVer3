@@ -197,6 +197,16 @@ html {
                     min-height: 38px;
                 }
             }
+            .ext-select__control {
+                .ext-select__single-value {
+                    color: #000 !important;
+                }
+            }
+            
+
+            .ext-imgs-list {
+                max-width: 34% !important;
+            }
         }
 
         &.podorder-ext-app-max {

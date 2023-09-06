@@ -12,7 +12,7 @@ const colourStyles: StylesConfig = {
 };
 
 export default function NavUser() {
-    const { currentUser, setCurrentUser, currentToken, setCurrentToken, currentDocker, setCurrentDocker, templateId, setTemplateId, currentAppConfig } = UiContext.UseUIContext()
+    const { currentUser, setCurrentUser, currentToken, setCurrentToken, currentDocker, setCurrentDocker, templateId, setTemplateId } = UiContext.UseUIContext()
     const [popoverOpen, togglePopoverOpen] = useState<boolean>(false)
     const wrapperRef = useRef<any>(null);
     useEffect(() => {
@@ -37,7 +37,7 @@ export default function NavUser() {
         if (currentDocker?._id && currentUser?.docker) {
             setCurrentDocker(find(currentUser?.docker, docker => String(docker?._id) === String(currentDocker?._id)))
         }
-    }, [currentDocker?._id, currentUser?.docker]) // eslint-disable-line
+    }, [currentDocker?._id, currentUser?.docker])
 
     function handleLogout() {
         setCurrentToken()
@@ -48,24 +48,22 @@ export default function NavUser() {
 
 
     return (<div ref={wrapperRef} className='d-flex flex-column justify-content-end p-1 position-relative bg-light' style={{ borderBottom: "1px solid rgba(0, 0, 0, 0.075)" }}>
-        <NavLink onClick={() => togglePopoverOpen(!popoverOpen)} className={`d-flex flex-nowrap ${currentAppConfig?.mode === "SimpleItemClaw" ? "justify-content-between" : "justify-content-end"} align-content-center align-items-center`} style={{ cursor: "pointer" }}>
-            {
-                currentAppConfig?.mode === "SimpleItemClaw" ? <div className='d-flex flex-wrap justify-content-start align-content-center align-items-center'>
-                    <Server size={14} />
-                    <span style={{ marginLeft: "3px" }} className={`text-nowrap ${!currentDocker?._id ?? "text-warning"}`}>
+        <NavLink onClick={() => togglePopoverOpen(!popoverOpen)} className={`d-flex flex-nowrap justify-content-between align-content-center align-items-center`} style={{ cursor: "pointer" }}>
+            <div className='d-flex flex-wrap justify-content-start align-content-center align-items-center'>
+                <Server size={14} />
+                {
+                    currentToken?.token ? <span style={{ marginLeft: "3px" }} className={`text-nowrap ${currentDocker?._id ? '' : "text-danger"}`}>
                         {
                             currentDocker?._id ? (currentDocker?.label ? currentDocker?.label : currentDocker?.domain) : "Pick your hub"
                         }
-                    </span>
-                </div> : false
-            }
-
+                    </span> : false
+                }
+            </div>
             <div className='d-flex flex-wrap justify-content-end align-content-center align-items-center'>
 
                 <User style={{ marginLeft: "12px" }} size={18} />
                 {
-                    currentToken?.access_token === null || currentToken?.access_token === undefined ||
-                        currentToken?.token === null || currentToken?.token === undefined ||
+                    currentToken?.token === null || currentToken?.token === undefined ||
                         currentUser === null
                         ? <span style={{ marginLeft: "3px" }} className='text-nowrap'><Spinner size="sm" /></span>
                         : !currentUser?._id
@@ -78,53 +76,49 @@ export default function NavUser() {
             </div>
         </NavLink>
         <Collapse isOpen={popoverOpen && !!currentUser?._id} className='mt-3'>
-            {
-                currentAppConfig?.mode === "SimpleItemClaw" ? <div className='mb-3'>
-                    <Label>Hub: </Label>
-                    <Select
-                        className="basic-single w-100"
-                        classNamePrefix="select"
-                        placeholder="Select your hub"
-                        isClearable={false}
-                        isLoading={currentUser?.docker === null || currentUser?.docker === undefined}
-                        isSearchable={true}
-                        name="color"
-                        options={map(currentUser?.docker, docker => {
-                            return {
-                                id: get(docker, "_id", ""),
-                                value: get(docker, "label", "") + " - " + get(docker, "domain", "") + "." + get(docker, "server", ""),
-                                label: <div className='d-flex flex-column'><strong>{get(docker, "label", "")}</strong><i>{get(docker, "domain", "") + "." + get(docker, "server", "")}</i></div>
-                            }
-                        })}
-                        styles={colourStyles}
-                        onChange={(data) => {
-                            setCurrentDocker(find(currentUser?.docker, docker => docker?._id === get(data, "id", "")))
-                        }}
-                        value={
-                            {
-                                id: currentDocker?._id,
-                                value: currentDocker?._id ? get(currentDocker, "label", "") + " - " + get(currentDocker, "domain", "") + "." + get(currentDocker, "server", "") : "",
-                                label: currentDocker?._id ? <div className='d-flex flex-column'><strong>{get(currentDocker, "label", "")}</strong><i>{get(currentDocker, "domain", "") + "." + get(currentDocker, "server", "")}</i></div> : <></>
-                            }
+            <div className='mb-3'>
+                <Label>Hub: </Label>
+                <Select
+                    className="basic-single w-100"
+                    classNamePrefix="ext-select"
+                    placeholder="Select your hub"
+                    isClearable={false}
+                    isLoading={currentUser?.docker === null || currentUser?.docker === undefined}
+                    isSearchable={true}
+                    name="color"
+                    options={map(currentUser?.docker, docker => {
+                        return {
+                            id: get(docker, "_id", ""),
+                            value: get(docker, "label", "") + " - " + get(docker, "domain", "") + "." + get(docker, "server", ""),
+                            label: <div className='d-flex flex-column'><strong>{get(docker, "label", "")}</strong><i>{get(docker, "domain", "") + "." + get(docker, "server", "")}</i></div>
                         }
-                    />
-                </div> : false
-            }
-            {
-                currentAppConfig?.mode === "SimpleItemClaw" ? <div className='mb-3'>
-                    <Label>Template ID: </Label>
-                    <Input
-                        type="text"
-                        placeholder="IT-01234-56789"
-                        className="bg-white text-black"
-                        value={templateId || ""}
-                        required={true}
-                        onChange={e => setTemplateId(e.target.value)}
-                        valid={false}
-                        style={{ fontSize: "initial" }}
-                    />
-                </div> : false
-            }
+                    })}
+                    styles={colourStyles}
+                    onChange={(data) => {
+                        setCurrentDocker(find(currentUser?.docker, docker => docker?._id === get(data, "id", "")))
+                    }}
+                    value={
+                        {
+                            id: currentDocker?._id,
+                            value: currentDocker?._id ? get(currentDocker, "label", "") + " - " + get(currentDocker, "domain", "") + "." + get(currentDocker, "server", "") : "",
+                            label: currentDocker?._id ? <div className='d-flex flex-column'><strong>{get(currentDocker, "label", "")}</strong><i>{get(currentDocker, "domain", "") + "." + get(currentDocker, "server", "")}</i></div> : <></>
+                        }
+                    }
+                />
+            </div>
+            {/* <div className='mb-3'>
+                <Label>Template ID: </Label>
+                <Input
+                    type="text"
+                    placeholder="IT-01234-56789"
+                    className="bg-white text-black"
+                    value={templateId || ""}
+                    required={true}
+                    onChange={e => setTemplateId(e.target.value)}
+                    valid={false}
+                    style={{ fontSize: "initial" }}
+                />
+            </div> */}
 
             <div className='d-inline-flex flex-wrap justify-content-end align-items-center w-100 mb-2'>
                 <NavLink className='d-inline-flex flex-wrap justify-content-end align-content-center align-items-center' style={{ cursor: "pointer", paddingRight: "0px" }} onClick={handleLogout}>

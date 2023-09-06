@@ -1,5 +1,0 @@
-mutation SavePersonalizeItem($data: InputPersonalizeItem!) {
-    savePersonalizeItem(data: $data) {
-        ...PersonalizeItemResponse
-    }
-}

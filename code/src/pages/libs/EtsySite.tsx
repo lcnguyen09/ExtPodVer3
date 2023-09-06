@@ -4,8 +4,8 @@ import $ from "jquery"
 import { Alert, Badge, Button, Card, CardBody, CardHeader, Col, FormGroup, Input, Label, NavLink, Row, Spinner, Table } from "reactstrap";
 import { ChevronDown, Save } from "react-feather"
 import Notification from "./../../components/Notification"
-import EtsyNewOrder from "../../data/etsy_new_order.json"
-import EtsyOldOrder from "../../data/etsy_old_order.json"
+// import EtsyNewOrder from "../../data/etsy_new_order.json"
+// import EtsyOldOrder from "../../data/etsy_old_order.json"
 
 // https://www.etsy.com/your/orders/sold?ref=seller-platform-mcnav
 export default function EtsySite() {
@@ -28,18 +28,18 @@ export default function EtsySite() {
     }, [])
 
     function _orderFetch() {
-        setTimeout(() => {
-            // setFullOrderData(EtsyOldOrder)
-            setOrders(EtsyOldOrder?.orders)
-            setCheckOrder(
-                fromPairs(
-                    map(EtsyOldOrder?.orders, order => {
-                        return [order.order_id, false]
-                    })
-                )
-            )
-            setLoading(false)
-        }, 500)
+        // setTimeout(() => {
+        //     // setFullOrderData(EtsyOldOrder)
+        //     setOrders(EtsyOldOrder?.orders)
+        //     setCheckOrder(
+        //         fromPairs(
+        //             map(EtsyOldOrder?.orders, order => {
+        //                 return [order.order_id, false]
+        //             })
+        //         )
+        //     )
+        //     setLoading(false)
+        // }, 500)
     }
 
 

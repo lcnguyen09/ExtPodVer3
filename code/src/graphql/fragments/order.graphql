@@ -1,0 +1,7 @@
+fragment Order on Order {
+    _id
+    platform
+    platform_id
+    identity
+    status
+}
