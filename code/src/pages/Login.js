@@ -14,15 +14,15 @@ import {
 import UiContext from '../contexts/ui.context';
 import { Eye, EyeOff } from 'react-feather';
 import $ from 'jquery';
-import { URL_ACCOUNT_PODORDER } from './../contexts/contants';
+import { URL_ACCOUNT_PODORDER } from '../contexts/contants';
 import { drop, head, map } from 'lodash';
 
 function Login() {
-	const [loading, setLoading]: [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(false);
-	const [email, setEmail]: [string, Dispatch<SetStateAction<string>>] = useState<string>('');
-	const [password, setPassword]: [string, Dispatch<SetStateAction<string>>] = useState<string>('');
-	const [errorMsg, setErrorMsg]: [string, Dispatch<SetStateAction<string>>] = useState<string>('');
-	const [pwdVisible, setPwdVisible]: [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(false);
+	const [loading, setLoading] = useState(false);
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
+	const [errorMsg, setErrorMsg] = useState('');
+	const [pwdVisible, setPwdVisible] = useState(false);
 	const { setPageRoute, setCurrentUser, setCurrentToken } = UiContext.UseUIContext();
 
 	function signIn() {

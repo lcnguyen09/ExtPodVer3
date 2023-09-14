@@ -2,9 +2,7 @@ import { Children, ReactNode, cloneElement, isValidElement, useEffect } from 're
 import { ApolloProvider } from '@apollo/client'
 import { useApollo } from './contexts/apollo.client'
 
-export default function Apollo({ children }: {
-    children: ReactNode
-}) {
+export default function Apollo({ children }) {
     const apolloClient = useApollo()
     return (<ApolloProvider client={apolloClient}>
         <>{

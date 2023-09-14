@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { find } from 'lodash'
 
-export function usePreviousValue(value: any) {
+export function usePreviousValue(value) {
     const ref = useRef();
     useEffect(() => {
         ref.current = value;

@@ -5,12 +5,9 @@ import { Col, Row } from "reactstrap";
 export default function ItemInfo({
     title,
     images
-}: {
-    title: string,
-    images: Array<string>
 }) {
-    const [Title, setTitle] = useState<string>("")
-    const [Images, setImages] = useState<Array<string>>([])
+    const [Title, setTitle] = useState("")
+    const [Images, setImages] = useState([])
 
     useEffect(() => {
         setTitle(title)

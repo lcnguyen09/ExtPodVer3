@@ -1,26 +1,8 @@
-import React, { ReactNode, createContext, useReducer, useContext, useEffect, useState, useMemo } from 'react';
-import { WINDOW_VIEWS, PAGE_ROUTES, ACTION, TOKEN, CURRENT_USER, DOCKER } from './type.context';
+import React, { createContext, useReducer, useContext, useEffect, useState, useMemo } from 'react';
 import { get } from 'lodash';
 import $ from 'jquery';
 import { APP_MODE, URL_ACCOUNT_GRAPHQL, URL_GRAPHQL } from './contants';
 import { Spinner } from 'reactstrap';
-
-interface UIManageContextProps {
-	children?: ReactNode;
-}
-
-export interface State {
-	appMode: string;
-	appLoading: boolean;
-	appHide: boolean;
-	windowView: WINDOW_VIEWS;
-	urlGraphql: string;
-	pageRoute: PAGE_ROUTES;
-	currentUser: CURRENT_USER | null;
-	currentToken: TOKEN | null;
-	currentDocker: DOCKER | null;
-	templateId: string | null;
-}
 
 const initialState = {
 	appMode: APP_MODE,
@@ -35,7 +17,7 @@ const initialState = {
 	templateId: null,
 };
 
-function uiReducer(state: State, action: ACTION) {
+function uiReducer(state, action) {
 	switch (action.type) {
 		case 'SET_LOADING': {
 			return { ...state, appLoading: !!action.appLoading };
@@ -75,8 +57,8 @@ function uiReducer(state: State, action: ACTION) {
 	}
 }
 
-export const useStorage = (key: string): [string | null, (val: string) => void] => {
-	const [value, setValue] = useState<string | null>(null);
+export const useStorage = key => {
+	const [value, setValue] = useState(null);
 	useEffect(() => {
 		storageGet(key).then((result) => {
 			setTimeout(() => {
@@ -89,12 +71,21 @@ export const useStorage = (key: string): [string | null, (val: string) => void] 
 			storageSet(key, value ? value : '');
 		}
 	}, [value]);
-	function storageGet(cname: string): Promise<string> {
+	function storageGet(cname) {
+		if (localStorage) {
+			// LocalStorage is supported
+			console.log('LocalStorage is supported: ');
+		  } else {
+			console.log('Fallback ');
+			// No support. Fallback here!
+		  }
+
 		return new Promise((resolve) => {
 			try {
-				chrome.storage.local.get([cname]).then((result) => {
-					resolve(get(result, cname, '') ? get(result, cname, '') : '');
-				});
+				// chrome.storage.local.get([cname]).then((result) => {
+				// 	resolve(get(result, cname, '') ? get(result, cname, '') : '');
+				// });
+				resolve(null)
 			} catch (error) {
 				const name = cname + '=';
 				const decodedCookie = decodeURIComponent(document.cookie);
@@ -112,12 +103,13 @@ export const useStorage = (key: string): [string | null, (val: string) => void] 
 			}
 		});
 	}
-	function storageSet(cname: string, cvalue: any, exdays = 365): Promise<boolean> {
+	function storageSet(cname, cvalue, exdays = 365) {
 		return new Promise((resolve) => {
 			try {
-				chrome.storage.local.set({ [key]: value ? value : '' }).then(() => {
-					resolve(true);
-				});
+				// chrome.storage.local.set({ [key]: value ? value : '' }).then(() => {
+				// 	resolve(true);
+				// });
+				resolve(true)
 			} catch (error) {
 				const d = new Date();
 				d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
@@ -127,27 +119,27 @@ export const useStorage = (key: string): [string | null, (val: string) => void] 
 			}
 		});
 	}
-	function toggleValue(val: string): void {
+	function toggleValue(val) {
 		setValue(val);
 	}
 	return [value, toggleValue];
 };
 
-export const ManagedUIContext: React.FC<UIManageContextProps> = ({ children }: UIManageContextProps) => {
+export const ManagedUIContext = ({ children }) => {
 	return <UIProvider>{children}</UIProvider>;
 };
 
-export const UIContext = createContext<State | any>(initialState);
+export const UIContext = createContext(initialState);
 UIContext.displayName = 'UIContext';
 
-export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContextProps) => {
-	const [state, dispatch]: any = useReducer<any>(uiReducer, initialState);
+export const UIProvider = (props) => {
+	const [state, dispatch] = useReducer(uiReducer, initialState);
 
-	const [init, setInit]: [boolean, (val: boolean) => void] = useState(false);
-	const [token, setToken]: [string | null, (val: string) => void] = useStorage('_pod_ext_token');
-	const [docker, setDocker]: [string | null, (val: string) => void] = useStorage('_pod_ext_docker');
-	const [windowViewStorage, setWindowViewStorage]: [string | null, (val: string) => void] = useStorage('_pod_ext_view');
-	const [templateIdStorage, setTemplateIdStorage]: [string | null, (val: string) => void] =
+	const [init, setInit] = useState(false);
+	const [token, setToken] = useStorage('_pod_ext_token');
+	const [docker, setDocker] = useStorage('_pod_ext_docker');
+	const [windowViewStorage, setWindowViewStorage] = useStorage('_pod_ext_view');
+	const [templateIdStorage, setTemplateIdStorage] =
 		useStorage('_pod_template_id');
 
 	useEffect(() => {
@@ -214,18 +206,18 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		setTemplateIdStorage(state.templateId);
 	}, [state.templateId]);
 
-	const setAppLoading = (appLoading: boolean) => dispatch({ type: 'SET_LOADING', appLoading });
-	const setAppHide = (appHide: boolean) => dispatch({ type: 'SET_APP_HIDE', appHide });
-	const setWindowView = (view: WINDOW_VIEWS | string) => dispatch({ type: 'SET_WINDOW_VIEW', view });
-	const setUrlGraphql = (urlGraphql: string) => dispatch({ type: 'SET_URL_GRAPHQL', urlGraphql });
+	const setAppLoading = (appLoading) => dispatch({ type: 'SET_LOADING', appLoading });
+	const setAppHide = (appHide) => dispatch({ type: 'SET_APP_HIDE', appHide });
+	const setWindowView = (view) => dispatch({ type: 'SET_WINDOW_VIEW', view });
+	const setUrlGraphql = (urlGraphql) => dispatch({ type: 'SET_URL_GRAPHQL', urlGraphql });
 	const setGraphqlForAccount = async () => setUrlGraphql(URL_ACCOUNT_GRAPHQL);
 	const setGraphqlForHub = async () => setUrlGraphql(URL_GRAPHQL(state.currentDocker));
 
-	const setPageRoute = (page: PAGE_ROUTES) => dispatch({ type: 'SET_PAGE_ROUTE', page });
-	const setCurrentUser = (user?: CURRENT_USER) => dispatch({ type: 'SET_CURRENT_USER', user });
-	const setCurrentToken = (currentToken: TOKEN) => dispatch({ type: 'SET_CURRENT_TOKEN', currentToken });
-	const setCurrentDocker = (currentDocker?: DOCKER) => dispatch({ type: 'SET_CURRENT_DOCKER', currentDocker });
-	const setTemplateId = (templateId?: string) => dispatch({ type: 'SET_TEMPLATE_ID', templateId });
+	const setPageRoute = (page) => dispatch({ type: 'SET_PAGE_ROUTE', page });
+	const setCurrentUser = (user) => dispatch({ type: 'SET_CURRENT_USER', user });
+	const setCurrentToken = (currentToken) => dispatch({ type: 'SET_CURRENT_TOKEN', currentToken });
+	const setCurrentDocker = (currentDocker) => dispatch({ type: 'SET_CURRENT_DOCKER', currentDocker });
+	const setTemplateId = (templateId) => dispatch({ type: 'SET_TEMPLATE_ID', templateId });
 
 	const value = useMemo(
 		() => ({

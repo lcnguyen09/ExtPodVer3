@@ -1,32 +1,29 @@
 import { useMemo } from 'react';
-import { ApolloClient, from, HttpLink, InMemoryCache, NormalizedCacheObject } from '@apollo/client';
+import { ApolloClient, from, HttpLink, InMemoryCache } from '@apollo/client';
 import unfetch from 'isomorphic-unfetch';
 import { onError } from '@apollo/client/link/error';
-import UiContext from './../contexts/ui.context';
+import UiContext from './ui.context';
 
 const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__';
 
-let apolloClient: ApolloClient<NormalizedCacheObject>;
-
-interface IApolloStateProps {
-	[APOLLO_STATE_PROP_NAME]?: NormalizedCacheObject;
-}
+let apolloClient;
 
 function newApollo(
-	{ headers, targetUrl }: { headers?: Record<string, string>; targetUrl?: string } = { headers: {}, targetUrl: '' }
+	{ headers, targetUrl } = { headers: {}, targetUrl: '' }
 ) {
 	return new ApolloClient({
 		ssrMode: typeof window === 'undefined',
 		link: from([
-			onError((errors) => {
-				if (errors.graphQLErrors && errors.graphQLErrors[0].extensions?.code === 'UNAUTHENTICATED' && errors.response) {
-					errors.response.errors = undefined;
-				}
-			}),
+			// onError((errors) => {
+			// 	console.log('errors: ', errors);
+			// 	if (errors.graphQLErrors && errors.graphQLErrors[0].extensions?.code === 'UNAUTHENTICATED' && errors.response) {
+			// 		errors.response.errors = undefined;
+			// 	}
+			// }),
 			new HttpLink({
 				uri: targetUrl,
 				headers: headers,
-				fetch: (url: RequestInfo, init: RequestInit) =>
+				fetch: (url, init) =>
 					unfetch(url, {
 						...init,
 						headers: {
@@ -40,7 +37,7 @@ function newApollo(
 }
 
 function initializeApollo(
-	{ headers, targetUrl }: { headers?: Record<string, string>; targetUrl?: string } = { headers: {}, targetUrl: '' }
+	{ headers, targetUrl } = { headers: {}, targetUrl: '' }
 ) {
 	const _apolloClient = apolloClient ?? newApollo({ headers: headers, targetUrl: targetUrl });
 	// For SSG and SSR always create a new Apollo Client
@@ -50,7 +47,7 @@ function initializeApollo(
 	return _apolloClient;
 }
 
-export function addApolloState(client: ApolloClient<NormalizedCacheObject>, pageProps: { props: IApolloStateProps }) {
+export function addApolloState(client, pageProps) {
 	if (pageProps?.props) {
 		pageProps.props[APOLLO_STATE_PROP_NAME] = client.cache.extract();
 	}
@@ -62,7 +59,7 @@ export function useApollo() {
 	const { urlGraphql, currentToken } = UiContext.UseUIContext();
 	const store = useMemo(() => {
 		const apolloStore = initializeApollo();
-		let apolloOnError = (errors: any) => {
+		let apolloOnError = (errors) => {
 			if (errors.graphQLErrors && errors.graphQLErrors[0].extensions?.code === 'UNAUTHENTICATED' && errors.response) {
 				errors.response.errors = undefined;
 			}
@@ -73,7 +70,7 @@ export function useApollo() {
 				new HttpLink({
 					uri: urlGraphql,
 					headers: { Authorization: `Bearer ${currentToken?.token}` },
-					fetch: (url: RequestInfo, init: RequestInit) =>
+					fetch: (url, init) =>
 						unfetch(url, {
 							...init,
 							headers: init.headers,

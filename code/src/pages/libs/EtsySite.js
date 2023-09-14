@@ -3,20 +3,19 @@ import { chunk, filter, find, fromPairs, get, head, keyBy, last, map, set, sortB
 import $ from "jquery"
 import { Alert, Badge, Button, Card, CardBody, CardHeader, Col, FormGroup, Input, Label, NavLink, Row, Spinner, Table } from "reactstrap";
 import { ChevronDown, Save } from "react-feather"
-import Notification from "./../../components/Notification"
-import BottomBar from './../../components/BottomBar';
+import Notification from "../../components/Notification"
+import BottomBar from '../../components/BottomBar';
 // import EtsyNewOrder from "../../data/etsy_new_order.json"
 // import EtsyOldOrder from "../../data/etsy_old_order.json"
 
 // https://www.etsy.com/your/orders/sold?ref=seller-platform-mcnav
 export default function EtsySite() {
-    const [Loading, setLoading] = useState<boolean>(true)
-    const [CheckAll, setCheckAll] = useState<boolean>(false)
-    const [CheckOrder, setCheckOrder] = useState<any>({})
+    const [Loading, setLoading] = useState(true)
+    const [CheckAll, setCheckAll] = useState(false)
+    const [CheckOrder, setCheckOrder] = useState({})
     const [ErrorMsg, setErrorMsg] = useState("")
     const [SuccessMsg, setSuccessMsg] = useState("")
-    // const [FullOrderData, setFullOrderData] = useState<any>({})
-    const [Orders, setOrders] = useState<any>([])
+    const [Orders, setOrders] = useState([])
 
     useEffect(() => {
         _orderFetch()

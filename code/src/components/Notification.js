@@ -1,10 +1,6 @@
 import { Alert, Spinner } from "reactstrap";
 
-export default function Notification({Loading, ErrorMsg, SuccessMsg}: {
-    Loading: boolean,
-    ErrorMsg: string,
-    SuccessMsg: string
-}) {
+export default function Notification({Loading, ErrorMsg, SuccessMsg}) {
     return <>
         {
             ErrorMsg && <Alert color="danger" className="text-center mt-1 p-2"><strong>*Error:</strong> <i>{ErrorMsg}.</i></Alert>

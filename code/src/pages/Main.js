@@ -1,6 +1,6 @@
 import { get } from "lodash";
 import { useEffect, useState } from "react"
-import UiContext from './../contexts/ui.context'
+import UiContext from '../contexts/ui.context'
 import NomalItem from "./libs/NomalItem"
 import Inspireuplift from "./libs/inspireuplift/Inspireuplift"
 import EtsySite from "./libs/EtsySite"

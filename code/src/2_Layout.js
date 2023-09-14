@@ -6,7 +6,7 @@ import NavUser from './components/NavUser';
 import $ from 'jquery';
 import { filter } from 'lodash';
 
-export default function Layout({ children }: { children: ReactNode }) {
+export default function Layout({ children }) {
     const { appMode, appLoading, appHide, windowView, setWindowView, currentToken, currentDocker } = UiContext.UseUIContext();
 
     useEffect(() => {
@@ -33,7 +33,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                         }`}
                     id='podorder-ext-app-header'
                     onClick={(e) =>
-                        (e.target as Element).id === 'podorder-ext-app-header' && windowView !== 'MAX'
+                        e.target.id === 'podorder-ext-app-header' && windowView !== 'MAX'
                             ? setWindowView(windowView === 'MIN' ? 'NOMAL' : 'MIN')
                             : false
                     }

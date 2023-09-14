@@ -6,4 +6,4 @@ export const URL_ACCOUNT_PODORDER = APP_MODE === 'dev' ? "http://localhost:3201/
 export const URL_ACCOUNT_GRAPHQL = APP_MODE === 'dev' ? "http://localhost:3201/graphql" : "https://api-account.podorders.store/graphql"
 
 
-export const URL_GRAPHQL = (currentDocker: any) => APP_MODE === 'dev' ? "http://localhost:3001/graphql" : `https://api-${currentDocker?.domain}.${currentDocker?.server}/graphql`
+export const URL_GRAPHQL = (currentDocker) => APP_MODE === 'dev' ? "http://localhost:3001/graphql" : `https://api-${currentDocker?.domain}.${currentDocker?.server}/graphql`

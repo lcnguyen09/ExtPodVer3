@@ -1,28 +1,25 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { Alert, Button, Col, Row, Spinner } from 'reactstrap';
 import { Save } from 'react-feather';
-import UiContext from './../../contexts/ui.context';
-import { useInfoLazyQuery } from '../../graphql/graphql';
-import Notification from './../../components/Notification';
-import BottomBar from './../../components/BottomBar';
+import UiContext from '../../contexts/ui.context';
+import Notification from '../../components/Notification';
+import BottomBar from '../../components/BottomBar';
 import $ from 'jquery';
 import { clone, filter, get, head, includes, map, remove, split, startsWith, trim, union } from 'lodash';
 
 export default function NomalItem() {
 	const { setGraphqlForAccount } = UiContext.UseUIContext();
 
-	const [infoQuery] = useInfoLazyQuery({ fetchPolicy: 'network-only' });
-
-	const [Loading, setLoading] = useState<boolean>(true);
+	const [Loading, setLoading] = useState(true);
 	const [ErrorMsg, setErrorMsg] = useState('');
 	const [SuccessMsg, setSuccessMsg] = useState('');
 
-	const [ExtensionRule, setExtensionRule] = useState<any>({});
-	const [__NEXT_DATA__, setNextData] = useState<any>({});
-	const [__INITIAL_STATE__, setInitialState] = useState<any>({});
+	const [ExtensionRule, setExtensionRule] = useState({});
+	const [__NEXT_DATA__, setNextData] = useState({});
+	const [__INITIAL_STATE__, setInitialState] = useState({});
 	const [ItemTitle, setItemTitle] = useState('');
-	const [ItemImages, setItemImages] = useState<Array<string>>([]);
-	const [ItemImagesSelected, setItemImagesSelected] = useState<Array<string>>([]);
+	const [ItemImages, setItemImages] = useState<Array>([]);
+	const [ItemImagesSelected, setItemImagesSelected] = useState<Array>([]);
 	useEffect(() => {
 		getRule();
 		try {
@@ -53,10 +50,10 @@ export default function NomalItem() {
 
 	function getRule() {
 		setGraphqlForAccount().then(() => {
-			infoQuery({ fetchPolicy: 'network-only' }).then((response) => {
-				setExtensionRule(response?.data?.info?.extension_rule);
-				setLoading(false);
-			});
+			// infoQuery({ fetchPolicy: 'network-only' }).then((response) => {
+			// 	setExtensionRule(response?.data?.info?.extension_rule);
+			// 	setLoading(false);
+			// });
 		})
 	}
 
@@ -68,8 +65,8 @@ export default function NomalItem() {
 				: trim($(get(ExtensionRule, 'name', '')).first().text());
 	}
 
-	function getImageFromSite(configRules: any, index: number) {
-		const images: Array<string> = [];
+	function getImageFromSite(configRules, index) {
+		const images = [];
 		filter(configRules, (configRule) => {
 			$.each($(get(configRule, 'block', '')).first().find(get(configRule, 'loop', '')), (index, element) => {
 				const imgAttrTmp = $(element).attr(get(configRule, 'main_attr', ''))
@@ -164,12 +161,6 @@ function NomalItemSave({
 	ItemImages,
 	setSuccessMsg,
 	setErrorMsg,
-}: {
-	setLoading: Dispatch<SetStateAction<boolean>>;
-	ItemTitle: string;
-	ItemImages: Array<string>;
-	setSuccessMsg: Dispatch<SetStateAction<string>>;
-	setErrorMsg: Dispatch<SetStateAction<string>>;
 }) {
 	const { currentDocker, currentToken, templateId } = UiContext.UseUIContext();
 

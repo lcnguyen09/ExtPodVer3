@@ -1,24 +1,24 @@
 import { useEffect, useState } from 'react';
 import { Button, Spinner, Table } from 'reactstrap';
 import { RefreshCw, UploadCloud } from 'react-feather';
-import UiContext from './../../../contexts/ui.context';
-import Notification from './../../../components/Notification';
-import BottomBar from './../../../components/BottomBar';
+import UiContext from '../../../contexts/ui.context';
+import Notification from '../../../components/Notification';
+import BottomBar from '../../../components/BottomBar';
 import $ from 'jquery';
 import { filter, find, get, head, last, map, unionBy } from 'lodash';
 
-export default function (Identifier: any) {
+export default function (Identifier) {
 	const { currentDocker, currentToken, templateId } = UiContext.UseUIContext();
 
 	const [pathname, setPathname] = useState(window.location.pathname);
 
-	const [Loading, setLoading] = useState<boolean>(true);
-	const [LoadingStatus, setLoadingStatus] = useState<boolean>(true);
+	const [Loading, setLoading] = useState(true);
+	const [LoadingStatus, setLoadingStatus] = useState(true);
 	const [ErrorMsg, setErrorMsg] = useState('');
 	const [SuccessMsg, setSuccessMsg] = useState('');
 
-	const [orders, setOrders] = useState<any[]>([]);
-	const [ordersSync, setOrdersSync] = useState<any[]>([]);
+	const [orders, setOrders] = useState([]);
+	const [ordersSync, setOrdersSync] = useState([]);
 
 	useEffect(() => {
 		setPathname(window.location.pathname);

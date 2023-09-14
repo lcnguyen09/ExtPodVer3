@@ -1,10 +1,9 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { Alert, Button, Col, Input, Label, Row, Spinner, Table } from 'reactstrap';
 import { PlusCircle, RefreshCw, Save, UploadCloud } from 'react-feather';
-import UiContext from './../../../contexts/ui.context';
-import { useItemsInfoLazyQuery } from '../../../graphql/graphql';
-import Notification from './../../../components/Notification';
-import BottomBar from './../../../components/BottomBar';
+import UiContext from '../../../contexts/ui.context';
+import Notification from '../../../components/Notification';
+import BottomBar from '../../../components/BottomBar';
 import $ from 'jquery';
 import './test'
 import {
@@ -24,22 +23,20 @@ import {
     unionBy,
 } from 'lodash';
 
-export default function (Identifier: any) {
+export default function (Identifier) {
     const { setGraphqlForHub } = UiContext.UseUIContext();
-
-    const [itemsInfoQuery] = useItemsInfoLazyQuery({ fetchPolicy: 'network-only' });
 
     const { currentDocker, currentToken } = UiContext.UseUIContext();
 
     const [site, setSite] = useState(window.location.host);
     const [pathname, setPathname] = useState(window.location.pathname);
 
-    const [Loading, setLoading] = useState<boolean>(false);
+    const [Loading, setLoading] = useState(false);
     const [ErrorMsg, setErrorMsg] = useState('');
     const [SuccessMsg, setSuccessMsg] = useState('');
 
-    const [itemId, setItemId] = useState<string>('IT-89470-13420');
-    const [itemInfo, setItemInfo] = useState<any>();
+    const [itemId, setItemId] = useState('IT-89470-13420');
+    const [itemInfo, setItemInfo] = useState();
 
 
     useEffect(() => {
@@ -86,7 +83,7 @@ export default function (Identifier: any) {
         }
         try {
             // const descriptionElm = get(window, 'tinyMCE', {}) as any
-            console.log('(window as any): ', (window as any).tinyMCE);
+            console.log('(window as any): ', window.tinyMCE);
             // console.log('(window as any).tinyMCE: ', (window as any).tinymce);
             // (window as any).tinymce.activeEditor.setContent(itemInfo?.description);
         } catch (error) {
@@ -98,15 +95,15 @@ export default function (Identifier: any) {
     const handleGetItemData = () => {
         return new Promise((resolve, reject) => {
             setGraphqlForHub().then(() => {
-                itemsInfoQuery({
-                    variables: {
-                        identity: itemId
-                    },
-                    fetchPolicy: 'network-only',
-                }).then((response) => {
-                    setItemInfo(head(get(response, ['data', 'itemsInfo'])))
-                    setLoading(false);
-                })
+                // itemsInfoQuery({
+                //     variables: {
+                //         identity: itemId
+                //     },
+                //     fetchPolicy: 'network-only',
+                // }).then((response) => {
+                //     setItemInfo(head(get(response, ['data', 'itemsInfo'])))
+                //     setLoading(false);
+                // })
             })
 
         });

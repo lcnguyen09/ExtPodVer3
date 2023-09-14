@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import { NavLink, Collapse, Spinner, Label, Input } from 'reactstrap'
 import { User, LogOut, ChevronDown, ChevronUp, Server } from "react-feather"
 import UiContext from '../contexts/ui.context'
-import Select, { StylesConfig } from 'react-select';
+import Select from 'react-select';
 import { map, get, find } from 'lodash'
 
-const colourStyles: StylesConfig = {
+const colourStyles = {
     control: (styles) => ({ ...styles, backgroundColor: 'white' }),
     menu: (styles) => ({ ...styles, maxHeight: '150px', overflow: "hidden", padding: '0 6px' }),
     option: (styles) => ({ ...styles, maxHeight: "150px" })
@@ -13,10 +13,10 @@ const colourStyles: StylesConfig = {
 
 export default function NavUser() {
     const { appMode, currentUser, setCurrentUser, currentToken, setCurrentToken, currentDocker, setCurrentDocker, templateId, setTemplateId } = UiContext.UseUIContext()
-    const [popoverOpen, togglePopoverOpen] = useState<boolean>(false)
-    const wrapperRef = useRef<any>(null);
+    const [popoverOpen, togglePopoverOpen] = useState(false)
+    const wrapperRef = useRef(null);
     useEffect(() => {
-        function handleClickOutside(event: any) {
+        function handleClickOutside(event) {
             if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
                 togglePopoverOpen(false)
             }
