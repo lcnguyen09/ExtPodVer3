@@ -2,7 +2,7 @@ import React, { ReactNode, createContext, useReducer, useContext, useEffect, use
 import { WINDOW_VIEWS, PAGE_ROUTES, ACTION, TOKEN, CURRENT_USER, DOCKER } from './type.context';
 import { get } from 'lodash';
 import $ from 'jquery';
-import { URL_ACCOUNT_GRAPHQL } from './contants';
+import { APP_MODE, URL_ACCOUNT_GRAPHQL, URL_GRAPHQL } from './contants';
 import { Spinner } from 'reactstrap';
 
 interface UIManageContextProps {
@@ -10,6 +10,7 @@ interface UIManageContextProps {
 }
 
 export interface State {
+	appMode: string;
 	appLoading: boolean;
 	appHide: boolean;
 	windowView: WINDOW_VIEWS;
@@ -22,6 +23,7 @@ export interface State {
 }
 
 const initialState = {
+	appMode: APP_MODE,
 	appLoading: true,
 	appHide: false,
 	windowView: null,
@@ -161,10 +163,14 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 					token: token,
 				});
 			if (windowViewStorage !== null) setWindowView(windowViewStorage);
-			if (docker !== null) setCurrentDocker({ _id: docker });
+			if (docker !== null) setCurrentDocker(docker ? { _id: docker } : undefined);
 			if (templateIdStorage !== null) setTemplateId(templateIdStorage);
 		}
 	}, [init]);
+
+	// useEffect(() => {
+	// 	setCurrentDocker(docker ? { _id: docker || '' } : undefined)
+	// }, [state?.currentUser?.docker]);
 
 	useEffect(() => {
 		if (state.windowView === 'MIN') {
@@ -212,6 +218,9 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	const setAppHide = (appHide: boolean) => dispatch({ type: 'SET_APP_HIDE', appHide });
 	const setWindowView = (view: WINDOW_VIEWS | string) => dispatch({ type: 'SET_WINDOW_VIEW', view });
 	const setUrlGraphql = (urlGraphql: string) => dispatch({ type: 'SET_URL_GRAPHQL', urlGraphql });
+	const setGraphqlForAccount = async () => setUrlGraphql(URL_ACCOUNT_GRAPHQL);
+	const setGraphqlForHub = async () => setUrlGraphql(URL_GRAPHQL(state.currentDocker));
+
 	const setPageRoute = (page: PAGE_ROUTES) => dispatch({ type: 'SET_PAGE_ROUTE', page });
 	const setCurrentUser = (user?: CURRENT_USER) => dispatch({ type: 'SET_CURRENT_USER', user });
 	const setCurrentToken = (currentToken: TOKEN) => dispatch({ type: 'SET_CURRENT_TOKEN', currentToken });
@@ -225,6 +234,8 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 			setAppHide,
 			setWindowView,
 			setUrlGraphql,
+			setGraphqlForAccount,
+			setGraphqlForHub,
 			setPageRoute,
 			setCurrentUser,
 			setCurrentToken,

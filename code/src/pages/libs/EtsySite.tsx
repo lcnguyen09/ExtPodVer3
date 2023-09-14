@@ -4,6 +4,7 @@ import $ from "jquery"
 import { Alert, Badge, Button, Card, CardBody, CardHeader, Col, FormGroup, Input, Label, NavLink, Row, Spinner, Table } from "reactstrap";
 import { ChevronDown, Save } from "react-feather"
 import Notification from "./../../components/Notification"
+import BottomBar from './../../components/BottomBar';
 // import EtsyNewOrder from "../../data/etsy_new_order.json"
 // import EtsyOldOrder from "../../data/etsy_old_order.json"
 
@@ -116,8 +117,8 @@ export default function EtsySite() {
 
             </CardBody>
         </Card>
-        <div className="position-absolute start-0 bottom-0 end-0 bg-white d-flex justify-content-end align-items-right p-2 border-top footer-action">
+        <BottomBar>
             <Button size="xs" color="success" className="py-1 d-flex justify-content-center align-items-center" onClick={handleSubmit}><Save size={14} /> <span style={{ marginLeft: "3px" }}>Sync orders</span></Button>
-        </div>
+        </BottomBar>
     </div>
 }

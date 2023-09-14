@@ -112,7 +112,7 @@ html {
                 }
 
                 #podorder-ext-app-body {
-                    height: calc(100% - 35px);
+                    height: 100%;
                     overflow: hidden;
 
                     &::-webkit-scrollbar:horizontal {
@@ -126,9 +126,18 @@ html {
                         backdrop-filter: grayscale(1);
                     }
 
+                    .ext-nav-user {
+                        z-index: 2147483646;
+                        background-color: rgba(0, 0, 0, 0.5);
+                        backdrop-filter: grayscale(1);
+                    }
+                    
+
                     #podorder-ext-app-body-card {
                         overflow-y: scroll;
-
+                        margin-top: 27px !important;
+                        margin-bottom: 45px !important;
+                        height: calc(100% - 72px);
                         &::-webkit-scrollbar:horizontal {
                             width: 0px;
                             height: 0px;
@@ -138,6 +147,10 @@ html {
                             button {
                                 font-size: 12px;
                             }
+                        }
+
+                        .overlay-div {
+                            z-index: 2147483645;
                         }
                     }
                 }

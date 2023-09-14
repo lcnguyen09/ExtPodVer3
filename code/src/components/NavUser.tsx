@@ -12,7 +12,7 @@ const colourStyles: StylesConfig = {
 };
 
 export default function NavUser() {
-    const { currentUser, setCurrentUser, currentToken, setCurrentToken, currentDocker, setCurrentDocker, templateId, setTemplateId } = UiContext.UseUIContext()
+    const { appMode, currentUser, setCurrentUser, currentToken, setCurrentToken, currentDocker, setCurrentDocker, templateId, setTemplateId } = UiContext.UseUIContext()
     const [popoverOpen, togglePopoverOpen] = useState<boolean>(false)
     const wrapperRef = useRef<any>(null);
     useEffect(() => {
@@ -47,14 +47,16 @@ export default function NavUser() {
 
 
 
-    return (<div ref={wrapperRef} className='d-flex flex-column justify-content-end p-1 position-relative bg-light' style={{ borderBottom: "1px solid rgba(0, 0, 0, 0.075)" }}>
+    return (<div ref={wrapperRef} className='d-flex flex-column justify-content-end p-1 position-absolute w-100 bg-light ext-nav-user' style={{ borderBottom: "1px solid rgba(0, 0, 0, 0.075)" }}>
         <NavLink onClick={() => togglePopoverOpen(!popoverOpen)} className={`d-flex flex-nowrap justify-content-between align-content-center align-items-center`} style={{ cursor: "pointer" }}>
             <div className='d-flex flex-wrap justify-content-start align-content-center align-items-center'>
                 <Server size={14} />
                 {
                     currentToken?.token ? <span style={{ marginLeft: "3px" }} className={`text-nowrap ${currentDocker?._id ? '' : "text-danger"}`}>
                         {
-                            currentDocker?._id ? (currentDocker?.label ? currentDocker?.label : currentDocker?.domain) : "Pick your hub"
+                            currentDocker?._id ? (currentDocker?.label ? currentDocker?.label : currentDocker?.domain) : (
+                                appMode === 'dev' ? 'Dev' : "Pick your hub"
+                            )
                         }
                     </span> : false
                 }

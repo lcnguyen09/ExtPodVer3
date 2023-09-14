@@ -9,11 +9,32 @@ fragment ExtensionRule on ExtensionRule {
     images {
         ...ExtensionRuleImage
     }
+    id {
+        ...ExtensionRuleId
+    }
+    items {
+        ...ExtensionRuleItems
+    }
 }
 
 fragment ExtensionRuleImage on ExtensionRuleImage {
     block
     loop
-    main_attr
-    extra_attr
+    attr
+}
+
+fragment ExtensionRuleId on ExtensionRuleId {
+    block
+    attr
+}
+
+fragment ExtensionRuleItems on ExtensionRuleItems {
+    block
+    loop
+    url
+    url_attr
+    name
+    name_attr
+    image
+    image_attr
 }

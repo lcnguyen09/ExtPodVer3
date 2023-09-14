@@ -3,3 +3,9 @@ try {
         document.getElementsByTagName("body")[0].setAttribute("tmp___NEXT_DATA__", JSON.stringify(__NEXT_DATA__))
     }
 } catch (error) { }
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    console.log(window.tinymce);
+});

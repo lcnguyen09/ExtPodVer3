@@ -1,4 +1,5 @@
 const path = require("path");
+const Dotenv = require('dotenv-webpack');
 
 module.exports = {
   entry: {
@@ -44,6 +45,11 @@ module.exports = {
     filename: "[name].js",
     path: path.resolve(__dirname, "..", "extension"),
   },
+  plugins: [
+    new Dotenv({
+      path: ".env.production",
+    })
+  ],    
   performance: {
     hints: false,
     maxEntrypointSize: 512000,

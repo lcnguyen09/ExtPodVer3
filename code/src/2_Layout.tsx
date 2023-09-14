@@ -7,7 +7,7 @@ import $ from 'jquery';
 import { filter } from 'lodash';
 
 export default function Layout({ children }: { children: ReactNode }) {
-    const { appLoading, appHide, windowView, setWindowView } = UiContext.UseUIContext();
+    const { appMode, appLoading, appHide, windowView, setWindowView, currentToken, currentDocker } = UiContext.UseUIContext();
 
     useEffect(() => {
         filter(
@@ -49,25 +49,21 @@ export default function Layout({ children }: { children: ReactNode }) {
                         ) : (
                             <Maximize2 cursor='pointer' className='mx-3' size={13} onClick={() => setWindowView('MAX')} />
                         )}
-                        {windowView === 'MIN' || windowView === null ? (
+                        {windowView === 'MIN' || !windowView ? (
                             <ChevronsUp cursor='pointer' className='ml-1' size={15} onClick={() => setWindowView('NOMAL')} />
                         ) : (
                             <ChevronsDown cursor='pointer' className='ml-1' size={15} onClick={() => setWindowView('MIN')} />
                         )}
                     </div>
                 </CardHeader>
-                <Collapse
-                    id='podorder-ext-app-body'
-                    className='position-relative d-flex flex-column'
-                    isOpen={windowView !== 'MIN'}
-                >
+                <CardBody id='podorder-ext-app-body' className='p-0 position-relative'>
                     {appLoading && (
                         <div className='position-absolute w-100 h-100 top-0 bottom-0 start-0 end-0 d-flex justify-content-center align-items-center overlay-div'>
                             <Spinner color='primary' />
                         </div>
                     )}
                     <NavUser />
-                    <CardBody id='podorder-ext-app-body-card' className='p-1 mb-5'>
+                    <div id='podorder-ext-app-body-card' className='p-1'>
                         {windowView === null ? (
                             <div className='d-flex justify-content-center align-items-center mt-5'>
                                 <div className='brand-logo' />
@@ -75,8 +71,13 @@ export default function Layout({ children }: { children: ReactNode }) {
                         ) : (
                             <>{children}</>
                         )}
-                    </CardBody>
-                </Collapse>
+                        {(!currentDocker?._id && currentToken?.token && appMode !== 'dev') && (
+                            <div className='position-absolute w-100 h-100 top-0 bottom-0 start-0 end-0 d-flex justify-content-center align-items-center overlay-div'>
+                                Pick your hub first
+                            </div>
+                        )}
+                    </div>
+                </CardBody>
             </Card>
         </>
     );

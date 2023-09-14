@@ -1,35 +1,15 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { Alert, Button, Col, Row, Spinner, Table } from 'reactstrap';
-import { RefreshCw, Save, UploadCloud } from 'react-feather';
-import UiContext from './../../contexts/ui.context';
-import { useInfoLazyQuery } from '../../graphql/graphql';
-import Notification from './../../components/Notification';
+import { useEffect, useState } from 'react';
+import { Button, Spinner, Table } from 'reactstrap';
+import { RefreshCw, UploadCloud } from 'react-feather';
+import UiContext from './../../../contexts/ui.context';
+import Notification from './../../../components/Notification';
+import BottomBar from './../../../components/BottomBar';
 import $ from 'jquery';
-import {
-	clone,
-	filter,
-	find,
-	get,
-	head,
-	includes,
-	last,
-	map,
-	remove,
-	split,
-	startsWith,
-	trim,
-	union,
-	unionBy,
-} from 'lodash';
+import { filter, find, get, head, last, map, unionBy } from 'lodash';
 
-const Identifier = 'Inspireuplift.com';
-
-export default function Inspireuplift() {
-	const [infoQuery] = useInfoLazyQuery({ fetchPolicy: 'network-only' });
-
+export default function (Identifier: any) {
 	const { currentDocker, currentToken, templateId } = UiContext.UseUIContext();
 
-	const [site, setSite] = useState(window.location.host);
 	const [pathname, setPathname] = useState(window.location.pathname);
 
 	const [Loading, setLoading] = useState<boolean>(true);
@@ -39,12 +19,6 @@ export default function Inspireuplift() {
 
 	const [orders, setOrders] = useState<any[]>([]);
 	const [ordersSync, setOrdersSync] = useState<any[]>([]);
-
-	let PrevOrder = [];
-
-	useEffect(() => {
-		setSite(window.location.host);
-	}, [window.location.host]);
 
 	useEffect(() => {
 		setPathname(window.location.pathname);
@@ -105,7 +79,6 @@ export default function Inspireuplift() {
 			}
 
 			const s = new URLSearchParams(window.location.search);
-			console.log('window.location.search: ', window.location.search);
 			const page = s.get('page') || '1';
 			let search = s.get('search') || '';
 			if (search) {
@@ -166,7 +139,11 @@ export default function Inspireuplift() {
 				.then((response) => {
 					setLoading(false);
 					resolve(setOrders(get(response, ['data', 'data'], [])));
-				});
+				}).catch(e => {
+					console.log('e: ', e);
+					setLoading(false);
+					reject([]);
+				})
 		});
 	}
 
@@ -342,11 +319,10 @@ export default function Inspireuplift() {
 						return new Promise((resolve, reject) => {
 							const settings = {
 								method: 'POST',
-								url: `${
-									currentDocker?.domain
+								url: `${currentDocker?.domain
 										? `https://api-${currentDocker?.domain}.${currentDocker?.server}/api/v1/order/create`
 										: '/api/order/create'
-								}`,
+									}`,
 								data: orderDataForSync,
 								timeout: 0,
 								headers: {
@@ -486,7 +462,7 @@ export default function Inspireuplift() {
 					</tbody>
 				</Table>
 			</div>
-			<div className='position-absolute start-0 bottom-0 end-0 bg-white d-flex justify-content-end align-items-right p-2 border-top footer-action'>
+			<BottomBar>
 				<Button
 					size='xs'
 					color='primary'
@@ -504,7 +480,7 @@ export default function Inspireuplift() {
 				>
 					<UploadCloud size={14} /> <span style={{ marginLeft: '3px' }}>Sync checked orders</span>
 				</Button>
-			</div>
+			</BottomBar>
 		</>
 	);
 }

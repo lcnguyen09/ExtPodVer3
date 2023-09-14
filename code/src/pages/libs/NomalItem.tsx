@@ -4,10 +4,13 @@ import { Save } from 'react-feather';
 import UiContext from './../../contexts/ui.context';
 import { useInfoLazyQuery } from '../../graphql/graphql';
 import Notification from './../../components/Notification';
+import BottomBar from './../../components/BottomBar';
 import $ from 'jquery';
 import { clone, filter, get, head, includes, map, remove, split, startsWith, trim, union } from 'lodash';
 
 export default function NomalItem() {
+	const { setGraphqlForAccount } = UiContext.UseUIContext();
+
 	const [infoQuery] = useInfoLazyQuery({ fetchPolicy: 'network-only' });
 
 	const [Loading, setLoading] = useState<boolean>(true);
@@ -25,11 +28,11 @@ export default function NomalItem() {
 		try {
 			const nextData = $('body').attr('tmp___NEXT_DATA__');
 			if (nextData) setNextData(JSON.parse(nextData));
-		} catch (error) {}
+		} catch (error) { }
 		try {
 			const initialStateTag = $('#__INITIAL_STATE__')[0].textContent;
 			if (initialStateTag) setInitialState(JSON.parse(initialStateTag));
-		} catch (error) {}
+		} catch (error) { }
 	}, []);
 
 	useEffect(() => {
@@ -49,18 +52,20 @@ export default function NomalItem() {
 	]);
 
 	function getRule() {
-		infoQuery({ fetchPolicy: 'network-only' }).then((response) => {
-			setExtensionRule(response?.data?.info?.extension_rule);
-			setLoading(false);
-		});
+		setGraphqlForAccount().then(() => {
+			infoQuery({ fetchPolicy: 'network-only' }).then((response) => {
+				setExtensionRule(response?.data?.info?.extension_rule);
+				setLoading(false);
+			});
+		})
 	}
 
 	function getItemName() {
 		return __INITIAL_STATE__?.product?.product?.title
 			? __INITIAL_STATE__?.product?.product?.title
 			: __NEXT_DATA__?.props?.pageProps?.product?.title
-			? __NEXT_DATA__?.props?.pageProps?.product?.title
-			: trim($(get(ExtensionRule, 'name', '')).first().text());
+				? __NEXT_DATA__?.props?.pageProps?.product?.title
+				: trim($(get(ExtensionRule, 'name', '')).first().text());
 	}
 
 	function getImageFromSite(configRules: any, index: number) {
@@ -82,15 +87,15 @@ export default function NomalItem() {
 	function getItemImages() {
 		return __INITIAL_STATE__?.product?.product?.images
 			? filter(
-					map(__INITIAL_STATE__?.product?.product?.images, (image) => image?.src),
-					(imgSrc) => imgSrc
-			  )
+				map(__INITIAL_STATE__?.product?.product?.images, (image) => image?.src),
+				(imgSrc) => imgSrc
+			)
 			: __NEXT_DATA__?.props?.pageProps?.product?.gallery
-			? filter(
+				? filter(
 					map(__NEXT_DATA__?.props?.pageProps?.product?.gallery, (image) => image?.src),
 					(imgSrc) => imgSrc
-			  )
-			: filter(union(getImageFromSite(get(ExtensionRule, 'images', []), 0)), (imgSrc) => imgSrc);
+				)
+				: filter(union(getImageFromSite(get(ExtensionRule, 'images', []), 0)), (imgSrc) => imgSrc);
 	}
 
 	return (
@@ -122,9 +127,8 @@ export default function NomalItem() {
 										alt={img}
 										width='100%'
 										height='100%'
-										className={`cursor-pointer border rounded border-3 ${
-											includes(ItemImagesSelected, img) ? 'border-success' : ''
-										}`}
+										className={`cursor-pointer border rounded border-3 ${includes(ItemImagesSelected, img) ? 'border-success' : ''
+											}`}
 										onClick={(e) => {
 											if (includes(ItemImagesSelected, img)) {
 												const oldItemImagesSelected = clone(ItemImagesSelected);
@@ -141,7 +145,7 @@ export default function NomalItem() {
 					)}
 				</Row>
 			</div>
-			<div className='position-absolute start-0 bottom-0 end-0 bg-white d-flex justify-content-end align-items-right p-2 border-top footer-action'>
+			<BottomBar>
 				<NomalItemSave
 					setLoading={setLoading}
 					ItemTitle={ItemTitle}
@@ -149,7 +153,7 @@ export default function NomalItem() {
 					setSuccessMsg={setSuccessMsg}
 					setErrorMsg={setErrorMsg}
 				/>
-			</div>
+			</BottomBar>
 		</>
 	);
 }
@@ -173,11 +177,10 @@ function NomalItemSave({
 		console.log('handleSave: ');
 		setLoading(true);
 		var settings = {
-			url: `${
-				currentDocker?.domain
-					? `https://api-${currentDocker?.domain}.${currentDocker?.server}/api/v1/item-clone`
-					: '/api/v1/item-clone'
-			}`,
+			url: `${currentDocker?.domain
+				? `https://api-${currentDocker?.domain}.${currentDocker?.server}/api/v1/item-clone`
+				: '/api/v1/item-clone'
+				}`,
 			data: {
 				id: templateId,
 				name: ItemTitle,

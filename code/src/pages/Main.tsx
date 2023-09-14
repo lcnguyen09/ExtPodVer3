@@ -2,7 +2,7 @@ import { get } from "lodash";
 import { useEffect, useState } from "react"
 import UiContext from './../contexts/ui.context'
 import NomalItem from "./libs/NomalItem"
-import Inspireuplift from "./libs/Inspireuplift"
+import Inspireuplift from "./libs/inspireuplift/Inspireuplift"
 import EtsySite from "./libs/EtsySite"
 
 export default function Main() {
@@ -12,9 +12,9 @@ export default function Main() {
 		setSite(window.location.host)
 	}, [window.location.host])
 
-	if (site === 'sellercentral.inspireuplift.com') {
+	// return <NomalItem />
+	if (site === 'sellercentral.inspireuplift.com' || true) {
 		return <Inspireuplift />
 	}
 	return <></>
-	// return <NomalItem />
 }

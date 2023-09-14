@@ -1052,16 +1052,35 @@ export type EtsyV3 = {
 
 export type ExtensionRule = {
   __typename?: 'ExtensionRule';
+  id?: Maybe<Array<Maybe<ExtensionRuleId>>>;
   images?: Maybe<Array<Maybe<ExtensionRuleImage>>>;
+  items?: Maybe<Array<Maybe<ExtensionRuleItems>>>;
   name?: Maybe<Scalars['String']>;
+};
+
+export type ExtensionRuleId = {
+  __typename?: 'ExtensionRuleId';
+  attr?: Maybe<Scalars['String']>;
+  block?: Maybe<Scalars['String']>;
 };
 
 export type ExtensionRuleImage = {
   __typename?: 'ExtensionRuleImage';
+  attr?: Maybe<Array<Maybe<Scalars['String']>>>;
   block?: Maybe<Scalars['String']>;
-  extra_attr?: Maybe<Scalars['String']>;
   loop?: Maybe<Scalars['String']>;
-  main_attr?: Maybe<Scalars['String']>;
+};
+
+export type ExtensionRuleItems = {
+  __typename?: 'ExtensionRuleItems';
+  block?: Maybe<Scalars['String']>;
+  image?: Maybe<Scalars['String']>;
+  image_attr?: Maybe<Scalars['String']>;
+  loop?: Maybe<Scalars['String']>;
+  name?: Maybe<Scalars['String']>;
+  name_attr?: Maybe<Scalars['String']>;
+  url?: Maybe<Scalars['String']>;
+  url_attr?: Maybe<Scalars['String']>;
 };
 
 export type ExternalFolderInput = {
@@ -2769,6 +2788,7 @@ export type RootMutationCloneOrderArgs = {
 export type RootMutationConvertItemImagesArgs = {
   _id: Scalars['String'];
   image_id?: InputMaybe<Scalars['String']>;
+  images_remove?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
 };
 
 
@@ -5608,11 +5628,17 @@ export type DockerFragment = { __typename?: 'Docker', _id?: string | null, domai
 
 export type DockerAuthFragment = { __typename?: 'DockerAuth', auth_id?: string | null, user?: { __typename?: 'User', _id?: string | null, email?: string | null, name?: string | null, identity?: string | null, identity_label?: string | null, role?: string | null, created_at?: number | null, token?: string | null, auth_docker?: Array<{ __typename?: 'AuthDocker', docker_id?: string | null, docker?: { __typename?: 'Docker', _id?: string | null, domain?: string | null, label?: string | null, server?: string | null, sku?: string | null } | null } | null> | null } | null };
 
-export type InfoFragment = { __typename?: 'Info', extension_rule?: { __typename?: 'ExtensionRule', name?: string | null, images?: Array<{ __typename?: 'ExtensionRuleImage', block?: string | null, loop?: string | null, main_attr?: string | null, extra_attr?: string | null } | null> | null } | null };
+export type InfoFragment = { __typename?: 'Info', extension_rule?: { __typename?: 'ExtensionRule', name?: string | null, images?: Array<{ __typename?: 'ExtensionRuleImage', block?: string | null, loop?: string | null, attr?: Array<string | null> | null } | null> | null, id?: Array<{ __typename?: 'ExtensionRuleId', block?: string | null, attr?: string | null } | null> | null, items?: Array<{ __typename?: 'ExtensionRuleItems', block?: string | null, loop?: string | null, url?: string | null, url_attr?: string | null, name?: string | null, name_attr?: string | null, image?: string | null, image_attr?: string | null } | null> | null } | null };
 
-export type ExtensionRuleFragment = { __typename?: 'ExtensionRule', name?: string | null, images?: Array<{ __typename?: 'ExtensionRuleImage', block?: string | null, loop?: string | null, main_attr?: string | null, extra_attr?: string | null } | null> | null };
+export type ExtensionRuleFragment = { __typename?: 'ExtensionRule', name?: string | null, images?: Array<{ __typename?: 'ExtensionRuleImage', block?: string | null, loop?: string | null, attr?: Array<string | null> | null } | null> | null, id?: Array<{ __typename?: 'ExtensionRuleId', block?: string | null, attr?: string | null } | null> | null, items?: Array<{ __typename?: 'ExtensionRuleItems', block?: string | null, loop?: string | null, url?: string | null, url_attr?: string | null, name?: string | null, name_attr?: string | null, image?: string | null, image_attr?: string | null } | null> | null };
 
-export type ExtensionRuleImageFragment = { __typename?: 'ExtensionRuleImage', block?: string | null, loop?: string | null, main_attr?: string | null, extra_attr?: string | null };
+export type ExtensionRuleImageFragment = { __typename?: 'ExtensionRuleImage', block?: string | null, loop?: string | null, attr?: Array<string | null> | null };
+
+export type ExtensionRuleIdFragment = { __typename?: 'ExtensionRuleId', block?: string | null, attr?: string | null };
+
+export type ExtensionRuleItemsFragment = { __typename?: 'ExtensionRuleItems', block?: string | null, loop?: string | null, url?: string | null, url_attr?: string | null, name?: string | null, name_attr?: string | null, image?: string | null, image_attr?: string | null };
+
+export type ItemInfoFragment = { __typename?: 'ItemInfo', _id?: string | null, identity?: string | null, name?: string | null, description?: string | null, description_ai?: string | null, description_ai_pos?: string | null, front?: string | null, back?: string | null, sleeve?: string | null, hood?: string | null, type?: string | null, product_id?: string | null, plf_price?: number | null, size_chart?: string | null, shipping_preset?: string | null, fix_profit?: number | null, fixed_profit?: number | null, tax_fee_fix?: number | null, tax_fee?: number | null, include_size_chart?: boolean | null, custom_name?: boolean | null, include_extend_images?: boolean | null, ebay_template_id?: string | null, mockup_id?: string | null, store_queue?: string | null, weight?: number | null, package_width?: number | null, package_height?: number | null, package_length?: number | null, queue_messenger?: string | null, queue_status?: boolean | null, sku?: string | null, barcode?: string | null, barcode_type?: string | null, price_addition?: number | null, price?: number | null, job_list?: string | null };
 
 export type OrderFragment = { __typename?: 'Order', _id?: string | null, platform?: string | null, platform_id?: string | null, identity?: string | null, status?: string | null };
 
@@ -5623,7 +5649,14 @@ export type AuthDockerFragment = { __typename?: 'AuthDocker', docker_id?: string
 export type InfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type InfoQuery = { __typename?: 'RootQuery', info?: { __typename?: 'Info', extension_rule?: { __typename?: 'ExtensionRule', name?: string | null, images?: Array<{ __typename?: 'ExtensionRuleImage', block?: string | null, loop?: string | null, main_attr?: string | null, extra_attr?: string | null } | null> | null } | null } | null };
+export type InfoQuery = { __typename?: 'RootQuery', info?: { __typename?: 'Info', extension_rule?: { __typename?: 'ExtensionRule', name?: string | null, images?: Array<{ __typename?: 'ExtensionRuleImage', block?: string | null, loop?: string | null, attr?: Array<string | null> | null } | null> | null, id?: Array<{ __typename?: 'ExtensionRuleId', block?: string | null, attr?: string | null } | null> | null, items?: Array<{ __typename?: 'ExtensionRuleItems', block?: string | null, loop?: string | null, url?: string | null, url_attr?: string | null, name?: string | null, name_attr?: string | null, image?: string | null, image_attr?: string | null } | null> | null } | null } | null };
+
+export type ItemsInfoQueryVariables = Exact<{
+  identity?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type ItemsInfoQuery = { __typename?: 'RootQuery', itemsInfo?: Array<{ __typename?: 'ItemInfo', _id?: string | null, identity?: string | null, name?: string | null, description?: string | null, description_ai?: string | null, description_ai_pos?: string | null, front?: string | null, back?: string | null, sleeve?: string | null, hood?: string | null, type?: string | null, product_id?: string | null, plf_price?: number | null, size_chart?: string | null, shipping_preset?: string | null, fix_profit?: number | null, fixed_profit?: number | null, tax_fee_fix?: number | null, tax_fee?: number | null, include_size_chart?: boolean | null, custom_name?: boolean | null, include_extend_images?: boolean | null, ebay_template_id?: string | null, mockup_id?: string | null, store_queue?: string | null, weight?: number | null, package_width?: number | null, package_height?: number | null, package_length?: number | null, queue_messenger?: string | null, queue_status?: boolean | null, sku?: string | null, barcode?: string | null, barcode_type?: string | null, price_addition?: number | null, price?: number | null, job_list?: string | null } | null> | null };
 
 export type CUserQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -5674,8 +5707,25 @@ export const ExtensionRuleImageFragmentDoc = gql`
     fragment ExtensionRuleImage on ExtensionRuleImage {
   block
   loop
-  main_attr
-  extra_attr
+  attr
+}
+    `;
+export const ExtensionRuleIdFragmentDoc = gql`
+    fragment ExtensionRuleId on ExtensionRuleId {
+  block
+  attr
+}
+    `;
+export const ExtensionRuleItemsFragmentDoc = gql`
+    fragment ExtensionRuleItems on ExtensionRuleItems {
+  block
+  loop
+  url
+  url_attr
+  name
+  name_attr
+  image
+  image_attr
 }
     `;
 export const ExtensionRuleFragmentDoc = gql`
@@ -5684,8 +5734,16 @@ export const ExtensionRuleFragmentDoc = gql`
   images {
     ...ExtensionRuleImage
   }
+  id {
+    ...ExtensionRuleId
+  }
+  items {
+    ...ExtensionRuleItems
+  }
 }
-    ${ExtensionRuleImageFragmentDoc}`;
+    ${ExtensionRuleImageFragmentDoc}
+${ExtensionRuleIdFragmentDoc}
+${ExtensionRuleItemsFragmentDoc}`;
 export const InfoFragmentDoc = gql`
     fragment Info on Info {
   extension_rule {
@@ -5693,6 +5751,47 @@ export const InfoFragmentDoc = gql`
   }
 }
     ${ExtensionRuleFragmentDoc}`;
+export const ItemInfoFragmentDoc = gql`
+    fragment ItemInfo on ItemInfo {
+  _id
+  identity
+  name
+  description
+  description_ai
+  description_ai_pos
+  front
+  back
+  sleeve
+  hood
+  type
+  product_id
+  plf_price
+  size_chart
+  shipping_preset
+  fix_profit
+  fixed_profit
+  tax_fee_fix
+  tax_fee
+  include_size_chart
+  custom_name
+  include_extend_images
+  ebay_template_id
+  mockup_id
+  store_queue
+  weight
+  package_width
+  package_height
+  package_length
+  queue_messenger
+  queue_status
+  sku
+  barcode
+  barcode_type
+  price_addition
+  price
+  job_list
+}
+    `;
 export const OrderFragmentDoc = gql`
     fragment Order on Order {
   _id
@@ -5736,6 +5835,41 @@ export function useInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<InfoQ
 export type InfoQueryHookResult = ReturnType<typeof useInfoQuery>;
 export type InfoLazyQueryHookResult = ReturnType<typeof useInfoLazyQuery>;
 export type InfoQueryResult = Apollo.QueryResult<InfoQuery, InfoQueryVariables>;
+export const ItemsInfoDocument = gql`
+    query ItemsInfo($identity: String) {
+  itemsInfo(identity: $identity) {
+    ...ItemInfo
+  }
+}
+    ${ItemInfoFragmentDoc}`;
+
+/**
+ * __useItemsInfoQuery__
+ *
+ * To run a query within a React component, call `useItemsInfoQuery` and pass it any options that fit your needs.
+ * When your component renders, `useItemsInfoQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useItemsInfoQuery({
+ *   variables: {
+ *      identity: // value for 'identity'
+ *   },
+ * });
+ */
+export function useItemsInfoQuery(baseOptions?: Apollo.QueryHookOptions<ItemsInfoQuery, ItemsInfoQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ItemsInfoQuery, ItemsInfoQueryVariables>(ItemsInfoDocument, options);
+      }
+export function useItemsInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ItemsInfoQuery, ItemsInfoQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ItemsInfoQuery, ItemsInfoQueryVariables>(ItemsInfoDocument, options);
+        }
+export type ItemsInfoQueryHookResult = ReturnType<typeof useItemsInfoQuery>;
+export type ItemsInfoLazyQueryHookResult = ReturnType<typeof useItemsInfoLazyQuery>;
+export type ItemsInfoQueryResult = Apollo.QueryResult<ItemsInfoQuery, ItemsInfoQueryVariables>;
 export const CUserDocument = gql`
     query CUser {
   cUser {

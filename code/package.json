@@ -28,9 +28,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "PORT=3333 GENERATE_SOURCEMAP=false react-scripts start",
+    "start": "react-scripts start",
     "build": "webpack",
-    "dev": "webpack && GENERATE_SOURCEMAP=false react-scripts start",
+    "dev": "webpack --watch",
     "codegen": "graphql-codegen --verbose --config codegen.json",
     "codegenpodorder": "graphql-codegen --verbose --config codegen-podorder.json"
   },
@@ -58,6 +58,7 @@
     "@graphql-codegen/typescript-react-apollo": "^3.3.7",
     "@types/chrome": "^0.0.235",
     "@types/jquery": "^3.5.16",
+    "dotenv-webpack": "^8.0.1",
     "sass": "^1.62.1",
     "sass-loader": "^13.2.2",
     "ts-loader": "^9.4.1",

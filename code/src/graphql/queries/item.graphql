@@ -1,0 +1,5 @@
+query ItemsInfo($identity: String) {
+    itemsInfo(identity: $identity) {
+        ...ItemInfo
+    }
+}
