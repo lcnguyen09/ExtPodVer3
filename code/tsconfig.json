@@ -24,7 +24,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "types": [
-      "chrome"
+      "chrome",
     ],
     "baseUrl": "./",
     "rootDir": "./",

@@ -1507,6 +1507,7 @@ export type ItemInfo = {
   queue_messenger?: Maybe<Scalars['String']>;
   queue_status?: Maybe<Scalars['Boolean']>;
   shipping_preset?: Maybe<Scalars['String']>;
+  shipping_preset_info?: Maybe<ShippingPreset>;
   size_chart?: Maybe<Scalars['String']>;
   sku?: Maybe<Scalars['String']>;
   sleeve?: Maybe<Scalars['String']>;
@@ -5638,7 +5639,11 @@ export type ExtensionRuleIdFragment = { __typename?: 'ExtensionRuleId', block?: 
 
 export type ExtensionRuleItemsFragment = { __typename?: 'ExtensionRuleItems', block?: string | null, loop?: string | null, url?: string | null, url_attr?: string | null, name?: string | null, name_attr?: string | null, image?: string | null, image_attr?: string | null };
 
-export type ItemInfoFragment = { __typename?: 'ItemInfo', _id?: string | null, identity?: string | null, name?: string | null, description?: string | null, description_ai?: string | null, description_ai_pos?: string | null, front?: string | null, back?: string | null, sleeve?: string | null, hood?: string | null, type?: string | null, product_id?: string | null, plf_price?: number | null, size_chart?: string | null, shipping_preset?: string | null, fix_profit?: number | null, fixed_profit?: number | null, tax_fee_fix?: number | null, tax_fee?: number | null, include_size_chart?: boolean | null, custom_name?: boolean | null, include_extend_images?: boolean | null, ebay_template_id?: string | null, mockup_id?: string | null, store_queue?: string | null, weight?: number | null, package_width?: number | null, package_height?: number | null, package_length?: number | null, queue_messenger?: string | null, queue_status?: boolean | null, sku?: string | null, barcode?: string | null, barcode_type?: string | null, price_addition?: number | null, price?: number | null, job_list?: string | null };
+export type ItemInfoFragment = { __typename?: 'ItemInfo', _id?: string | null, identity?: string | null, name?: string | null, description?: string | null, description_ai?: string | null, description_ai_pos?: string | null, front?: string | null, back?: string | null, sleeve?: string | null, hood?: string | null, type?: string | null, plf_price?: number | null, tags?: Array<string | null> | null, collections?: Array<string | null> | null, size_chart?: string | null, fix_profit?: number | null, fixed_profit?: number | null, tax_fee_fix?: number | null, tax_fee?: number | null, include_size_chart?: boolean | null, custom_name?: boolean | null, include_extend_images?: boolean | null, ebay_template_id?: string | null, sku?: string | null, barcode?: string | null, barcode_type?: string | null, price_addition?: number | null, price?: number | null, images?: Array<{ __typename?: 'Image', src?: string | null } | null> | null, prety_attributes?: Array<{ __typename?: 'PretyAttribute', attribute_type?: string | null, plf_attribute_name?: string | null, options?: Array<{ __typename?: 'PretyAttributeOption', ffm_value?: string | null, plf_value?: string | null, plf_price?: number | null, hex?: string | null, default?: boolean | null } | null> | null } | null> | null, specifics?: Array<{ __typename?: 'ItemSpecific', key?: string | null, value?: string | null, required?: string | null } | null> | null, attribute_specifics?: Array<{ __typename?: 'SpecificAttribute', sale_price?: number | null, base_price?: number | null, fix_profit?: number | null, fixed_profit?: number | null, sku?: string | null, barcode?: string | null, name_value?: Array<{ __typename?: 'NameValueType', name?: string | null, type?: string | null, value?: string | null } | null> | null } | null> | null, attribute_specifics_modify?: Array<{ __typename?: 'SpecificAttribute', sale_price?: number | null, base_price?: number | null, fix_profit?: number | null, fixed_profit?: number | null, sku?: string | null, barcode?: string | null, name_value?: Array<{ __typename?: 'NameValueType', name?: string | null, type?: string | null, value?: string | null } | null> | null } | null> | null, shipping_preset_info?: { __typename?: 'ShippingPreset', dispatch_time_max?: string | null, shipping_time_max?: string | null, location?: string | null, location_detail?: string | null, country?: string | null, shipping_service?: string | null, shipping_cost?: string | null, shipping_additional_cost?: string | null, return_accept?: string | null, global_shipping?: string | null, international_shipping_time_max?: string | null, international_location?: string | null, international_shipping_service?: string | null, international_shipping_cost?: string | null, international_shipping_additional_cost?: string | null, international_return_accept?: string | null, default_quantity?: string | null } | null, platform_category?: Array<{ __typename?: 'PlatformCategory', type?: string | null, category_selected?: Array<{ __typename?: 'PlatformCategorySelected', id?: string | null, level?: string | null, name?: string | null, parent?: string | null } | null> | null } | null> | null, platform_specifics?: Array<{ __typename?: 'PlatformItemSpecific', platform?: string | null, specifics?: Array<{ __typename?: 'ItemSpecific', key?: string | null, value?: string | null, required?: string | null } | null> | null } | null> | null, extend_images?: Array<{ __typename?: 'Image', src?: string | null } | null> | null };
+
+export type SpecificAttributeFragment = { __typename?: 'SpecificAttribute', sale_price?: number | null, base_price?: number | null, fix_profit?: number | null, fixed_profit?: number | null, sku?: string | null, barcode?: string | null, name_value?: Array<{ __typename?: 'NameValueType', name?: string | null, type?: string | null, value?: string | null } | null> | null };
+
+export type ItemSpecificFragment = { __typename?: 'ItemSpecific', key?: string | null, value?: string | null, required?: string | null };
 
 export type OrderFragment = { __typename?: 'Order', _id?: string | null, platform?: string | null, platform_id?: string | null, identity?: string | null, status?: string | null };
 
@@ -5656,7 +5661,7 @@ export type ItemsInfoQueryVariables = Exact<{
 }>;
 
 
-export type ItemsInfoQuery = { __typename?: 'RootQuery', itemsInfo?: Array<{ __typename?: 'ItemInfo', _id?: string | null, identity?: string | null, name?: string | null, description?: string | null, description_ai?: string | null, description_ai_pos?: string | null, front?: string | null, back?: string | null, sleeve?: string | null, hood?: string | null, type?: string | null, product_id?: string | null, plf_price?: number | null, size_chart?: string | null, shipping_preset?: string | null, fix_profit?: number | null, fixed_profit?: number | null, tax_fee_fix?: number | null, tax_fee?: number | null, include_size_chart?: boolean | null, custom_name?: boolean | null, include_extend_images?: boolean | null, ebay_template_id?: string | null, mockup_id?: string | null, store_queue?: string | null, weight?: number | null, package_width?: number | null, package_height?: number | null, package_length?: number | null, queue_messenger?: string | null, queue_status?: boolean | null, sku?: string | null, barcode?: string | null, barcode_type?: string | null, price_addition?: number | null, price?: number | null, job_list?: string | null } | null> | null };
+export type ItemsInfoQuery = { __typename?: 'RootQuery', itemsInfo?: Array<{ __typename?: 'ItemInfo', _id?: string | null, identity?: string | null, name?: string | null, description?: string | null, description_ai?: string | null, description_ai_pos?: string | null, front?: string | null, back?: string | null, sleeve?: string | null, hood?: string | null, type?: string | null, plf_price?: number | null, tags?: Array<string | null> | null, collections?: Array<string | null> | null, size_chart?: string | null, fix_profit?: number | null, fixed_profit?: number | null, tax_fee_fix?: number | null, tax_fee?: number | null, include_size_chart?: boolean | null, custom_name?: boolean | null, include_extend_images?: boolean | null, ebay_template_id?: string | null, sku?: string | null, barcode?: string | null, barcode_type?: string | null, price_addition?: number | null, price?: number | null, images?: Array<{ __typename?: 'Image', src?: string | null } | null> | null, prety_attributes?: Array<{ __typename?: 'PretyAttribute', attribute_type?: string | null, plf_attribute_name?: string | null, options?: Array<{ __typename?: 'PretyAttributeOption', ffm_value?: string | null, plf_value?: string | null, plf_price?: number | null, hex?: string | null, default?: boolean | null } | null> | null } | null> | null, specifics?: Array<{ __typename?: 'ItemSpecific', key?: string | null, value?: string | null, required?: string | null } | null> | null, attribute_specifics?: Array<{ __typename?: 'SpecificAttribute', sale_price?: number | null, base_price?: number | null, fix_profit?: number | null, fixed_profit?: number | null, sku?: string | null, barcode?: string | null, name_value?: Array<{ __typename?: 'NameValueType', name?: string | null, type?: string | null, value?: string | null } | null> | null } | null> | null, attribute_specifics_modify?: Array<{ __typename?: 'SpecificAttribute', sale_price?: number | null, base_price?: number | null, fix_profit?: number | null, fixed_profit?: number | null, sku?: string | null, barcode?: string | null, name_value?: Array<{ __typename?: 'NameValueType', name?: string | null, type?: string | null, value?: string | null } | null> | null } | null> | null, shipping_preset_info?: { __typename?: 'ShippingPreset', dispatch_time_max?: string | null, shipping_time_max?: string | null, location?: string | null, location_detail?: string | null, country?: string | null, shipping_service?: string | null, shipping_cost?: string | null, shipping_additional_cost?: string | null, return_accept?: string | null, global_shipping?: string | null, international_shipping_time_max?: string | null, international_location?: string | null, international_shipping_service?: string | null, international_shipping_cost?: string | null, international_shipping_additional_cost?: string | null, international_return_accept?: string | null, default_quantity?: string | null } | null, platform_category?: Array<{ __typename?: 'PlatformCategory', type?: string | null, category_selected?: Array<{ __typename?: 'PlatformCategorySelected', id?: string | null, level?: string | null, name?: string | null, parent?: string | null } | null> | null } | null> | null, platform_specifics?: Array<{ __typename?: 'PlatformItemSpecific', platform?: string | null, specifics?: Array<{ __typename?: 'ItemSpecific', key?: string | null, value?: string | null, required?: string | null } | null> | null } | null> | null, extend_images?: Array<{ __typename?: 'Image', src?: string | null } | null> | null } | null> | null };
 
 export type CUserQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -5751,6 +5756,28 @@ export const InfoFragmentDoc = gql`
   }
 }
     ${ExtensionRuleFragmentDoc}`;
+export const ItemSpecificFragmentDoc = gql`
+    fragment ItemSpecific on ItemSpecific {
+  key
+  value
+  required
+}
+    `;
+export const SpecificAttributeFragmentDoc = gql`
+    fragment SpecificAttribute on SpecificAttribute {
+  sale_price
+  base_price
+  name_value {
+    name
+    type
+    value
+  }
+  fix_profit
+  fixed_profit
+  sku
+  barcode
+}
+    `;
 export const ItemInfoFragmentDoc = gql`
     fragment ItemInfo on ItemInfo {
   _id
@@ -5759,39 +5786,91 @@ export const ItemInfoFragmentDoc = gql`
   description
   description_ai
   description_ai_pos
+  images {
+    src
+  }
   front
   back
   sleeve
   hood
   type
-  product_id
   plf_price
+  prety_attributes {
+    attribute_type
+    plf_attribute_name
+    options {
+      ffm_value
+      plf_value
+      plf_price
+      hex
+      default
+    }
+  }
+  specifics {
+    ...ItemSpecific
+  }
+  attribute_specifics {
+    ...SpecificAttribute
+  }
+  attribute_specifics_modify {
+    ...SpecificAttribute
+  }
+  tags
+  collections
   size_chart
-  shipping_preset
+  shipping_preset_info {
+    dispatch_time_max
+    shipping_time_max
+    location
+    location_detail
+    country
+    shipping_service
+    shipping_cost
+    shipping_additional_cost
+    return_accept
+    global_shipping
+    international_shipping_time_max
+    international_location
+    international_shipping_service
+    international_shipping_cost
+    international_shipping_additional_cost
+    international_return_accept
+    default_quantity
+  }
   fix_profit
   fixed_profit
   tax_fee_fix
   tax_fee
+  platform_category {
+    type
+    category_selected {
+      id
+      level
+      name
+      parent
+    }
+  }
   include_size_chart
   custom_name
   include_extend_images
   ebay_template_id
-  mockup_id
-  store_queue
-  weight
-  package_width
-  package_height
-  package_length
-  queue_messenger
-  queue_status
+  platform_specifics {
+    platform
+    specifics {
+      ...ItemSpecific
+    }
+  }
   sku
   barcode
   barcode_type
+  extend_images {
+    src
+  }
   price_addition
   price
-  job_list
 }
-    `;
+    ${ItemSpecificFragmentDoc}
+${SpecificAttributeFragmentDoc}`;
 export const OrderFragmentDoc = gql`
     fragment Order on Order {
   _id

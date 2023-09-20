@@ -1,9 +1,10 @@
 import React, { ReactNode, createContext, useReducer, useContext, useEffect, useState, useMemo } from 'react';
 import { WINDOW_VIEWS, PAGE_ROUTES, ACTION, TOKEN, CURRENT_USER, DOCKER } from './type.context';
-import { get } from 'lodash';
+import { find, get, head } from 'lodash';
 import $ from 'jquery';
 import { APP_MODE, URL_ACCOUNT_GRAPHQL, URL_GRAPHQL } from './contants';
 import { Spinner } from 'reactstrap';
+import reactTriggerChange from "./reacttrigger"
 
 interface UIManageContextProps {
 	children?: ReactNode;
@@ -34,6 +35,16 @@ const initialState = {
 	currentDocker: null,
 	templateId: null,
 };
+
+function toDataUrl(url: string, callback: any) {
+	var xhr = new XMLHttpRequest();
+	xhr.onload = function () {
+		callback(xhr.response);
+	};
+	xhr.open('GET', url);
+	xhr.responseType = 'blob';
+	xhr.send();
+}
 
 function uiReducer(state: State, action: ACTION) {
 	switch (action.type) {
@@ -96,6 +107,7 @@ export const useStorage = (key: string): [string | null, (val: string) => void] 
 					resolve(get(result, cname, '') ? get(result, cname, '') : '');
 				});
 			} catch (error) {
+				console.log('storageGet error: ', error);
 				const name = cname + '=';
 				const decodedCookie = decodeURIComponent(document.cookie);
 				const ca = decodedCookie.split(';');
@@ -119,6 +131,7 @@ export const useStorage = (key: string): [string | null, (val: string) => void] 
 					resolve(true);
 				});
 			} catch (error) {
+				console.log('storageSet error: ', error);
 				const d = new Date();
 				d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
 				const expires = 'expires=' + d.toUTCString();
@@ -226,6 +239,170 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	const setCurrentToken = (currentToken: TOKEN) => dispatch({ type: 'SET_CURRENT_TOKEN', currentToken });
 	const setCurrentDocker = (currentDocker?: DOCKER) => dispatch({ type: 'SET_CURRENT_DOCKER', currentDocker });
 	const setTemplateId = (templateId?: string) => dispatch({ type: 'SET_TEMPLATE_ID', templateId });
+	const $x = (xpath: any) => {
+		let results = [];
+		let query = document.evaluate(xpath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+		for (let i = 0, length = query.snapshotLength; i < length; ++i) {
+			results.push(query.snapshotItem(i));
+		}
+		return results;
+	};
+	const sleep = (ms: any) => {
+		return new Promise((resolve) => setTimeout(() => resolve(ms), ms));
+	};
+	const movingOnElm = async (selector: any) => {
+		try {
+			if (typeof selector !== 'string') return;
+			let elm = $(selector).first() as any;
+			if (elm && elm?.offset()?.top) {
+				await sleep(50);
+				$([document.documentElement, document.body]).animate(
+					{
+						scrollTop: elm.offset().top - 50,
+					},
+					50
+				);
+				await sleep(50);
+			}
+		} catch (error) {
+			console.log('movingOnElm fail: ', error);
+		}
+	};
+	const fillTextInput = async (selector: any, value: string | number) => {
+		try {
+			await movingOnElm(selector);
+			let elm = typeof selector === 'string' ? (head($(selector)) as any) : selector;
+			if (elm) {
+				let lastValue = elm.value;
+				elm.value = value;
+				//tracker is a hack to force React to handle change event
+				let tracker = elm._valueTracker;
+				if (tracker) {
+					tracker.setValue(lastValue);
+				}
+				elm.dispatchEvent(new Event('change', { bubbles: true }));
+				elm.dispatchEvent(new Event('blur', { bubbles: true }));
+			}
+		} catch (error) {
+			console.log(`%cCannot find element`, 'color: red');
+			console.log('error: ', error);
+		}
+	};
+
+	const fillTextArea = async (selector: any, value: string | number) => {
+		try {
+			await movingOnElm(selector);
+			let elm = typeof selector === 'string' ? (head($(selector)) as any) : selector;
+			if (elm) {
+				window.postMessage(
+					{
+						action: 'setTinyMceContent',
+						payload: value,
+					},
+					'*'
+				);
+			}
+		} catch (error) {
+			console.log(`%cCannot find element`, 'color: red');
+			console.log('error: ', error);
+		}
+	};
+
+	const fillSelect = async (
+		selector: string,
+		text: string | number | null | undefined,
+		value: string | number | null | undefined
+	) => {
+		try {
+			await movingOnElm(selector);
+			let elm = typeof selector === 'string' ? (head($(selector)) as any) : selector;
+			if (elm) {
+				const valueForSet = text
+					? find($(elm)?.find('option'), (elm) => {
+						return $(elm)?.text() === text;
+					})?.getAttribute('value')
+					: value;
+				if (valueForSet) {
+					elm.value = String(valueForSet);
+					elm.dispatchEvent(new Event('change', { bubbles: true }));
+				} else {
+					console.log(`%cCannot find value`, 'color: red');
+				}
+			}
+		} catch (error) {
+			console.log(`%cCannot find element`, 'color: red');
+			console.log('error: ', error);
+		}
+	};
+
+	const fillCheckbox = async (selector: string, checked: boolean) => {
+		try {
+			await movingOnElm(selector);
+			let elm = typeof selector === 'string' ? (head($(selector)) as any) : selector;
+			if (elm) {
+				if (elm.checked === checked) {
+					return;
+				}
+				elm.click();
+			}
+		} catch (error) {
+			console.log(`%cCannot find element`, 'color: red');
+			console.log('error: ', error);
+		}
+	};
+	const clickButton = async (selector: string) => {
+		try {
+			const elm = $(selector).first() as any;
+			if (elm) {
+				elm.click();
+			}
+		} catch (error) {
+			console.log(`%cCannot find element`, 'color: red');
+			console.log('error: ', error);
+		}
+	};
+	const clickXButton = async (selector: string) => {
+		try {
+			const elm = head($x(selector)) as any;
+			if (elm) {
+				elm.click();
+			}
+		} catch (error) {
+			console.log(`%cCannot find element`, 'color: red');
+			console.log('error: ', error);
+		}
+	};
+
+	const fillInputFile = async (
+		selector: string,
+		image: string[]
+	) => {
+		try {
+			await movingOnElm(selector);
+			let elm = typeof selector === 'string' ? (head($(selector)) as any) : selector;
+			if (elm) {
+				const dT = new ClipboardEvent('').clipboardData || new DataTransfer();
+				await Promise.allSettled(image.map((imgUrl, index) => {
+					return new Promise((resolve, reject) => {
+						try {
+							toDataUrl(imgUrl, async (x: any) => {
+								resolve(dT.items.add(new File([x], `my-image-${index}${imgUrl.substring(imgUrl.lastIndexOf("."))}`)))
+							})
+						} catch (error) {
+							resolve(false)
+						}
+
+					})
+				})).then(async imgs => {
+					elm.files = dT.files;
+					await reactTriggerChange(elm)
+				})
+			}
+		} catch (error) {
+			console.log(`%cCannot find element`, 'color: red');
+			console.log('error: ', error);
+		}
+	};
 
 	const value = useMemo(
 		() => ({
@@ -241,6 +418,16 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 			setCurrentToken,
 			setCurrentDocker,
 			setTemplateId,
+			$x,
+			sleep,
+			movingOnElm,
+			fillTextInput,
+			fillTextArea,
+			fillSelect,
+			fillCheckbox,
+			clickButton,
+			clickXButton,
+			fillInputFile
 		}),
 		[state]
 	);

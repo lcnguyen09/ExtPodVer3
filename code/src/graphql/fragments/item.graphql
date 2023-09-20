@@ -5,49 +5,106 @@ fragment ItemInfo on ItemInfo {
     description
     description_ai
     description_ai_pos
-    # images: [Image]
+    images {
+        src
+    }
     front
     back
     sleeve
     hood
     type
-    product_id
     plf_price
-    # prety_attributes: [PretyAttribute]
-    # specifics: [ItemSpecific]
-    # attribute_specifics: [SpecificAttribute]
-    # attribute_specifics_modify: [SpecificAttribute]
-    # tags: [String]
-    # collections: [String]
+    prety_attributes {
+        attribute_type
+		plf_attribute_name
+		options {
+            ffm_value
+            plf_value
+            plf_price
+            hex
+            default
+        }
+    }
+    specifics {
+        ...ItemSpecific
+    }
+    attribute_specifics {
+        ...SpecificAttribute
+    }
+    attribute_specifics_modify {
+        ...SpecificAttribute
+    }
+    tags
+    collections
     size_chart
-    shipping_preset
+    shipping_preset_info {
+        dispatch_time_max
+		shipping_time_max
+		location
+		location_detail
+		country
+		shipping_service
+		shipping_cost
+		shipping_additional_cost
+		return_accept
+		global_shipping
+		international_shipping_time_max
+		international_location
+		international_shipping_service
+		international_shipping_cost
+		international_shipping_additional_cost
+		international_return_accept
+		default_quantity
+    }
     fix_profit
     fixed_profit
     tax_fee_fix
     tax_fee
-    # items: [Item]
-    # platform_category: [PlatformCategory]
-    # product: ProductPreset
+    platform_category {
+        type
+		category_selected {
+            id
+            level
+            name
+            parent
+        }
+    }
     include_size_chart
     custom_name
     include_extend_images
     ebay_template_id
-    # platform_specifics: [PlatformItemSpecific]
-    mockup_id
-    # mockup: MockupDesign
-    store_queue
-    # store: Store
-    weight
-    package_width
-    package_height
-    package_length
-    queue_messenger
-    queue_status
+    platform_specifics {
+        platform
+		specifics {
+            ...ItemSpecific
+        }
+    }
     sku
     barcode
     barcode_type
-    # extend_images: [Image]
+    extend_images {
+        src
+    }
     price_addition
     price
-    job_list
 }
+
+fragment SpecificAttribute on SpecificAttribute {
+		sale_price
+		base_price
+		name_value {
+            name
+            type
+            value
+        }
+		fix_profit
+		fixed_profit
+		sku
+		barcode
+}
+
+fragment ItemSpecific on ItemSpecific {
+		key
+		value
+		required
+	}

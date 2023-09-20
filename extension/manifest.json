@@ -10,8 +10,17 @@
     "128": "icons/icon128.png"
   },
   "permissions": [
-    "storage"
+    "storage",
+    "scripting",
+    "tabs",
+    "activeTab"
   ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
       "matches": [
@@ -29,7 +38,9 @@
         "<all_urls>"
       ],
       "resources": [
-        "inject-script.js"
+        "inject-script.js",
+        "content.js",
+        "jquery.js"
       ],
       "extension_ids": []
     }

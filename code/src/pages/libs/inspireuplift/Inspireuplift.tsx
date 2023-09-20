@@ -8,10 +8,12 @@ export default function Inspireuplift() {
 	const [path, setPath] = useState(window.location.pathname);
 
 	useEffect(() => {
-		setPath(window.location.pathname);
+		setInterval(() => {
+			setPath(window.location.pathname);
+		}, 500)
 	}, [window.location.pathname]);
 
-	if (path === '/product/add' || true) {
+	if (path === '/product/add') {
 		return <InspireupliftItem Identifier={Identifier} />;
 	}
 
