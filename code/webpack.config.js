@@ -3,7 +3,7 @@ const Dotenv = require('dotenv-webpack');
 
 module.exports = {
   entry: {
-    "content": "./src/index.tsx"
+    "bundle": "./src/index.tsx"
   },
   mode: "production",
   module: {
@@ -43,7 +43,7 @@ module.exports = {
   },
   output: {
     filename: "[name].js",
-    path: path.resolve(__dirname, "..", "extension"),
+    path: path.resolve(__dirname, "..", "dir"),
   },
   plugins: [
     new Dotenv({

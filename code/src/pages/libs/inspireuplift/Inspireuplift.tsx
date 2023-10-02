@@ -13,7 +13,7 @@ export default function Inspireuplift() {
 		}, 500)
 	}, [window.location.pathname]);
 
-	if (path === '/product/add') {
+	if (path === '/product/add' || true) {
 		return <InspireupliftItem Identifier={Identifier} />;
 	}
 

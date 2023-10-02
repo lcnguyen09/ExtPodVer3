@@ -4,7 +4,7 @@ import { find, get, head } from 'lodash';
 import $ from 'jquery';
 import { APP_MODE, URL_ACCOUNT_GRAPHQL, URL_GRAPHQL } from './contants';
 import { Spinner } from 'reactstrap';
-import reactTriggerChange from "./reacttrigger"
+import reactTriggerChange from './reacttrigger';
 
 interface UIManageContextProps {
 	children?: ReactNode;
@@ -89,57 +89,94 @@ function uiReducer(state: State, action: ACTION) {
 export const useStorage = (key: string): [string | null, (val: string) => void] => {
 	const [value, setValue] = useState<string | null>(null);
 	useEffect(() => {
-		storageGet(key).then((result) => {
-			setTimeout(() => {
-				setValue(result ? result : '');
-			}, 0);
+		// storageGet(key).then((result) => {
+		// 	setTimeout(() => {
+		// 		setValue(result ? result : '');
+		// 	}, 0);
+		// });
+		window.postMessage(
+			{
+				action: 'storageGetRequest',
+				request: {key: key},
+			},
+			'*'
+		);
+
+		window.addEventListener('message', (event) => {
+			if (event?.data?.action === 'storageGetResponse' && event?.data.response?.key === key) {
+				setValue(event?.data.response?.value)
+			}
 		});
+
+
 	}, []);
+
 	useEffect(() => {
 		if (value !== null) {
-			storageSet(key, value ? value : '');
+			console.log('value: ', value);
+			window.postMessage(
+				{
+					action: 'storageSetRequest',
+					request: {
+						key: key,
+						value: value
+					},
+				},
+				'*'
+			);
+			// storageSet(key, value ? value : '');
 		}
 	}, [value]);
-	function storageGet(cname: string): Promise<string> {
-		return new Promise((resolve) => {
-			try {
-				chrome.storage.local.get([cname]).then((result) => {
-					resolve(get(result, cname, '') ? get(result, cname, '') : '');
-				});
-			} catch (error) {
-				console.log('storageGet error: ', error);
-				const name = cname + '=';
-				const decodedCookie = decodeURIComponent(document.cookie);
-				const ca = decodedCookie.split(';');
-				for (let i = 0; i < ca.length; i++) {
-					let c = ca[i];
-					while (c.charAt(0) === ' ') {
-						c = c.substring(1);
-					}
-					if (c.indexOf(name) === 0) {
-						resolve(c.substring(name.length, c.length) ? c.substring(name.length, c.length) : '');
-					}
-				}
-				resolve('');
-			}
-		});
-	}
-	function storageSet(cname: string, cvalue: any, exdays = 365): Promise<boolean> {
-		return new Promise((resolve) => {
-			try {
-				chrome.storage.local.set({ [key]: value ? value : '' }).then(() => {
-					resolve(true);
-				});
-			} catch (error) {
-				console.log('storageSet error: ', error);
-				const d = new Date();
-				d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
-				const expires = 'expires=' + d.toUTCString();
-				document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/;';
-				resolve(true);
-			}
-		});
-	}
+
+	
+
+	// function storageGet(cname: string): Promise<string> {
+	// 	return new Promise((resolve) => {
+	// 		try {
+	// 			window.postMessage(
+	// 				{
+	// 					action: 'storageGetRequest',
+	// 					payload: cname,
+	// 				},
+	// 				'*'
+	// 			);
+	// 			chrome.storage.local.get([cname]).then((result) => {
+	// 				resolve(get(result, cname, '') ? get(result, cname, '') : '');
+	// 			});
+	// 		} catch (error) {
+	// 			console.log('storageGet error: ', error);
+	// 			const name = cname + '=';
+	// 			const decodedCookie = decodeURIComponent(document.cookie);
+	// 			const ca = decodedCookie.split(';');
+	// 			for (let i = 0; i < ca.length; i++) {
+	// 				let c = ca[i];
+	// 				while (c.charAt(0) === ' ') {
+	// 					c = c.substring(1);
+	// 				}
+	// 				if (c.indexOf(name) === 0) {
+	// 					resolve(c.substring(name.length, c.length) ? c.substring(name.length, c.length) : '');
+	// 				}
+	// 			}
+	// 			resolve('');
+	// 		}
+	// 	});
+	// }
+	// function storageSet(cname: string, cvalue: any, exdays = 365): Promise<boolean> {
+	// 	return new Promise((resolve) => {
+	// 		try {
+	// 			chrome.storage.local.set({ [key]: value ? value : '' }).then(() => {
+	// 				resolve(true);
+	// 			});
+	// 		} catch (error) {
+	// 			console.log('storageSet error: ', error);
+	// 			const d = new Date();
+	// 			d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
+	// 			const expires = 'expires=' + d.toUTCString();
+	// 			document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/;';
+	// 			resolve(true);
+	// 		}
+	// 	});
+	// }
 	function toggleValue(val: string): void {
 		setValue(val);
 	}
@@ -165,6 +202,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 
 	useEffect(() => {
 		if (token !== null && docker !== null && windowViewStorage !== null && templateIdStorage !== null) {
+			console.log('token: ', token);
 			setInit(true);
 		}
 	}, [token, docker, windowViewStorage, templateIdStorage]);
@@ -294,13 +332,14 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 			await movingOnElm(selector);
 			let elm = typeof selector === 'string' ? (head($(selector)) as any) : selector;
 			if (elm) {
-				window.postMessage(
-					{
-						action: 'setTinyMceContent',
-						payload: value,
-					},
-					'*'
-				);
+				(window as any)?.tinymce?.activeEditor?.setContent(value);
+				// window.postMessage(
+				// 	{
+				// 		action: 'setTinyMceContent',
+				// 		payload: value,
+				// 	},
+				// 	'*'
+				// );
 			}
 		} catch (error) {
 			console.log(`%cCannot find element`, 'color: red');
@@ -319,8 +358,8 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 			if (elm) {
 				const valueForSet = text
 					? find($(elm)?.find('option'), (elm) => {
-						return $(elm)?.text() === text;
-					})?.getAttribute('value')
+							return $(elm)?.text() === text;
+					  })?.getAttribute('value')
 					: value;
 				if (valueForSet) {
 					elm.value = String(valueForSet);
@@ -373,30 +412,28 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		}
 	};
 
-	const fillInputFile = async (
-		selector: string,
-		image: string[]
-	) => {
+	const fillInputFile = async (selector: string, image: string[]) => {
 		try {
 			await movingOnElm(selector);
 			let elm = typeof selector === 'string' ? (head($(selector)) as any) : selector;
 			if (elm) {
 				const dT = new ClipboardEvent('').clipboardData || new DataTransfer();
-				await Promise.allSettled(image.map((imgUrl, index) => {
-					return new Promise((resolve, reject) => {
-						try {
-							toDataUrl(imgUrl, async (x: any) => {
-								resolve(dT.items.add(new File([x], `my-image-${index}${imgUrl.substring(imgUrl.lastIndexOf("."))}`)))
-							})
-						} catch (error) {
-							resolve(false)
-						}
-
+				await Promise.allSettled(
+					image.map((imgUrl, index) => {
+						return new Promise((resolve, reject) => {
+							try {
+								toDataUrl(imgUrl, async (x: any) => {
+									resolve(dT.items.add(new File([x], `my-image-${index}${imgUrl.substring(imgUrl.lastIndexOf('.'))}`)));
+								});
+							} catch (error) {
+								resolve(false);
+							}
+						});
 					})
-				})).then(async imgs => {
+				).then(async (imgs) => {
 					elm.files = dT.files;
-					await reactTriggerChange(elm)
-				})
+					await reactTriggerChange(elm);
+				});
 			}
 		} catch (error) {
 			console.log(`%cCannot find element`, 'color: red');
@@ -427,7 +464,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 			fillCheckbox,
 			clickButton,
 			clickXButton,
-			fillInputFile
+			fillInputFile,
 		}),
 		[state]
 	);

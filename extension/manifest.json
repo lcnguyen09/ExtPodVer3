@@ -27,8 +27,7 @@
         "<all_urls>"
       ],
       "js": [
-        "inject.js",
-        "content.js"
+        "inject.js"
       ]
     }
   ],
@@ -44,5 +43,9 @@
       ],
       "extension_ids": []
     }
-  ]
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; script-src-elem 'self' 'unsafe-inline' 'sha256-z45zR03J8fjhB+XZI75tfFNuEulXqY6Qn0ZMYwFwVws='; object-src 'self';",
+    "sandbox": "sandbox allow-scripts allow-forms allow-popups allow-modals; script-src 'self' 'unsafe-inline' 'unsafe-eval'; child-src 'self';"
+  }
 }

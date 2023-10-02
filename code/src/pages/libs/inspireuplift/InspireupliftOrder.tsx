@@ -5,9 +5,9 @@ import UiContext from './../../../contexts/ui.context';
 import Notification from './../../../components/Notification';
 import BottomBar from './../../../components/BottomBar';
 import $ from 'jquery';
-import { filter, find, get, head, last, map, unionBy } from 'lodash';
+import { filter, find, findIndex, get, head, last, map, unionBy } from 'lodash';
 
-export default function (Identifier: any) {
+export default function ({ Identifier }: any) {
 	const { currentDocker, currentToken, templateId } = UiContext.UseUIContext();
 
 	const [pathname, setPathname] = useState(window.location.pathname);
@@ -139,11 +139,12 @@ export default function (Identifier: any) {
 				.then((response) => {
 					setLoading(false);
 					resolve(setOrders(get(response, ['data', 'data'], [])));
-				}).catch(e => {
+				})
+				.catch((e) => {
 					console.log('e: ', e);
 					setLoading(false);
 					reject([]);
-				})
+				});
 		});
 	}
 
@@ -243,6 +244,9 @@ export default function (Identifier: any) {
 										const itemInfo = find(get(response, ['data', 'data'], []), (itemInfo) => {
 											return get(itemInfo, 'product_id') === itemID;
 										});
+										if (!itemInfo) {
+											return Promise.resolve(null)
+										}
 										return fetch(
 											`https://sellercentral-api.inspireuplift.com/api/v1/seller/marketplace/products/${get(
 												itemInfo,
@@ -267,12 +271,34 @@ export default function (Identifier: any) {
 												mode: 'cors',
 												credentials: 'include',
 											}
-										).then((response) => response.json());
+										)
+											.then((response) => response.json())
+											.catch((error) => {
+												console.log('error: ', error);
+											});
+									})
+									.catch((error) => {
+										console.log('error: ', error);
 									});
 							})
-						);
+						).then((items) => {
+							return items
+						})
 					})
 					.then((items) => {
+						if (findIndex(items, (item) => !item) >= 0) {
+							const newOrder = map(orders, (o) => {
+								return order.id === o.id
+									? {
+											...o,
+											ErrorMsg: 'Cannot find items, pls import in order detail page',
+									  }
+									: o;
+							});
+							setSuccessMsg('');
+							setErrorMsg('Some orders had errors when imported');
+							return setOrders(newOrder);
+						}
 						const orderDataForSync = {
 							order_id: get(orderData, 'order_number', ''),
 							identifier: Identifier,
@@ -316,13 +342,16 @@ export default function (Identifier: any) {
 								};
 							}),
 						};
+						console.log(orderDataForSync);
+						return;
 						return new Promise((resolve, reject) => {
 							const settings = {
 								method: 'POST',
-								url: `${currentDocker?.domain
+								url: `${
+									currentDocker?.domain
 										? `https://api-${currentDocker?.domain}.${currentDocker?.server}/api/v1/order/create`
 										: '/api/order/create'
-									}`,
+								}`,
 								data: orderDataForSync,
 								timeout: 0,
 								headers: {
@@ -402,6 +431,7 @@ export default function (Identifier: any) {
 									break;
 								default:
 							}
+							color = order?.ErrorMsg ? 'danger' : color;
 							return (
 								<tr>
 									<td>
@@ -431,12 +461,15 @@ export default function (Identifier: any) {
 										>
 											{get(order, 'order_number', '')}-{get(order, 'seller_order_number', '')}
 										</strong>
+										{order?.ErrorMsg ? <p className='text-danger'>{order?.ErrorMsg}</p> : false}
 									</td>
 									<td className='text-center'>
 										{LoadingStatus ? (
 											<Spinner />
 										) : (
-											<span className={`bg-${color} rounded px-1 text-light`}>{get(orderSyns, 'status', 'New')}</span>
+											<span className={`bg-${color} rounded px-1 text-light`}>
+												{order?.ErrorMsg ? 'Error' : get(orderSyns, 'status', 'New')}
+											</span>
 										)}
 									</td>
 									<td className='text-center'>

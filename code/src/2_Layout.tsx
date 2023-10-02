@@ -7,7 +7,7 @@ import $ from 'jquery';
 import { filter } from 'lodash';
 
 export default function Layout({ children }: { children: ReactNode }) {
-    const { appMode, appLoading, appHide, windowView, setWindowView, currentToken, currentDocker } = UiContext.UseUIContext();
+  const { appMode, appLoading, appHide, windowView, setWindowView, currentToken, currentDocker } = UiContext.UseUIContext();
 
     useEffect(() => {
         filter(
