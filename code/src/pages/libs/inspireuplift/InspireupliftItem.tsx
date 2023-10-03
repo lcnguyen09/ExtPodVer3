@@ -20,7 +20,7 @@ import {
 } from 'lodash';
 
 export default function (Identifier: any) {
-	const { setGraphqlForHub, sleep, movingOnElm, fillTextInput, fillTextArea, fillSelect, fillCheckbox, clickButton, clickXButton, fillInputFile } =
+	const { appMode, sleep, movingOnElm, fillTextInput, fillTextArea, fillSelect, fillCheckbox, clickButton, clickXButton, fillInputFile } =
 		UiContext.UseUIContext();
 
 	const [itemsInfoQuery] = useItemsInfoLazyQuery({ fetchPolicy: 'network-only' });
@@ -96,10 +96,10 @@ export default function (Identifier: any) {
 				await sleep(3000);
 			}
 
-			
+
 			resolve(true)
 		})
-		
+
 	}
 
 	const handleFillData = async () => {
@@ -154,7 +154,7 @@ export default function (Identifier: any) {
 		if (!platform_category.length) {
 			setErrorMsg("The product does not belong to any category, please set up a category")
 		}
-		
+
 		await handleClearData()
 
 		await fillTextInput(`input#product-title[name="title"]`, titleReplace);
@@ -213,7 +213,7 @@ export default function (Identifier: any) {
 			? itemInfo?.attribute_specifics_modify.length
 			: 9;
 		await fillTextInput(`input#product-available-inventory`, quantity ? quantity : 1);
-		
+
 
 		const promises: any = [];
 		timeout = 0;
@@ -250,7 +250,7 @@ export default function (Identifier: any) {
 			const promise = new Promise(async (resolve, reject) => {
 				timeout += 250;
 				await sleep(timeout);
-				await fillTextInput(`${selectorQuery}:eq(${index})`, price ? price : maxPrice);
+				await fillTextInput(`${selectorQuery}:eq(${index})`, parseFloat(price ? price : maxPrice).toFixed(2));
 				await fillTextInput(`${selectorQuantity}:eq(${index})`, 1);
 				return resolve(true);
 			});
@@ -306,35 +306,52 @@ export default function (Identifier: any) {
 		setOnFillData(false)
 
 		if (autoSave) {
-			await sleep(2000)
-			await clickXButton(`//button/span[text()="Save"]`);
+			let count = 0
+			const intVal = setInterval(async () => {
+				if ($(`.get-files-primary .main-img-container`).length === pictures.length) {
+					setSuccessMsg("Saving...")
+					await sleep(2000)
+					await clickXButton(`//button/span[text()="Save"]`);
+					clearInterval(intVal)
+				} else if ($(`.get-files-primary .main-img-container`).length && $(`.get-files-primary .main-img-container`).length !== pictures.length) {
+					count++
+					if (count > 5) {
+						return setErrorMsg("Image upload failed, please check again then click save product")
+					}
+				}
+			}, 500)
+			return setSuccessMsg("Fill data done. Wait for photo to upload")
 		}
-		setSuccessMsg("Fill data done")
+		setSuccessMsg("Fill data done.")
 	};
 
 	const handleGetItemData = () => {
 		if (!itemId) {
 			return
 		}
+		setLoading(true)
 		return new Promise((resolve, reject) => {
-			setGraphqlForHub().then(() => {
-				itemsInfoQuery({
-					variables: {
-						identity: itemId,
-					},
-					fetchPolicy: 'network-only',
-				}).then((response) => {
-					const itemInfoResponse = head(get(response, ['data', 'itemsInfo']));
-					if (
-						!Array.isArray(get(itemInfoResponse, 'prety_attributes', [])) ||
-						get(itemInfoResponse, 'prety_attributes', []).length > 3
-					) {
-						return setErrorMsg('Too many variant');
-					}
-					setItemInfo(head(get(response, ['data', 'itemsInfo'])));
-					setLoading(false);
-				});
-			});
+			itemsInfoQuery({
+				variables: {
+					identity: itemId,
+				},
+				fetchPolicy: 'network-only',
+			}).then((response) => {
+				const itemInfoResponse = head(get(response, ['data', 'itemsInfo']));
+				if (
+					!Array.isArray(get(itemInfoResponse, 'prety_attributes', [])) ||
+					get(itemInfoResponse, 'prety_attributes', []).length > 3
+				) {
+					return setErrorMsg('Too many variant');
+				}
+				setItemInfo(head(get(response, ['data', 'itemsInfo'])));
+				setLoading(false);
+				resolve(true)
+			}).catch(() => {
+				setErrorMsg('Fail to get item info');
+				setLoading(false);
+				reject(false)
+			})
 		});
 	};
 

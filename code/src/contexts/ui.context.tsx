@@ -2,7 +2,7 @@ import React, { ReactNode, createContext, useReducer, useContext, useEffect, use
 import { WINDOW_VIEWS, PAGE_ROUTES, ACTION, TOKEN, CURRENT_USER, DOCKER } from './type.context';
 import { find, get, head } from 'lodash';
 import $ from 'jquery';
-import { APP_MODE, URL_ACCOUNT_GRAPHQL, URL_GRAPHQL } from './contants';
+import { APP_MODE, URL_ACCOUNT_GRAPHQL, URL_GRAPHQL, URL_REST_API } from './contants';
 import { Spinner } from 'reactstrap';
 import reactTriggerChange from './reacttrigger';
 
@@ -16,6 +16,7 @@ export interface State {
 	appHide: boolean;
 	windowView: WINDOW_VIEWS;
 	urlGraphql: string;
+	urlRestApi: string;
 	pageRoute: PAGE_ROUTES;
 	currentUser: CURRENT_USER | null;
 	currentToken: TOKEN | null;
@@ -29,6 +30,7 @@ const initialState = {
 	appHide: false,
 	windowView: null,
 	urlGraphql: '',
+	urlRestApi: '',
 	pageRoute: 'INIT',
 	currentUser: null,
 	currentToken: null,
@@ -80,6 +82,9 @@ function uiReducer(state: State, action: ACTION) {
 		case 'SET_URL_GRAPHQL': {
 			return { ...state, urlGraphql: action.urlGraphql };
 		}
+		case 'SET_URL_REST_API': {
+			return { ...state, urlRestApi: action.urlRestApi };
+		}
 		default: {
 			return state;
 		}
@@ -89,11 +94,6 @@ function uiReducer(state: State, action: ACTION) {
 export const useStorage = (key: string): [string | null, (val: string) => void] => {
 	const [value, setValue] = useState<string | null>(null);
 	useEffect(() => {
-		// storageGet(key).then((result) => {
-		// 	setTimeout(() => {
-		// 		setValue(result ? result : '');
-		// 	}, 0);
-		// });
 		window.postMessage(
 			{
 				action: 'storageGetRequest',
@@ -113,7 +113,6 @@ export const useStorage = (key: string): [string | null, (val: string) => void] 
 
 	useEffect(() => {
 		if (value !== null) {
-			console.log('value: ', value);
 			window.postMessage(
 				{
 					action: 'storageSetRequest',
@@ -124,59 +123,8 @@ export const useStorage = (key: string): [string | null, (val: string) => void] 
 				},
 				'*'
 			);
-			// storageSet(key, value ? value : '');
 		}
 	}, [value]);
-
-	
-
-	// function storageGet(cname: string): Promise<string> {
-	// 	return new Promise((resolve) => {
-	// 		try {
-	// 			window.postMessage(
-	// 				{
-	// 					action: 'storageGetRequest',
-	// 					payload: cname,
-	// 				},
-	// 				'*'
-	// 			);
-	// 			chrome.storage.local.get([cname]).then((result) => {
-	// 				resolve(get(result, cname, '') ? get(result, cname, '') : '');
-	// 			});
-	// 		} catch (error) {
-	// 			console.log('storageGet error: ', error);
-	// 			const name = cname + '=';
-	// 			const decodedCookie = decodeURIComponent(document.cookie);
-	// 			const ca = decodedCookie.split(';');
-	// 			for (let i = 0; i < ca.length; i++) {
-	// 				let c = ca[i];
-	// 				while (c.charAt(0) === ' ') {
-	// 					c = c.substring(1);
-	// 				}
-	// 				if (c.indexOf(name) === 0) {
-	// 					resolve(c.substring(name.length, c.length) ? c.substring(name.length, c.length) : '');
-	// 				}
-	// 			}
-	// 			resolve('');
-	// 		}
-	// 	});
-	// }
-	// function storageSet(cname: string, cvalue: any, exdays = 365): Promise<boolean> {
-	// 	return new Promise((resolve) => {
-	// 		try {
-	// 			chrome.storage.local.set({ [key]: value ? value : '' }).then(() => {
-	// 				resolve(true);
-	// 			});
-	// 		} catch (error) {
-	// 			console.log('storageSet error: ', error);
-	// 			const d = new Date();
-	// 			d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
-	// 			const expires = 'expires=' + d.toUTCString();
-	// 			document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/;';
-	// 			resolve(true);
-	// 		}
-	// 	});
-	// }
 	function toggleValue(val: string): void {
 		setValue(val);
 	}
@@ -202,7 +150,6 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 
 	useEffect(() => {
 		if (token !== null && docker !== null && windowViewStorage !== null && templateIdStorage !== null) {
-			console.log('token: ', token);
 			setInit(true);
 		}
 	}, [token, docker, windowViewStorage, templateIdStorage]);
@@ -218,10 +165,6 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 			if (templateIdStorage !== null) setTemplateId(templateIdStorage);
 		}
 	}, [init]);
-
-	// useEffect(() => {
-	// 	setCurrentDocker(docker ? { _id: docker || '' } : undefined)
-	// }, [state?.currentUser?.docker]);
 
 	useEffect(() => {
 		if (state.windowView === 'MIN') {
@@ -268,9 +211,11 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	const setAppLoading = (appLoading: boolean) => dispatch({ type: 'SET_LOADING', appLoading });
 	const setAppHide = (appHide: boolean) => dispatch({ type: 'SET_APP_HIDE', appHide });
 	const setWindowView = (view: WINDOW_VIEWS | string) => dispatch({ type: 'SET_WINDOW_VIEW', view });
+
 	const setUrlGraphql = (urlGraphql: string) => dispatch({ type: 'SET_URL_GRAPHQL', urlGraphql });
 	const setGraphqlForAccount = async () => setUrlGraphql(URL_ACCOUNT_GRAPHQL);
 	const setGraphqlForHub = async () => setUrlGraphql(URL_GRAPHQL(state.currentDocker));
+	const setUrlRestApi = () => dispatch({ type: 'SET_URL_REST_API', urlRestApi: URL_REST_API(state.currentDocker) });
 
 	const setPageRoute = (page: PAGE_ROUTES) => dispatch({ type: 'SET_PAGE_ROUTE', page });
 	const setCurrentUser = (user?: CURRENT_USER) => dispatch({ type: 'SET_CURRENT_USER', user });
@@ -450,6 +395,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 			setUrlGraphql,
 			setGraphqlForAccount,
 			setGraphqlForHub,
+			setUrlRestApi,
 			setPageRoute,
 			setCurrentUser,
 			setCurrentToken,

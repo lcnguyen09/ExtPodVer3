@@ -8,7 +8,7 @@ import $ from 'jquery';
 import { filter, find, findIndex, get, head, last, map, unionBy } from 'lodash';
 
 export default function ({ Identifier }: any) {
-	const { currentDocker, currentToken, templateId } = UiContext.UseUIContext();
+	const { currentDocker, currentToken, templateId, urlRestApi } = UiContext.UseUIContext();
 
 	const [pathname, setPathname] = useState(window.location.pathname);
 
@@ -43,6 +43,7 @@ export default function ({ Identifier }: any) {
 	}
 
 	function handleGetOrderData() {
+		setLoading(true)
 		new Promise((resolve, reject) => {
 			if (isDetail()) {
 				const id = last(window.location.pathname.split('/'));
@@ -145,14 +146,14 @@ export default function ({ Identifier }: any) {
 					setLoading(false);
 					reject([]);
 				});
-		});
+		})
 	}
 
 	function handleGetOrderSync() {
 		setLoadingStatus(false);
 		$.ajax({
 			method: 'GET',
-			url: `https://api-${currentDocker?.domain}.${currentDocker?.server}/api/v1/order/orders?${map(
+			url: `${urlRestApi}/order/orders?${map(
 				orders,
 				(o) => `external_numbers[]=${get(o, 'order_number', '')}`
 			).join('&')}&identifier=${Identifier}`,
@@ -168,6 +169,7 @@ export default function ({ Identifier }: any) {
 			.fail((e) => {
 				setLoadingStatus(false);
 			});
+
 	}
 
 	function handleSaveOrder(order = null) {
@@ -205,16 +207,419 @@ export default function ({ Identifier }: any) {
 						orderData = get(data, 'data', {});
 						let items = map(get(orderData, 'line_items', []), (li) => {
 							return {
-								itemID: get(li, 'product_id', ''),
+								productId: get(li, 'product_id', ''),
 								itemName: get(li, 'name', ''),
 							};
 						});
-						items = unionBy(items, 'itemID');
+						items = unionBy(items, 'productId');
+						// if (isDetail()) {
+						// 	// return await Promise.all(
+
+						// 	// )
+						// 	return [
+						// 		{
+						// 			"product_id": 3606448,
+						// 			"sku": "BMPBVKO8I5",
+						// 			"seller_sku": "BMPBVKO8I5",
+						// 			"type": "configurable",
+						// 			"title": "NEW! Jordan Love Bay 10 Packers 2023-24 Green Jersey Print Fanmade Shirt",
+						// 			"video_url": null,
+						// 			"video_thumbnail": null,
+						// 			"description": "<div><strong>Product Information</strong></div>\n<div>&nbsp; &nbsp; &nbsp; All Over Print Football Jersey &ndash; V-Next Shirt<br />\n<ul>\n<li>High-quality materials without fading, cracking, peeling, or flaking vibrant colors that won&rsquo;t fade.</li>\n<li>Dry clean, hand, or machine wash are also acceptable.</li>\n<li>Dryer-safe without any fading, peeling, or wrinkling, quick-drying.</li>\n<li>Full US size from S to 5XL</li>\n<li>The product is made on demand. No minimum required.</li>\n<li>Made in Vietnam, in-house manufacturing</li>\n<li>Colors: As Design</li>\n<li>Sizes: S, M, L, XL, 2 XL, 3 XL, 4 XL, 5 XL</li>\n<li>Due to the difference between different monitors, the divicture may not reflect the actual color of the item.</li>\n<li>Compare the detail sizes with yours, please allow 1-2 cm variations due to manual measurement.</li>\n</ul>\n</div>\n<div>\n<p><strong>Shipping Info</strong></p>\n<ul>\n<li>Estimated Processing time: 2-6 business days.</li>\n<li>Estimated US Shipping time: 4-9 business days.</li>\n<li>Estimated EU &amp; UK Shipping time: 10-13 business days.</li>\n<li>Estimated CA Shipping time: 10-15 business days.</li>\n</ul>\n<br /><strong>Replacement/Return Policy</strong><br />\n<ul>\n<li>If you are not completely satisfied with your purchase, we will implement to replace another within 30 days without fee if the item is defective, damaged, or an error is made on our end. We do our best to process as quickly as possible.</li>\n<li>If for any reason you are unsatisfied with the item you buy, please contact us so that we can talk about the sollution for you. If you send us the proof like an image, it is easier for us to handle your issue.</li>\n</ul>\n<br /><strong>WE DO NOT SHIP TO HI PR ALASKA PO.BOX We can't accept changing/refunding request if you just do not like this material. This is fan made jersey. The letters are 3D printed.</strong></div>",
+						// 			"short_description": "",
+						// 			"featured_image_id": 6615552,
+						// 			"price": 33.5,
+						// 			"compare_at_price": 50,
+						// 			"cost_per_item": 16.5,
+						// 			"expedite_shipping": null,
+						// 			"charge_tax": 1,
+						// 			"media_gallery": [
+						// 				{
+						// 					"id": 6615552,
+						// 					"alt": "new-jordan-love-bay-10-packers-2023-24-green-jersey-print-fanmade-shirt (1).jpeg"
+						// 				},
+						// 				{
+						// 					"id": 6615553,
+						// 					"alt": "new-jordan-love-bay-10-packers-2023-24-green-jersey-print-fanmade-shirt.jpeg"
+						// 				},
+						// 				{
+						// 					"id": 6615587,
+						// 					"alt": "football-jersey.jpeg"
+						// 				},
+						// 				{
+						// 					"id": 6615585,
+						// 					"alt": "1689827303_DJu3ws.jpeg"
+						// 				},
+						// 				{
+						// 					"id": 6615586,
+						// 					"alt": "1692537798_c7xRTQ.png"
+						// 				}
+						// 			],
+						// 			"seo_title": "NEW! Jordan Love Bay 10 Packers 2023-24 Green Jersey Print F",
+						// 			"seo_description": "Product Information  \n       All Over Print Football Jersey &ndash; V-Next Shirt \n \n High-quality materials without fading, cracking, peeling, or flaking vibran",
+						// 			"slug": "New-Jordan-Love-Bay-10-Packers-2023-24-Green-Jersey",
+						// 			"rating": null,
+						// 			"rating_count": null,
+						// 			"is_online_channel": 0,
+						// 			"status": {
+						// 				"id": 2,
+						// 				"name": "Approved"
+						// 			},
+						// 			"adult_status": 0,
+						// 			"product_promotion_id": 0,
+						// 			"tags": [],
+						// 			"product_type": null,
+						// 			"vendor": "PrintMasters",
+						// 			"seller_id": 21061,
+						// 			"stock": 11,
+						// 			"inventory": null,
+						// 			"variants": [
+						// 				{
+						// 					"id": 125123224,
+						// 					"_id": 0,
+						// 					"product_id": 3606448,
+						// 					"sku": "BMPBVKO8I5-1",
+						// 					"seller_sku": "BMPBVKO8I5-1",
+						// 					"compare_at_price": 50,
+						// 					"is_continue_sell": 0,
+						// 					"available_quantity": 25,
+						// 					"title": "S",
+						// 					"price": 33.5,
+						// 					"image": null,
+						// 					"position": 1,
+						// 					"attributes": [
+						// 						{
+						// 							"label": "S",
+						// 							"id": "S",
+						// 							"text": "S",
+						// 							"value_index": 104,
+						// 							"code": "size"
+						// 						}
+						// 					],
+						// 					"is_enabled": true,
+						// 					"taxable": true,
+						// 					"weight": null,
+						// 					"weight_unit": null,
+						// 					"requires_shipping": true,
+						// 					"stock": 11
+						// 				},
+						// 				{
+						// 					"id": 125123225,
+						// 					"_id": 0,
+						// 					"product_id": 3606448,
+						// 					"sku": "BMPBVKO8I5-2",
+						// 					"seller_sku": "BMPBVKO8I5-2",
+						// 					"compare_at_price": 50,
+						// 					"is_continue_sell": 0,
+						// 					"available_quantity": 24,
+						// 					"title": "M",
+						// 					"price": 33.5,
+						// 					"image": null,
+						// 					"position": 2,
+						// 					"attributes": [
+						// 						{
+						// 							"label": "M",
+						// 							"id": "M",
+						// 							"text": "M",
+						// 							"value_index": 107,
+						// 							"code": "size"
+						// 						}
+						// 					],
+						// 					"is_enabled": true,
+						// 					"taxable": true,
+						// 					"weight": null,
+						// 					"weight_unit": null,
+						// 					"requires_shipping": true,
+						// 					"stock": 11
+						// 				},
+						// 				{
+						// 					"id": 125123226,
+						// 					"_id": 0,
+						// 					"product_id": 3606448,
+						// 					"sku": "BMPBVKO8I5-3",
+						// 					"seller_sku": "BMPBVKO8I5-3",
+						// 					"compare_at_price": 50,
+						// 					"is_continue_sell": 0,
+						// 					"available_quantity": 25,
+						// 					"title": "L",
+						// 					"price": 35.23,
+						// 					"image": null,
+						// 					"position": 3,
+						// 					"attributes": [
+						// 						{
+						// 							"label": "L",
+						// 							"id": "L",
+						// 							"text": "L",
+						// 							"value_index": 111,
+						// 							"code": "size"
+						// 						}
+						// 					],
+						// 					"is_enabled": true,
+						// 					"taxable": true,
+						// 					"weight": null,
+						// 					"weight_unit": null,
+						// 					"requires_shipping": true,
+						// 					"stock": 11
+						// 				},
+						// 				{
+						// 					"id": 125123227,
+						// 					"_id": 0,
+						// 					"product_id": 3606448,
+						// 					"sku": "BMPBVKO8I5-4",
+						// 					"seller_sku": "BMPBVKO8I5-4",
+						// 					"compare_at_price": 50,
+						// 					"is_continue_sell": 0,
+						// 					"available_quantity": 22,
+						// 					"title": "XL",
+						// 					"price": 35.23,
+						// 					"image": null,
+						// 					"position": 4,
+						// 					"attributes": [
+						// 						{
+						// 							"label": "XL",
+						// 							"id": "XL",
+						// 							"text": "XL",
+						// 							"value_index": 116,
+						// 							"code": "size"
+						// 						}
+						// 					],
+						// 					"is_enabled": true,
+						// 					"taxable": true,
+						// 					"weight": null,
+						// 					"weight_unit": null,
+						// 					"requires_shipping": true,
+						// 					"stock": 11
+						// 				},
+						// 				{
+						// 					"id": 125123228,
+						// 					"_id": 0,
+						// 					"product_id": 3606448,
+						// 					"sku": "BMPBVKO8I5-5",
+						// 					"seller_sku": "BMPBVKO8I5-5",
+						// 					"compare_at_price": 79.66,
+						// 					"is_continue_sell": 0,
+						// 					"available_quantity": 24,
+						// 					"title": "2XL",
+						// 					"price": 37.68,
+						// 					"image": null,
+						// 					"position": 5,
+						// 					"attributes": [
+						// 						{
+						// 							"label": "2XL",
+						// 							"id": "2XL",
+						// 							"text": "2XL",
+						// 							"value_index": 122,
+						// 							"code": "size"
+						// 						}
+						// 					],
+						// 					"is_enabled": true,
+						// 					"taxable": true,
+						// 					"weight": null,
+						// 					"weight_unit": null,
+						// 					"requires_shipping": true,
+						// 					"stock": 11
+						// 				},
+						// 				{
+						// 					"id": 125123230,
+						// 					"_id": 0,
+						// 					"product_id": 3606448,
+						// 					"sku": "BMPBVKO8I5-6",
+						// 					"seller_sku": "BMPBVKO8I5-6",
+						// 					"compare_at_price": 79.66,
+						// 					"is_continue_sell": 0,
+						// 					"available_quantity": 25,
+						// 					"title": "3XL",
+						// 					"price": 37.68,
+						// 					"image": null,
+						// 					"position": 6,
+						// 					"attributes": [
+						// 						{
+						// 							"label": "3XL",
+						// 							"id": "3XL",
+						// 							"text": "3XL",
+						// 							"value_index": 129,
+						// 							"code": "size"
+						// 						}
+						// 					],
+						// 					"is_enabled": true,
+						// 					"taxable": true,
+						// 					"weight": null,
+						// 					"weight_unit": null,
+						// 					"requires_shipping": true,
+						// 					"stock": 11
+						// 				},
+						// 				{
+						// 					"id": 125123232,
+						// 					"_id": 0,
+						// 					"product_id": 3606448,
+						// 					"sku": "BMPBVKO8I5-7",
+						// 					"seller_sku": "BMPBVKO8I5-7",
+						// 					"compare_at_price": 79.66,
+						// 					"is_continue_sell": 0,
+						// 					"available_quantity": 25,
+						// 					"title": "4XL",
+						// 					"price": 39.99,
+						// 					"image": null,
+						// 					"position": 7,
+						// 					"attributes": [
+						// 						{
+						// 							"label": "4XL",
+						// 							"id": "4XL",
+						// 							"text": "4XL",
+						// 							"value_index": 137,
+						// 							"code": "size"
+						// 						}
+						// 					],
+						// 					"is_enabled": true,
+						// 					"taxable": true,
+						// 					"weight": null,
+						// 					"weight_unit": null,
+						// 					"requires_shipping": true,
+						// 					"stock": 11
+						// 				},
+						// 				{
+						// 					"id": 125123234,
+						// 					"_id": 0,
+						// 					"product_id": 3606448,
+						// 					"sku": "BMPBVKO8I5-8",
+						// 					"seller_sku": "BMPBVKO8I5-8",
+						// 					"compare_at_price": 79.66,
+						// 					"is_continue_sell": 0,
+						// 					"available_quantity": 25,
+						// 					"title": "5XL",
+						// 					"price": 41.69,
+						// 					"image": null,
+						// 					"position": 8,
+						// 					"attributes": [
+						// 						{
+						// 							"label": "5XL",
+						// 							"id": "5XL",
+						// 							"text": "5XL",
+						// 							"value_index": 146,
+						// 							"code": "size"
+						// 						}
+						// 					],
+						// 					"is_enabled": true,
+						// 					"taxable": true,
+						// 					"weight": null,
+						// 					"weight_unit": null,
+						// 					"requires_shipping": true,
+						// 					"stock": 11
+						// 				}
+						// 			],
+						// 			"categories": [
+						// 				17,
+						// 				262
+						// 			],
+						// 			"product_options": [
+						// 				{
+						// 					"position": 0,
+						// 					"label": "size",
+						// 					"attribute_code": "size",
+						// 					"swatcherType": "text",
+						// 					"values": [
+						// 						{
+						// 							"id": "S",
+						// 							"text": "S",
+						// 							"value_index": 104,
+						// 							"label": "S"
+						// 						},
+						// 						{
+						// 							"id": "M",
+						// 							"text": "M",
+						// 							"value_index": 107,
+						// 							"label": "M"
+						// 						},
+						// 						{
+						// 							"id": "L",
+						// 							"text": "L",
+						// 							"value_index": 111,
+						// 							"label": "L"
+						// 						},
+						// 						{
+						// 							"id": "XL",
+						// 							"text": "XL",
+						// 							"value_index": 116,
+						// 							"label": "XL"
+						// 						},
+						// 						{
+						// 							"id": "2XL",
+						// 							"text": "2XL",
+						// 							"value_index": 122,
+						// 							"label": "2XL"
+						// 						},
+						// 						{
+						// 							"id": "3XL",
+						// 							"text": "3XL",
+						// 							"value_index": 129,
+						// 							"label": "3XL"
+						// 						},
+						// 						{
+						// 							"id": "4XL",
+						// 							"text": "4XL",
+						// 							"value_index": 137,
+						// 							"label": "4XL"
+						// 						},
+						// 						{
+						// 							"id": "5XL",
+						// 							"text": "5XL",
+						// 							"value_index": 146,
+						// 							"label": "5XL"
+						// 						}
+						// 					],
+						// 					"type": "selector"
+						// 				}
+						// 			],
+						// 			"is_personalization": 0,
+						// 			"handmade": 0,
+						// 			"made_to_order": 0,
+						// 			"personalization_optional": 0,
+						// 			"personalization_description": "",
+						// 			"processing_time": 7,
+						// 			"approved_by": null,
+						// 			"zone_id": 21606,
+						// 			"created_at": "2023-09-13T10:16:22.000000Z",
+						// 			"_media_gallery": [
+						// 				{
+						// 					"id": 6615552,
+						// 					"url": "https://cdn.inspireuplift.com/uploads/images/seller_products/1694600149_new-jordan-love-bay-10-packers-2023-24-green-jersey-print-fanmade-shirt1.jpeg",
+						// 					"alt": "new-jordan-love-bay-10-packers-2023-24-green-jersey-print-fanmade-shirt (1).jpeg"
+						// 				},
+						// 				{
+						// 					"id": 6615553,
+						// 					"url": "https://cdn.inspireuplift.com/uploads/images/seller_products/1694600150_new-jordan-love-bay-10-packers-2023-24-green-jersey-print-fanmade-shirt.jpeg",
+						// 					"alt": "new-jordan-love-bay-10-packers-2023-24-green-jersey-print-fanmade-shirt.jpeg"
+						// 				},
+						// 				{
+						// 					"id": 6615587,
+						// 					"url": "https://cdn.inspireuplift.com/uploads/images/seller_products/1694600178_football-jersey.jpeg",
+						// 					"alt": "football-jersey.jpeg"
+						// 				},
+						// 				{
+						// 					"id": 6615585,
+						// 					"url": "https://cdn.inspireuplift.com/uploads/images/seller_products/1694600177_1689827303_DJu3ws.jpeg",
+						// 					"alt": "1689827303_DJu3ws.jpeg"
+						// 				},
+						// 				{
+						// 					"id": 6615586,
+						// 					"url": "https://cdn.inspireuplift.com/uploads/images/seller_products/1694600178_1692537798_c7xRTQ.png",
+						// 					"alt": "1692537798_c7xRTQ.png"
+						// 				}
+						// 			],
+						// 			"gallery_id": 3676061,
+						// 			"printful_product": false,
+						// 			"hasVariants": true,
+						// 			"hasProductOptions": false,
+						// 			"bought_with_products": []
+						// 		}
+						// 	]
+						// }
 						return await Promise.all(
 							map(items, (item) => {
-								const itemID = item?.itemID;
+								console.log('item: ', item);
+								const productId = item?.productId;
 								const itemName = item?.itemName;
-								if (!itemID || !itemName) {
+								if (!productId || !itemName) {
 									setErrorMsg('Cannot find item, try again');
 									throw 'Cannot find item, try again';
 								}
@@ -242,17 +647,14 @@ export default function ({ Identifier }: any) {
 									.then((response) => response.json())
 									.then((response) => {
 										const itemInfo = find(get(response, ['data', 'data'], []), (itemInfo) => {
-											return get(itemInfo, 'product_id') === itemID;
+											return get(itemInfo, 'product_id') === productId;
 										});
-										if (!itemInfo) {
+										const itemId = get(itemInfo, 'id', '')
+										if (!itemId) {
 											return Promise.resolve(null)
 										}
 										return fetch(
-											`https://sellercentral-api.inspireuplift.com/api/v1/seller/marketplace/products/${get(
-												itemInfo,
-												'id',
-												''
-											)}?is_seller=true`,
+											`https://sellercentral-api.inspireuplift.com/api/v1/seller/marketplace/products/${itemId}?is_seller=true`,
 											{
 												headers: {
 													accept: 'application/json',
@@ -286,13 +688,13 @@ export default function ({ Identifier }: any) {
 						})
 					})
 					.then((items) => {
-						if (findIndex(items, (item) => !item) >= 0) {
+						if (findIndex(items, (item) => !item) >= 0 || !Array.isArray(items) || !items.length) {
 							const newOrder = map(orders, (o) => {
 								return order.id === o.id
 									? {
-											...o,
-											ErrorMsg: 'Cannot find items, pls import in order detail page',
-									  }
+										...o,
+										ErrorMsg: 'Cannot find items, or item has been deleted. Pls import in order detail page',
+									}
 									: o;
 							});
 							setSuccessMsg('');
@@ -347,11 +749,10 @@ export default function ({ Identifier }: any) {
 						return new Promise((resolve, reject) => {
 							const settings = {
 								method: 'POST',
-								url: `${
-									currentDocker?.domain
-										? `https://api-${currentDocker?.domain}.${currentDocker?.server}/api/v1/order/create`
-										: '/api/order/create'
-								}`,
+								url: `${currentDocker?.domain
+									? `${urlRestApi}/order/create`
+									: '/api/order/create'
+									}`,
 								data: orderDataForSync,
 								timeout: 0,
 								headers: {
@@ -400,7 +801,7 @@ export default function ({ Identifier }: any) {
 						</tr>
 					</thead>
 					<tbody>
-						{map(orders, (order) => {
+						{map(orders, (order, index) => {
 							const orderSyns = find(
 								ordersSync,
 								(oS) => String(oS.external_number) === String(get(order, 'order_number', ''))
@@ -432,14 +833,14 @@ export default function ({ Identifier }: any) {
 								default:
 							}
 							color = order?.ErrorMsg ? 'danger' : color;
-							return (
-								<tr>
-									<td>
+							return [
+								<tr key={get(order, 'order_number', '') + index}>
+									<td rowSpan={order?.ErrorMsg  ? 2 : 1}>
 										<input
 											type='checkbox'
-											checked={order.checked}
+											checked={!!order.checked}
 											value={get(order, 'order_number', '')}
-											onChange={() =>
+											onChange={(e) =>
 												setOrders(
 													map(orders, (o) =>
 														order.order_number === o.order_number ? { ...o, checked: !order.checked } : o
@@ -448,7 +849,7 @@ export default function ({ Identifier }: any) {
 											}
 										/>
 									</td>
-									<td>
+									<td className={`${order?.ErrorMsg ? 'border-bottom-none' : ''}`}>
 										<strong
 											className='cursor-pointer'
 											onClick={() =>
@@ -461,9 +862,8 @@ export default function ({ Identifier }: any) {
 										>
 											{get(order, 'order_number', '')}-{get(order, 'seller_order_number', '')}
 										</strong>
-										{order?.ErrorMsg ? <p className='text-danger'>{order?.ErrorMsg}</p> : false}
 									</td>
-									<td className='text-center'>
+									<td className={`text-center ${order?.ErrorMsg ? 'border-bottom-none' : ''}`}>
 										{LoadingStatus ? (
 											<Spinner />
 										) : (
@@ -472,7 +872,7 @@ export default function ({ Identifier }: any) {
 											</span>
 										)}
 									</td>
-									<td className='text-center'>
+									<td className={`text-center ${order?.ErrorMsg ? 'border-bottom-none' : ''}`}>
 										{orderSyns ? (
 											false
 										) : (
@@ -489,8 +889,16 @@ export default function ({ Identifier }: any) {
 											</Button>
 										)}
 									</td>
-								</tr>
-							);
+								</tr>,
+								(() => {
+									return order?.ErrorMsg ? <tr key={get(order, 'order_number', '') + index + 'noti'}>
+										<td colSpan={3}>
+											<p className='text-danger text-right mb-1'>{order?.ErrorMsg}</p>
+										</td>
+									</tr>
+										: false
+								})()
+							]
 						})}
 					</tbody>
 				</Table>

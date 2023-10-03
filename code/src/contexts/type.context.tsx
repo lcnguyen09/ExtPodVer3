@@ -65,3 +65,7 @@ export type ACTION =
         type: "SET_URL_GRAPHQL"
         urlGraphql: string
     }
+    | {
+        type: "SET_URL_REST_API"
+        urlRestApi: string
+    }

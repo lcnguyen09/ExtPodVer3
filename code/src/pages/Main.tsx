@@ -13,7 +13,7 @@ export default function Main() {
 	}, [window.location.host])
 
 	// return <NomalItem />
-	if (site === 'sellercentral.inspireuplift.com' || true) {
+	if (site === 'sellercentral.inspireuplift.com') {
 		return <Inspireuplift />
 	}
 	return <></>

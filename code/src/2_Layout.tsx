@@ -1,13 +1,24 @@
 import { ReactNode, useEffect } from 'react';
-import { Card, CardBody, CardHeader, CardTitle, Collapse, Spinner } from 'reactstrap';
+import { Card, CardBody, CardHeader, CardTitle, Spinner } from 'reactstrap';
 import { Maximize2, Minimize2, ChevronsDown, ChevronsUp } from 'react-feather';
 import UiContext from './contexts/ui.context';
 import NavUser from './components/NavUser';
 import $ from 'jquery';
-import { filter } from 'lodash';
+import { filter, find } from 'lodash';
 
 export default function Layout({ children }: { children: ReactNode }) {
-  const { appMode, appLoading, appHide, windowView, setWindowView, currentToken, currentDocker } = UiContext.UseUIContext();
+    const {
+        appLoading,
+        appHide,
+        windowView,
+        setWindowView,
+        currentToken,
+        currentUser,
+        currentDocker,
+        setCurrentDocker,
+        setGraphqlForHub,
+        setUrlRestApi,
+    } = UiContext.UseUIContext();
 
     useEffect(() => {
         filter(
@@ -19,7 +30,18 @@ export default function Layout({ children }: { children: ReactNode }) {
         );
     }, [window.location.host]);
 
-    useEffect(() => { });
+    useEffect(() => {
+        if (currentDocker?._id && currentUser?.docker) {
+            setCurrentDocker(find(currentUser?.docker, (docker) => String(docker?._id) === String(currentDocker?._id)));
+        }
+    }, [currentDocker?._id, currentUser?.docker]);
+
+    useEffect(() => {
+        if (currentDocker?.domain) {
+            setGraphqlForHub();
+            setUrlRestApi();
+        }
+    }, [currentDocker]);
 
     return (
         <>
@@ -71,8 +93,8 @@ export default function Layout({ children }: { children: ReactNode }) {
                         ) : (
                             <>{children}</>
                         )}
-                        {(!currentDocker?._id && currentToken?.token && appMode !== 'dev') && (
-                            <div className='position-absolute w-100 h-100 top-0 bottom-0 start-0 end-0 d-flex justify-content-center align-items-center overlay-div'>
+                        {!currentDocker?._id && currentToken?.token && (
+                            <div className='position-absolute w-100 h-100 top-0 bottom-0 start-0 end-0 d-flex justify-content-center align-items-center overlay-div overlay-div-write text-danger'>
                                 Pick your hub first
                             </div>
                         )}

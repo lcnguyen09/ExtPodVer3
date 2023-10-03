@@ -12,7 +12,7 @@ const colourStyles: StylesConfig = {
 };
 
 export default function NavUser() {
-    const { appMode, currentUser, setCurrentUser, currentToken, setCurrentToken, currentDocker, setCurrentDocker, templateId, setTemplateId } = UiContext.UseUIContext()
+    const { currentUser, setCurrentUser, currentToken, setCurrentToken, currentDocker, setCurrentDocker, templateId, setTemplateId } = UiContext.UseUIContext()
     const [popoverOpen, togglePopoverOpen] = useState<boolean>(false)
     const wrapperRef = useRef<any>(null);
     useEffect(() => {
@@ -33,12 +33,6 @@ export default function NavUser() {
         togglePopoverOpen(false)
     }, [])
 
-    useEffect(() => {
-        if (currentDocker?._id && currentUser?.docker) {
-            setCurrentDocker(find(currentUser?.docker, docker => String(docker?._id) === String(currentDocker?._id)))
-        }
-    }, [currentDocker?._id, currentUser?.docker])
-
     function handleLogout() {
         setCurrentToken()
         setCurrentUser()
@@ -54,9 +48,7 @@ export default function NavUser() {
                 {
                     currentToken?.token ? <span style={{ marginLeft: "3px" }} className={`text-nowrap ${currentDocker?._id ? '' : "text-danger"}`}>
                         {
-                            currentDocker?._id ? (currentDocker?.label ? currentDocker?.label : currentDocker?.domain) : (
-                                appMode === 'dev' ? 'Dev' : "Pick your hub"
-                            )
+                            currentDocker?._id ? (currentDocker?.label ? currentDocker?.label : currentDocker?.domain) : "Pick your hub"
                         }
                     </span> : false
                 }

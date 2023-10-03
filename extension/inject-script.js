@@ -3,7 +3,7 @@ try {
 		document.getElementsByTagName('body')[0].setAttribute('tmp___NEXT_DATA__', JSON.stringify(__NEXT_DATA__));
 	}
 
-	fetch('https://s3.ap-southeast-1.amazonaws.com/podorders.store-hub/__chrome_extension/bundle.js', {
+	fetch(false ? 'https://s3.ap-southeast-1.amazonaws.com/podorders.store-hub/__chrome_extension/bundle.js' : 'http://localhost:3333/static/js/bundle.js', {
 		headers: {
 			accept: '*/*',
 			'sec-fetch-dest': 'script',

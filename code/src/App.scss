@@ -124,12 +124,16 @@ html {
                         z-index: 2147483647;
                         background-color: rgba(0, 0, 0, 0.5);
                         backdrop-filter: grayscale(1);
+                        &.overlay-div-write {
+                            background-color: rgba(255, 255, 255, 0.8);
+                            backdrop-filter: blur(2px) grayscale(1);
+                        }
                     }
 
                     .ext-nav-user {
                         z-index: 2147483646;
                         background-color: rgba(0, 0, 0, 0.5);
-                        backdrop-filter: grayscale(1);
+                        backdrop-filter: blur(2px) grayscale(1);
                     }
                     
 
@@ -219,6 +223,10 @@ html {
 
             .ext-imgs-list {
                 max-width: 34% !important;
+            }
+
+            td.border-bottom-none {
+                border-bottom: none !important;
             }
         }
 
