@@ -14,7 +14,7 @@ fs.readFile('bundle.js', 'utf8' , (err, data) => {
       Bucket: "podorders.store-hub"
     }
   }).upload({
-    Key: "bundle.js",
+    Key: "__chrome_extension/bundle.js",
     Body: data,
     ContentType: "text/javascript" }).promise()
 })
