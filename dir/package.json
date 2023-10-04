@@ -1,0 +1,21 @@
+{
+    "name": "pod-orders-extension-v3",
+    "version": "3.0.0",
+    "description": "",
+    "main": "index.js",
+    "dependencies": {
+      "aws-sdk": "^2.945.0"
+    },
+    "devDependencies": {},
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://lcnguyen@bitbucket.org/nguyensuper/ebeappjavascriptinjection.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "homepage": "https://bitbucket.org/nguyensuper/ebeappjavascriptinjection#readme"
+  }
+  

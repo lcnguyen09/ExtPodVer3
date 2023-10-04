@@ -6,22 +6,23 @@ import { useItemsInfoLazyQuery } from '../../../graphql/graphql';
 import Notification from './../../../components/Notification';
 import BottomBar from './../../../components/BottomBar';
 import $ from 'jquery';
-import {
-	filter,
-	find,
-	flatMapDeep,
-	get,
-	head,
-	map,
-	startsWith,
-	toLower,
-	toUpper,
-	trim,
-} from 'lodash';
+import { filter, find, flatMapDeep, get, head, map, startsWith, toLower, toUpper, trim } from 'lodash';
 
 export default function (Identifier: any) {
-	const { appMode, sleep, movingOnElm, fillTextInput, fillTextArea, fillSelect, fillCheckbox, clickButton, clickXButton, fillInputFile } =
-		UiContext.UseUIContext();
+	const {
+		appMode,
+		sleep,
+		movingOnElm,
+		fillTextInput,
+		fillTextArea,
+		fillSelect,
+		fillCheckbox,
+		clickButton,
+		clickXButton,
+		fillInputFile,
+		urlGraphql,
+		setGraphqlForHub,
+	} = UiContext.UseUIContext();
 
 	const [itemsInfoQuery] = useItemsInfoLazyQuery({ fetchPolicy: 'network-only' });
 
@@ -59,23 +60,27 @@ export default function (Identifier: any) {
 
 	const handleClearData = async () => {
 		return new Promise(async (resolve, reject) => {
-			let timeout = 0
+			let timeout = 0;
 			if ($(`img[src="/images/icons/cancel-icon.svg"]`).length) {
 				const promisesAttrClear: any = [];
 				timeout = 0;
 				filter($(`img[src="/images/icons/cancel-icon.svg"]`), (index: number) => {
 					timeout += 2000;
-					promisesAttrClear.push(new Promise(async (resolve, reject) => {
-						await sleep(timeout);
-						await clickButton(`img[src="/images/icons/cancel-icon.svg"]`);
-						return resolve(true);
-					}));
+					promisesAttrClear.push(
+						new Promise(async (resolve, reject) => {
+							await sleep(timeout);
+							await clickButton(`img[src="/images/icons/cancel-icon.svg"]`);
+							return resolve(true);
+						})
+					);
 					timeout += 3000;
-					promisesAttrClear.push(new Promise(async (resolve, reject) => {
-						await sleep(timeout);
-						await clickButton(`button.rrt-ok-btn`)
-						return resolve(true);
-					}));
+					promisesAttrClear.push(
+						new Promise(async (resolve, reject) => {
+							await sleep(timeout);
+							await clickButton(`button.rrt-ok-btn`);
+							return resolve(true);
+						})
+					);
 				});
 				await Promise.allSettled(promisesAttrClear);
 				await sleep(1000);
@@ -86,28 +91,36 @@ export default function (Identifier: any) {
 				timeout = 0;
 				filter($(`img[src="/images/icons/red-cross.svg"]`), (index: number) => {
 					timeout += 500;
-					promisesImgClear.push(new Promise(async (resolve, reject) => {
-						await sleep(timeout);
-						await clickButton(`img[src="/images/icons/red-cross.svg"]`);
-						return resolve(true);
-					}));
+					promisesImgClear.push(
+						new Promise(async (resolve, reject) => {
+							await sleep(timeout);
+							await clickButton(`img[src="/images/icons/red-cross.svg"]`);
+							return resolve(true);
+						})
+					);
 				});
 				await Promise.allSettled(promisesImgClear);
 				await sleep(3000);
 			}
 
-
-			resolve(true)
-		})
-
-	}
+			resolve(true);
+		});
+	};
 
 	const handleFillData = async () => {
-		let timeout = 0
-		setErrorMsg("")
-		setSuccessMsg("")
-		setOnFillData(true)
+		let timeout = 0;
+		setErrorMsg('');
+		setSuccessMsg('');
+		setOnFillData(true);
 		console.log(itemInfo);
+		if (get(itemInfo, 'name', '').length > 120) {
+			setErrorMsg('Item title is too long');
+		}
+
+		if (get(itemInfo, 'description', '').length > 3000) {
+			setErrorMsg('Item description is too long');
+		}
+
 		let minPrice = parseFloat(itemInfo?.price);
 		let maxPrice = parseFloat(itemInfo?.price);
 		const prices = map(itemInfo?.attribute_specifics_modify, (attribute_specifics) =>
@@ -117,48 +130,58 @@ export default function (Identifier: any) {
 			minPrice = Math.min.apply(Math, prices);
 			maxPrice = Math.max.apply(Math, prices);
 		}
-		let titleReplace = get(itemInfo, "name", "")
-		titleReplace = titleReplace.replace(/(\[Your Company Name\])/g, "")
+		let titleReplace = get(itemInfo, 'name', '');
+		titleReplace = titleReplace.replace(/(\[Your Company Name\])/g, '');
 
-		let description = get(itemInfo, "description", "")
-		description = description.replace(/PRODUCT_HEADER/g, "")
-		description = description.replace(/PRODUCT_FOOTER/g, "")
-		description = description.replace(/{{PRODUCT_TITLE}}/g, get(itemInfo, "name", ""))
-		description = description.replace(/{{PRODUCT_NAME}}/g, get(itemInfo, "name", ""))
-		description = description.replace(/PRODUCT_NAME/g, get(itemInfo, "name", ""))
+		let description = get(itemInfo, 'description', '');
+		description = description.replace(/PRODUCT_HEADER/g, '');
+		description = description.replace(/PRODUCT_FOOTER/g, '');
+		description = description.replace(/{{PRODUCT_TITLE}}/g, get(itemInfo, 'name', ''));
+		description = description.replace(/{{PRODUCT_NAME}}/g, get(itemInfo, 'name', ''));
+		description = description.replace(/PRODUCT_NAME/g, get(itemInfo, 'name', ''));
 
-		let pictures = flatMapDeep(get(itemInfo, "images", []), img => get(img, "src", ""))
-		if (itemInfo.include_size_chart && itemInfo.size_chart && itemInfo.size_chart !== "" && itemInfo.size_chart !== null && startsWith(itemInfo.size_chart, "http")) {
-			pictures = [
-				...pictures,
-				itemInfo.size_chart
-			]
+		let pictures = flatMapDeep(get(itemInfo, 'images', []), (img) => get(img, 'src', ''));
+		if (
+			itemInfo.include_size_chart &&
+			itemInfo.size_chart &&
+			itemInfo.size_chart !== '' &&
+			itemInfo.size_chart !== null &&
+			startsWith(itemInfo.size_chart, 'http')
+		) {
+			pictures = [...pictures, itemInfo.size_chart];
 		}
 		if (itemInfo.include_extend_images && itemInfo.extend_images && Array.isArray(itemInfo.extend_images)) {
 			pictures = [
 				...pictures,
-				...map(filter(itemInfo.extend_images, image => {
-					return image.src && image.src !== "" && image.src !== null && startsWith(image.src, "http")
-				}), image => {
-					return image.src
-				})
-			]
+				...map(
+					filter(itemInfo.extend_images, (image) => {
+						return image.src && image.src !== '' && image.src !== null && startsWith(image.src, 'http');
+					}),
+					(image) => {
+						return image.src;
+					}
+				),
+			];
 		}
 
 		const dispatchTime = get(itemInfo, ['shipping_preset_info', 'dispatch_time_max'], 5);
 
-		const platform_category = get(find(itemInfo?.platform_category, pcate => {
-			return pcate?.type === "Inspireuplift"
-		}), 'category_selected', [])
+		const platform_category = get(
+			find(itemInfo?.platform_category, (pcate) => {
+				return pcate?.type === 'Inspireuplift';
+			}),
+			'category_selected',
+			[]
+		);
 
 		if (!platform_category.length) {
-			setErrorMsg("The product does not belong to any category, please set up a category")
+			setErrorMsg('The product does not belong to any category, please set up a category');
 		}
 
-		await handleClearData()
+		await handleClearData();
 
 		await fillTextInput(`input#product-title[name="title"]`, titleReplace);
-		await fillTextArea(`textarea`, description)
+		await fillTextArea(`textarea`, description);
 		await fillTextInput(`input#product-price[name="price"]`, minPrice);
 		await fillSelect(`select[name="zone_id"]`, 'World Wide');
 		await fillSelect(`select[name="processing_time"]`, dispatchTime + ' days');
@@ -213,7 +236,6 @@ export default function (Identifier: any) {
 			? itemInfo?.attribute_specifics_modify.length
 			: 9;
 		await fillTextInput(`input#product-available-inventory`, quantity ? quantity : 1);
-
 
 		const promises: any = [];
 		timeout = 0;
@@ -301,57 +323,65 @@ export default function (Identifier: any) {
 			await sleep(500);
 		}
 
-		await sleep(2000)
+		await sleep(2000);
 		await fillInputFile(`input[type="file"]:not([id*="my-image-file"])`, pictures);
-		setOnFillData(false)
+		setOnFillData(false);
 
 		if (autoSave) {
-			let count = 0
+			let count = 0;
 			const intVal = setInterval(async () => {
 				if ($(`.get-files-primary .main-img-container`).length === pictures.length) {
-					setSuccessMsg("Saving...")
-					await sleep(2000)
+					setSuccessMsg('Saving...');
+					await sleep(2000);
 					await clickXButton(`//button/span[text()="Save"]`);
-					clearInterval(intVal)
-				} else if ($(`.get-files-primary .main-img-container`).length && $(`.get-files-primary .main-img-container`).length !== pictures.length) {
-					count++
+					clearInterval(intVal);
+				} else if (
+					$(`.get-files-primary .main-img-container`).length &&
+					$(`.get-files-primary .main-img-container`).length !== pictures.length
+				) {
+					count++;
 					if (count > 5) {
-						return setErrorMsg("Image upload failed, please check again then click save product")
+						return setErrorMsg('Image upload failed, please check again then click save product');
 					}
 				}
-			}, 500)
-			return setSuccessMsg("Fill data done. Wait for photo to upload")
+			}, 500);
+			return setSuccessMsg('Fill data done. Wait for photo to upload');
 		}
-		setSuccessMsg("Fill data done.")
+		setSuccessMsg('Fill data done.');
 	};
 
 	const handleGetItemData = () => {
 		if (!itemId) {
-			return
+			return;
 		}
-		setLoading(true)
+		setLoading(true);
 		return new Promise((resolve, reject) => {
-			itemsInfoQuery({
-				variables: {
-					identity: itemId,
-				},
-				fetchPolicy: 'network-only',
-			}).then((response) => {
-				const itemInfoResponse = head(get(response, ['data', 'itemsInfo']));
-				if (
-					!Array.isArray(get(itemInfoResponse, 'prety_attributes', [])) ||
-					get(itemInfoResponse, 'prety_attributes', []).length > 3
-				) {
-					return setErrorMsg('Too many variant');
-				}
-				setItemInfo(head(get(response, ['data', 'itemsInfo'])));
-				setLoading(false);
-				resolve(true)
-			}).catch(() => {
-				setErrorMsg('Fail to get item info');
-				setLoading(false);
-				reject(false)
-			})
+			setGraphqlForHub()
+				.then(() =>
+					itemsInfoQuery({
+						variables: {
+							identity: itemId,
+						},
+						fetchPolicy: 'network-only',
+					})
+				)
+				.then((response: any) => {
+					const itemInfoResponse = head(get(response, ['data', 'itemsInfo']));
+					if (
+						!Array.isArray(get(itemInfoResponse, 'prety_attributes', [])) ||
+						get(itemInfoResponse, 'prety_attributes', []).length > 3
+					) {
+						return setErrorMsg('Too many variant');
+					}
+					setItemInfo(head(get(response, ['data', 'itemsInfo'])));
+					setLoading(false);
+					resolve(true);
+				})
+				.catch(() => {
+					setErrorMsg('Fail to get item info');
+					setLoading(false);
+					reject(false);
+				});
 		});
 	};
 
@@ -375,39 +405,42 @@ export default function (Identifier: any) {
 					/>
 				</div>
 				<div className='text-center'>{itemInfo?.name}</div>
-				{
-					onFillData
-						? <div style={{
-							position: "fixed",
+				{onFillData ? (
+					<div
+						style={{
+							position: 'fixed',
 							top: 0,
 							bottom: 0,
 							left: 0,
 							right: 0,
-							zIndex: "2147483647 !important",
+							zIndex: '2147483647 !important',
 							background: '#6c757d52',
-							display: "flex",
-							justifyContent: "center",
-							alignItems: "center"
-						}}>
-							<Spinner color='info' />
-						</div> : false
-				}
-
+							display: 'flex',
+							justifyContent: 'center',
+							alignItems: 'center',
+						}}
+					>
+						<Spinner color='info' />
+					</div>
+				) : (
+					false
+				)}
 			</div>
 			<BottomBar>
 				<div className='d-flex justify-content-center align-items-center p-1'>
 					<Input
-						id="autoSave"
-						type="checkbox"
-						value="autoSave"
-						onChange={e => {
-							setAutoSave(e.target.checked)
-
+						id='autoSave'
+						type='checkbox'
+						value='autoSave'
+						onChange={(e) => {
+							setAutoSave(e.target.checked);
 						}}
 						checked={autoSave}
 						disabled={onFillData}
 					/>
-					<Label for="autoSave" className='pl-1'>Auto save</Label>
+					<Label for='autoSave' className='pl-1'>
+						Auto save
+					</Label>
 				</div>
 				<Button
 					size='xs'

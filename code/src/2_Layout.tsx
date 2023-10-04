@@ -1,6 +1,6 @@
 import { ReactNode, useEffect } from 'react';
 import { Card, CardBody, CardHeader, CardTitle, Spinner } from 'reactstrap';
-import { Maximize2, Minimize2, ChevronsDown, ChevronsUp } from 'react-feather';
+import { Maximize2, Minimize2, ChevronsDown, ChevronsUp, RotateCw } from 'react-feather';
 import UiContext from './contexts/ui.context';
 import NavUser from './components/NavUser';
 import $ from 'jquery';
@@ -9,6 +9,7 @@ import { filter, find } from 'lodash';
 export default function Layout({ children }: { children: ReactNode }) {
     const {
         appLoading,
+        setAppLoading,
         appHide,
         windowView,
         setWindowView,
@@ -29,19 +30,6 @@ export default function Layout({ children }: { children: ReactNode }) {
             (elm) => $(elm).css('z-index', 2147483500)
         );
     }, [window.location.host]);
-
-    useEffect(() => {
-        if (currentDocker?._id && currentUser?.docker) {
-            setCurrentDocker(find(currentUser?.docker, (docker) => String(docker?._id) === String(currentDocker?._id)));
-        }
-    }, [currentDocker?._id, currentUser?.docker]);
-
-    useEffect(() => {
-        if (currentDocker?.domain) {
-            setGraphqlForHub();
-            setUrlRestApi();
-        }
-    }, [currentDocker]);
 
     return (
         <>
@@ -66,6 +54,15 @@ export default function Layout({ children }: { children: ReactNode }) {
                         </a>
                     </CardTitle>
                     <div className='actions d-flex justify-content-end align-items-center'>
+                        <RotateCw cursor='pointer' size={13} onClick={() => {
+                            setAppLoading(true)
+                            window.postMessage(
+                                {
+                                    action: 'reLoadExt'
+                                },
+                                '*'
+                            )
+                        }}/>
                         {windowView === 'MAX' ? (
                             <Minimize2 cursor='pointer' className='mx-3' size={13} onClick={() => setWindowView('NOMAL')} />
                         ) : (

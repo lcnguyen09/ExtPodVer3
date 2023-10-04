@@ -26,31 +26,29 @@ export default function Router({ apolloClient }: { apolloClient?: any }) {
 		if (!currentToken?.token) {
 			return setCurrentUser();
 		}
-		setGraphqlForAccount().then(() => {
-			fetchCUserLazyQuery({ fetchPolicy: 'network-only' })
-				.then((res) => {
-					const me = res.data?.cUser;
-					if (!me?._id) throw new Error('Unauth');
-					fetchCurrentUserSuccess({
-						_id: me?._id,
-						email: me?.email,
-						first_name: head((me?.name || '').split(' ')),
-						last_name: drop((me?.name || '').split(' ')).join(' '),
-						fullname: me?.name || '',
-						docker: map(me?.auth_docker, (auth_docker) => {
-							return {
-								_id: auth_docker?.docker?._id,
-								domain: auth_docker?.docker?.domain,
-								label: auth_docker?.docker?.label,
-								server: auth_docker?.docker?.server,
-								sku: auth_docker?.docker?.sku,
-							};
-						}),
-					});
-				})
-				.catch(fetchCurrentUserFail);
-		})
-
+		setGraphqlForAccount()
+			.then(() => fetchCUserLazyQuery({ fetchPolicy: 'network-only' }))
+			.then((res: any) => {
+				const me = res.data?.cUser;
+				if (!me?._id) throw new Error('Unauth');
+				fetchCurrentUserSuccess({
+					_id: me?._id,
+					email: me?.email,
+					first_name: head((me?.name || '').split(' ')),
+					last_name: drop((me?.name || '').split(' ')).join(' '),
+					fullname: me?.name || '',
+					docker: map(me?.auth_docker, (auth_docker) => {
+						return {
+							_id: auth_docker?.docker?._id,
+							domain: auth_docker?.docker?.domain,
+							label: auth_docker?.docker?.label,
+							server: auth_docker?.docker?.server,
+							sku: auth_docker?.docker?.sku,
+						};
+					}),
+				});
+			})
+			.catch(fetchCurrentUserFail);
 	}
 
 	function fetchCurrentUserSuccess(currentUser: any) {

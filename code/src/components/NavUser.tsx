@@ -100,8 +100,8 @@ export default function NavUser() {
                     }
                 />
             </div>
-            {/* <div className='mb-3'>
-                <Label>Template ID: </Label>
+            <div className='mb-3'>
+                <Label>Template ID: <i>(For item crawl)</i></Label>
                 <Input
                     type="text"
                     placeholder="IT-01234-56789"
@@ -112,7 +112,7 @@ export default function NavUser() {
                     valid={false}
                     style={{ fontSize: "initial" }}
                 />
-            </div> */}
+            </div>
 
             <div className='d-inline-flex flex-wrap justify-content-end align-items-center w-100 mb-2'>
                 <NavLink className='d-inline-flex flex-wrap justify-content-end align-content-center align-items-center' style={{ cursor: "pointer", paddingRight: "0px" }} onClick={handleLogout}>

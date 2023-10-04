@@ -19,8 +19,8 @@ import { drop, head, map } from 'lodash';
 
 function Login() {
 	const [loading, setLoading]: [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(false);
-	const [email, setEmail]: [string, Dispatch<SetStateAction<string>>] = useState<string>('');
-	const [password, setPassword]: [string, Dispatch<SetStateAction<string>>] = useState<string>('');
+	const [email, setEmail]: [string, Dispatch<SetStateAction<string>>] = useState<string>(process.env.REACT_APP_APP_MODE === 'dev' ? 'lechinguyen09@gmail.com' : '');
+	const [password, setPassword]: [string, Dispatch<SetStateAction<string>>] = useState<string>(process.env.REACT_APP_APP_MODE === 'dev' ? 'abc123' : '');
 	const [errorMsg, setErrorMsg]: [string, Dispatch<SetStateAction<string>>] = useState<string>('');
 	const [pwdVisible, setPwdVisible]: [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(false);
 	const { setPageRoute, setCurrentUser, setCurrentToken } = UiContext.UseUIContext();

@@ -97,18 +97,16 @@ export const useStorage = (key: string): [string | null, (val: string) => void] 
 		window.postMessage(
 			{
 				action: 'storageGetRequest',
-				request: {key: key},
+				request: { key: key },
 			},
 			'*'
 		);
 
 		window.addEventListener('message', (event) => {
 			if (event?.data?.action === 'storageGetResponse' && event?.data.response?.key === key) {
-				setValue(event?.data.response?.value)
+				setValue(event?.data.response?.value);
 			}
 		});
-
-
 	}, []);
 
 	useEffect(() => {
@@ -118,7 +116,7 @@ export const useStorage = (key: string): [string | null, (val: string) => void] 
 					action: 'storageSetRequest',
 					request: {
 						key: key,
-						value: value
+						value: value,
 					},
 				},
 				'*'
@@ -193,35 +191,66 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		if (state.currentDocker?._id !== undefined) {
 			setDocker(state.currentDocker?._id);
 		}
-		setUrlGraphql(URL_ACCOUNT_GRAPHQL);
 		if (state.currentToken?.token !== undefined && !!!state.currentToken?.token) {
 			setPageRoute('LOGIN');
 		}
-	}, [
-		// eslint-disable-line
-		state.currentToken?.token,
-		state.currentUser,
-		state.currentDocker?._id,
-	]);
+	}, [state.currentToken?.token, state.currentUser, state.currentDocker?._id]);
+
+	useEffect(() => {
+		if (state.currentDocker?._id && state.currentUser?.docker) {
+			setCurrentDocker(
+				find(state.currentUser?.docker, (docker) => String(docker?._id) === String(state.currentDocker?._id))
+			);
+		}
+	}, [state.currentDocker?._id, state.currentUser?.docker]);
+
+	useEffect(() => {
+		if (state.currentDocker?.domain) {
+			setUrlRestApi();
+		}
+	}, [state.currentDocker]);
 
 	useEffect(() => {
 		setTemplateIdStorage(state.templateId);
 	}, [state.templateId]);
 
-	const setAppLoading = (appLoading: boolean) => dispatch({ type: 'SET_LOADING', appLoading });
-	const setAppHide = (appHide: boolean) => dispatch({ type: 'SET_APP_HIDE', appHide });
-	const setWindowView = (view: WINDOW_VIEWS | string) => dispatch({ type: 'SET_WINDOW_VIEW', view });
+	const setAppLoading = (appLoading: boolean) => {
+		dispatch({ type: 'SET_LOADING', appLoading });
+	};
+	const setAppHide = (appHide: boolean) => {
+		dispatch({ type: 'SET_APP_HIDE', appHide });
+	};
+	const setWindowView = (view: WINDOW_VIEWS | string) => {
+		dispatch({ type: 'SET_WINDOW_VIEW', view });
+	};
+	const setUrlGraphql = (urlGraphql: string) => {
+		dispatch({ type: 'SET_URL_GRAPHQL', urlGraphql });
+	};
+	const setGraphqlForAccount = async () => {
+		setUrlGraphql(URL_ACCOUNT_GRAPHQL);
+	};
+	const setGraphqlForHub = async () => {
+		setUrlGraphql(URL_GRAPHQL(state.currentDocker));
+	};
+	const setUrlRestApi = () => {
+		dispatch({ type: 'SET_URL_REST_API', urlRestApi: URL_REST_API(state.currentDocker) });
+	};
+	const setPageRoute = (page: PAGE_ROUTES) => {
+		dispatch({ type: 'SET_PAGE_ROUTE', page });
+	};
+	const setCurrentUser = (user?: CURRENT_USER) => {
+		dispatch({ type: 'SET_CURRENT_USER', user });
+	};
+	const setCurrentToken = (currentToken: TOKEN) => {
+		dispatch({ type: 'SET_CURRENT_TOKEN', currentToken });
+	};
+	const setCurrentDocker = (currentDocker?: DOCKER) => {
+		dispatch({ type: 'SET_CURRENT_DOCKER', currentDocker });
+	};
+	const setTemplateId = (templateId?: string) => {
+		dispatch({ type: 'SET_TEMPLATE_ID', templateId });
+	};
 
-	const setUrlGraphql = (urlGraphql: string) => dispatch({ type: 'SET_URL_GRAPHQL', urlGraphql });
-	const setGraphqlForAccount = async () => setUrlGraphql(URL_ACCOUNT_GRAPHQL);
-	const setGraphqlForHub = async () => setUrlGraphql(URL_GRAPHQL(state.currentDocker));
-	const setUrlRestApi = () => dispatch({ type: 'SET_URL_REST_API', urlRestApi: URL_REST_API(state.currentDocker) });
-
-	const setPageRoute = (page: PAGE_ROUTES) => dispatch({ type: 'SET_PAGE_ROUTE', page });
-	const setCurrentUser = (user?: CURRENT_USER) => dispatch({ type: 'SET_CURRENT_USER', user });
-	const setCurrentToken = (currentToken: TOKEN) => dispatch({ type: 'SET_CURRENT_TOKEN', currentToken });
-	const setCurrentDocker = (currentDocker?: DOCKER) => dispatch({ type: 'SET_CURRENT_DOCKER', currentDocker });
-	const setTemplateId = (templateId?: string) => dispatch({ type: 'SET_TEMPLATE_ID', templateId });
 	const $x = (xpath: any) => {
 		let results = [];
 		let query = document.evaluate(xpath, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
