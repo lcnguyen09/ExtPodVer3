@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Input, Label, Spinner } from 'reactstrap';
+import { Button, Col, Input, Label, Row, Spinner } from 'reactstrap';
 import { PlusCircle } from 'react-feather';
 import UiContext from './../../../contexts/ui.context';
 import { useItemsInfoLazyQuery } from '../../../graphql/graphql';
@@ -111,16 +111,20 @@ export default function (Identifier: any) {
 		let timeout = 0;
 		setErrorMsg('');
 		setSuccessMsg('');
-		setOnFillData(true);
 		console.log(itemInfo);
+		let errorMsg = []
 		if (get(itemInfo, 'name', '').length > 120) {
-			setErrorMsg('Item title is too long');
+			errorMsg.push('Item title')
 		}
 
 		if (get(itemInfo, 'description', '').length > 3000) {
-			setErrorMsg('Item description is too long');
+			errorMsg.push('Item description')
 		}
 
+		if (errorMsg.length) {
+			return setErrorMsg(`${errorMsg.join('/')} is too long`);
+		}
+		setOnFillData(true);
 		let minPrice = parseFloat(itemInfo?.price);
 		let maxPrice = parseFloat(itemInfo?.price);
 		const prices = map(itemInfo?.attribute_specifics_modify, (attribute_specifics) =>
@@ -130,6 +134,14 @@ export default function (Identifier: any) {
 			minPrice = Math.min.apply(Math, prices);
 			maxPrice = Math.max.apply(Math, prices);
 		}
+		// let minBasePrice = parseFloat(itemInfo?.price);
+		// const basePrices = map(itemInfo?.attribute_specifics_modify, (attribute_specifics) =>
+		// 	parseFloat(attribute_specifics.base_price)
+		// );
+		// if (basePrices.length) {
+		// 	minBasePrice = Math.min.apply(Math, basePrices);
+		// }
+
 		let titleReplace = get(itemInfo, 'name', '');
 		titleReplace = titleReplace.replace(/(\[Your Company Name\])/g, '');
 
@@ -182,7 +194,7 @@ export default function (Identifier: any) {
 
 		await fillTextInput(`input#product-title[name="title"]`, titleReplace);
 		await fillTextArea(`textarea`, description);
-		await fillTextInput(`input#product-price[name="price"]`, minPrice);
+		await fillTextInput(`input#product-price[name="price"]`, minPrice.toFixed(2));
 		await fillSelect(`select[name="zone_id"]`, 'World Wide');
 		await fillSelect(`select[name="processing_time"]`, dispatchTime + ' days');
 		await fillCheckbox(`input#sell-stock[name="continueSelling"][type="checkbox"]`, true);
@@ -242,7 +254,7 @@ export default function (Identifier: any) {
 		filter([...determinedAttrs, ...undefinedAttrs], (prety_attribute, index: number) => {
 			filter(get(prety_attribute, 'options', []), (op, idx: number) => {
 				const promise = new Promise(async (resolve, reject) => {
-					timeout += 150;
+					timeout += 300;
 					await sleep(timeout);
 					await ($(`input.ReactTags__tagInputField:eq(${index})`).first() as any)?.focus();
 					await fillTextInput(`input.ReactTags__tagInputField:eq(${index})`, op?.plf_value);
@@ -387,8 +399,8 @@ export default function (Identifier: any) {
 
 	return (
 		<>
-			<Notification ErrorMsg={ErrorMsg} SuccessMsg={SuccessMsg} Loading={Loading} />
 			<h4 className='text-center'>Add item</h4>
+			<Notification ErrorMsg={ErrorMsg} SuccessMsg={SuccessMsg} Loading={Loading} />
 			<div className='mt-2'>
 				<div className='mb-3'>
 					<Label>Item ID: </Label>
@@ -404,7 +416,88 @@ export default function (Identifier: any) {
 						id='ext-item-id-input'
 					/>
 				</div>
-				<div className='text-center'>{itemInfo?.name}</div>
+				{
+					itemInfo
+						? <Row>
+							<Col sm={12} className='mt-2'>
+								<strong>Item name:</strong>
+							</Col>
+							<Col sm={12} className='mt-1'>
+								<div className='text-center'>{itemInfo?.name}</div>
+							</Col>
+						</Row>
+						: false
+				}
+
+				{
+					itemInfo
+						? <Row>
+							<Col sm={12} className='mt-2'>
+								<strong>Images:</strong>
+							</Col>
+							{map(
+								filter(
+									map(itemInfo?.images, ({ src }) => (startsWith(src, '//') ? window.location.protocol + src : src)),
+									(src) => !startsWith(src, 'data:image')
+								),
+								(img, index) => {
+									return (
+										<Col sm={4} className='mb-2 px-1 ext-imgs-list' key={index}>
+											<img
+												src={img}
+												alt={img}
+												width='100%'
+												height='100%'
+												className={`cursor-pointer border rounded border-3`}
+											/>
+										</Col>
+									);
+								}
+							)}
+							{
+								itemInfo?.include_size_chart &&
+									itemInfo?.size_chart &&
+									itemInfo?.size_chart !== '' &&
+									itemInfo?.size_chart !== null &&
+									startsWith(itemInfo?.size_chart, 'http')
+									? <Col sm={4} className='mb-2 px-1 ext-imgs-list'>
+										<img
+											src={itemInfo?.size_chart}
+											alt="Size chart"
+											width='100%'
+											height='100%'
+											className={`cursor-pointer border rounded border-3`}
+										/>
+									</Col>
+									: false
+							}
+							{
+								itemInfo?.include_extend_images && itemInfo?.extend_images && Array.isArray(itemInfo?.extend_images)
+									? map(
+										filter(
+											map(itemInfo?.extend_images, ({ src }) => (startsWith(src, '//') ? window.location.protocol + src : src)),
+											(src) => !startsWith(src, 'data:image')
+										),
+										(img, index) => {
+											return (
+												<Col sm={4} className='mb-2 px-1 ext-imgs-list' key={`extend-${index}`}>
+													<img
+														src={img}
+														alt={img}
+														width='100%'
+														height='100%'
+														className={`cursor-pointer border rounded border-3`}
+													/>
+												</Col>
+											);
+										}
+									)
+									: false
+							}
+
+						</Row>
+						: false
+				}
 				{onFillData ? (
 					<div
 						style={{

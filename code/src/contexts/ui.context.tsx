@@ -184,6 +184,14 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	}, [state.windowView]);
 
 	useEffect(() => {
+		if (state.appHide) {
+			$('body').addClass('podorder-ext-app-hide');
+		} else {
+			$('body').removeClass('podorder-ext-app-hide');
+		}
+	}, [state.appHide]);
+
+	useEffect(() => {
 		setAppLoading(state.currentToken?.token === undefined || state.currentUser === null);
 		if (state.currentToken?.token !== undefined) {
 			setToken(state.currentToken?.token);

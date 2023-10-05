@@ -249,5 +249,11 @@ html {
                 transition: height 0.25s ease-out;
             }
         }
+
+        &.podorder-ext-app-hide {
+            #podorder-ext-app {
+                display: none !important;
+            }
+        }
     }
 }
