@@ -32,8 +32,9 @@ export default function (Identifier: any) {
 	const [pathname, setPathname] = useState(window.location.pathname);
 
 	const [Loading, setLoading] = useState<boolean>(false);
-	const [ErrorMsg, setErrorMsg] = useState('');
-	const [SuccessMsg, setSuccessMsg] = useState('');
+	const [ErrorMsg, setErrorMsg] = useState<any>('');
+	const [SuccessMsg, setSuccessMsg] = useState<any>('');
+	const [WarningMsg, setWarningMsg] = useState<any>([]);
 
 	const [itemId, setItemId] = useState<string>('');
 	const [itemInfo, setItemInfo] = useState<any>();
@@ -111,18 +112,19 @@ export default function (Identifier: any) {
 		let timeout = 0;
 		setErrorMsg('');
 		setSuccessMsg('');
+		setWarningMsg([]);
 		console.log(itemInfo);
-		let errorMsg = []
+		let errorMsg = [];
 		if (get(itemInfo, 'name', '').length > 120) {
-			errorMsg.push('Item title')
+			errorMsg.push('Item title is too long');
 		}
 
 		if (get(itemInfo, 'description', '').length > 3000) {
-			errorMsg.push('Item description')
+			errorMsg.push('Item description is too long');
 		}
 
 		if (errorMsg.length) {
-			return setErrorMsg(`${errorMsg.join('/')} is too long`);
+			return setErrorMsg(errorMsg);
 		}
 		setOnFillData(true);
 		let minPrice = parseFloat(itemInfo?.price);
@@ -336,10 +338,19 @@ export default function (Identifier: any) {
 		}
 
 		await sleep(2000);
-		await fillInputFile(`input[type="file"]:not([id*="my-image-file"])`, pictures);
+		const resImg = await fillInputFile(`input[type="file"]:not([id*="my-image-file"])`, pictures);
+
+		const warningMsg = WarningMsg;
+		if (filter(resImg, (res) => res === false)) {
+			warningMsg.push('Image upload wrong, check again');
+		}
+		if (filter(resImg, (res) => res === 'webp')) {
+			warningMsg.push('Webp image not support, check again');
+		}
+		setWarningMsg(warningMsg);
 		setOnFillData(false);
 
-		if (autoSave) {
+		if (autoSave && warningMsg.length) {
 			let count = 0;
 			const intVal = setInterval(async () => {
 				if ($(`.get-files-primary .main-img-container`).length === pictures.length) {
@@ -353,11 +364,11 @@ export default function (Identifier: any) {
 				) {
 					count++;
 					if (count > 5) {
-						return setErrorMsg('Image upload failed, please check again then click save product');
+						return setErrorMsg('Some image upload failed, please check again then click save product');
 					}
 				}
 			}, 500);
-			return setSuccessMsg('Fill data done. Wait for photo to upload');
+			return setSuccessMsg('Fill data done.');
 		}
 		setSuccessMsg('Fill data done.');
 	};
@@ -400,7 +411,7 @@ export default function (Identifier: any) {
 	return (
 		<>
 			<h4 className='text-center'>Add item</h4>
-			<Notification ErrorMsg={ErrorMsg} SuccessMsg={SuccessMsg} Loading={Loading} />
+			<Notification ErrorMsg={ErrorMsg} SuccessMsg={SuccessMsg} WarningMsg={WarningMsg} Loading={Loading} />
 			<div className='mt-2'>
 				<div className='mb-3'>
 					<Label>Item ID: </Label>
@@ -416,88 +427,87 @@ export default function (Identifier: any) {
 						id='ext-item-id-input'
 					/>
 				</div>
-				{
-					itemInfo
-						? <Row>
-							<Col sm={12} className='mt-2'>
-								<strong>Item name:</strong>
-							</Col>
-							<Col sm={12} className='mt-1'>
-								<div className='text-center'>{itemInfo?.name}</div>
-							</Col>
-						</Row>
-						: false
-				}
+				{itemInfo ? (
+					<Row>
+						<Col sm={12} className='mt-2'>
+							<strong>Item name:</strong>
+						</Col>
+						<Col sm={12} className='mt-1'>
+							<div className='text-center'>{itemInfo?.name}</div>
+						</Col>
+					</Row>
+				) : (
+					false
+				)}
 
-				{
-					itemInfo
-						? <Row>
-							<Col sm={12} className='mt-2'>
-								<strong>Images:</strong>
-							</Col>
-							{map(
-								filter(
-									map(itemInfo?.images, ({ src }) => (startsWith(src, '//') ? window.location.protocol + src : src)),
-									(src) => !startsWith(src, 'data:image')
-								),
-								(img, index) => {
-									return (
-										<Col sm={4} className='mb-2 px-1 ext-imgs-list' key={index}>
-											<img
-												src={img}
-												alt={img}
-												width='100%'
-												height='100%'
-												className={`cursor-pointer border rounded border-3`}
-											/>
-										</Col>
-									);
-								}
-							)}
-							{
-								itemInfo?.include_size_chart &&
-									itemInfo?.size_chart &&
-									itemInfo?.size_chart !== '' &&
-									itemInfo?.size_chart !== null &&
-									startsWith(itemInfo?.size_chart, 'http')
-									? <Col sm={4} className='mb-2 px-1 ext-imgs-list'>
+				{itemInfo ? (
+					<Row>
+						<Col sm={12} className='mt-2'>
+							<strong>Images:</strong>
+						</Col>
+						{map(
+							filter(
+								map(itemInfo?.images, ({ src }) => (startsWith(src, '//') ? window.location.protocol + src : src)),
+								(src) => !startsWith(src, 'data:image')
+							),
+							(img, index) => {
+								return (
+									<Col sm={4} className='mb-2 px-1 ext-imgs-list' key={index}>
 										<img
-											src={itemInfo?.size_chart}
-											alt="Size chart"
+											src={img}
+											alt={img}
 											width='100%'
 											height='100%'
 											className={`cursor-pointer border rounded border-3`}
 										/>
 									</Col>
-									: false
+								);
 							}
-							{
-								itemInfo?.include_extend_images && itemInfo?.extend_images && Array.isArray(itemInfo?.extend_images)
-									? map(
-										filter(
-											map(itemInfo?.extend_images, ({ src }) => (startsWith(src, '//') ? window.location.protocol + src : src)),
-											(src) => !startsWith(src, 'data:image')
+						)}
+						{itemInfo?.include_size_chart &&
+						itemInfo?.size_chart &&
+						itemInfo?.size_chart !== '' &&
+						itemInfo?.size_chart !== null &&
+						startsWith(itemInfo?.size_chart, 'http') ? (
+							<Col sm={4} className='mb-2 px-1 ext-imgs-list'>
+								<img
+									src={itemInfo?.size_chart}
+									alt='Size chart'
+									width='100%'
+									height='100%'
+									className={`cursor-pointer border rounded border-3`}
+								/>
+							</Col>
+						) : (
+							false
+						)}
+						{itemInfo?.include_extend_images && itemInfo?.extend_images && Array.isArray(itemInfo?.extend_images)
+							? map(
+									filter(
+										map(itemInfo?.extend_images, ({ src }) =>
+											startsWith(src, '//') ? window.location.protocol + src : src
 										),
-										(img, index) => {
-											return (
-												<Col sm={4} className='mb-2 px-1 ext-imgs-list' key={`extend-${index}`}>
-													<img
-														src={img}
-														alt={img}
-														width='100%'
-														height='100%'
-														className={`cursor-pointer border rounded border-3`}
-													/>
-												</Col>
-											);
-										}
-									)
-									: false
-							}
-
-						</Row>
-						: false
-				}
+										(src) => !startsWith(src, 'data:image')
+									),
+									(img, index) => {
+										return (
+											<Col sm={4} className='mb-2 px-1 ext-imgs-list' key={`extend-${index}`}>
+												<img
+													src={img}
+													alt={img}
+													width='100%'
+													height='100%'
+													className={`cursor-pointer border rounded border-3`}
+												/>
+											</Col>
+										);
+									}
+							  )
+							: false}
+					</Row>
+				) : (
+					false
+				)}
 				{onFillData ? (
 					<div
 						style={{

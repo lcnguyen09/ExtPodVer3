@@ -3,6 +3,7 @@ import { WINDOW_VIEWS, PAGE_ROUTES, ACTION, TOKEN, CURRENT_USER, DOCKER } from '
 import { find, get, head } from 'lodash';
 import $ from 'jquery';
 import { APP_MODE, URL_ACCOUNT_GRAPHQL, URL_GRAPHQL, URL_REST_API } from './contants';
+import convertBlob from './function';
 import { Spinner } from 'reactstrap';
 import reactTriggerChange from './reacttrigger';
 
@@ -37,16 +38,6 @@ const initialState = {
 	currentDocker: null,
 	templateId: null,
 };
-
-function toDataUrl(url: string, callback: any) {
-	var xhr = new XMLHttpRequest();
-	xhr.onload = function () {
-		callback(xhr.response);
-	};
-	xhr.open('GET', url);
-	xhr.responseType = 'blob';
-	xhr.send();
-}
 
 function uiReducer(state: State, action: ACTION) {
 	switch (action.type) {
@@ -400,21 +391,49 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 			let elm = typeof selector === 'string' ? (head($(selector)) as any) : selector;
 			if (elm) {
 				const dT = new ClipboardEvent('').clipboardData || new DataTransfer();
-				await Promise.allSettled(
-					image.map((imgUrl, index) => {
-						return new Promise((resolve, reject) => {
+				return new Promise((resolve, reject) => {
+					const res: Array<any> = [];
+					const getImagesBlob = (index: number = 0) => {
+						const imgUrl = get(image, index);
+						if (imgUrl) {
 							try {
-								toDataUrl(imgUrl, async (x: any) => {
-									resolve(dT.items.add(new File([x], `my-image-${index}${imgUrl.substring(imgUrl.lastIndexOf('.'))}`)));
+								jQuery.ajax({
+									url: imgUrl,
+									cache: false,
+									xhr: function () {
+										// Seems like the only way to get access to the xhr object
+										var xhr = new XMLHttpRequest();
+										xhr.responseType = 'blob';
+										return xhr;
+									},
+									success: function (data) {
+										let fileExt = imgUrl.substring(imgUrl.lastIndexOf('.'));
+										dT.items.add(new File([data], `my-image-${index}${fileExt}`));
+										if (data?.type === 'image/webp') {
+											res.push('webp');
+										} else {
+											res.push(true);
+										}
+										return getImagesBlob(index + 1);
+									},
+									error: function (error) {
+										console.log('error: ', error);
+										res.push(false);
+										return getImagesBlob(index + 1);
+									},
 								});
 							} catch (error) {
-								resolve(false);
+								console.log('error2: ', error);
 							}
-						});
-					})
-				).then(async (imgs) => {
+						} else {
+							resolve(res);
+						}
+					};
+					getImagesBlob();
+				}).then(async (imgs: any) => {
 					elm.files = dT.files;
 					await reactTriggerChange(elm);
+					return imgs;
 				});
 			}
 		} catch (error) {
