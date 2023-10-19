@@ -13,7 +13,7 @@ try {
 		const loadExt = () => {
 			const time = new Date().getTime();
 			$.ajax({
-				url: true
+				url: false
 					? `https://s3.ap-southeast-1.amazonaws.com/podorders.store-hub/__chrome_extension/bundle.js?v=${time}`
 					: `http://localhost:3333/static/js/bundle.js?v=${time}`,
 			})
