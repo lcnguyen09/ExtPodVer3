@@ -7,411 +7,8 @@ import BottomBar from './../../../components/BottomBar';
 import $ from 'jquery';
 import { filter, find, findIndex, get, head, last, map, unionBy } from 'lodash';
 
-// if (isDetail()) {
-// 	// return await Promise.all(
-
-// 	// )
-// 	return [
-// 		{
-// 			"product_id": 3606448,
-// 			"sku": "BMPBVKO8I5",
-// 			"seller_sku": "BMPBVKO8I5",
-// 			"type": "configurable",
-// 			"title": "NEW! Jordan Love Bay 10 Packers 2023-24 Green Jersey Print Fanmade Shirt",
-// 			"video_url": null,
-// 			"video_thumbnail": null,
-// 			"description": "<div><strong>Product Information</strong></div>\n<div>&nbsp; &nbsp; &nbsp; All Over Print Football Jersey &ndash; V-Next Shirt<br />\n<ul>\n<li>High-quality materials without fading, cracking, peeling, or flaking vibrant colors that won&rsquo;t fade.</li>\n<li>Dry clean, hand, or machine wash are also acceptable.</li>\n<li>Dryer-safe without any fading, peeling, or wrinkling, quick-drying.</li>\n<li>Full US size from S to 5XL</li>\n<li>The product is made on demand. No minimum required.</li>\n<li>Made in Vietnam, in-house manufacturing</li>\n<li>Colors: As Design</li>\n<li>Sizes: S, M, L, XL, 2 XL, 3 XL, 4 XL, 5 XL</li>\n<li>Due to the difference between different monitors, the divicture may not reflect the actual color of the item.</li>\n<li>Compare the detail sizes with yours, please allow 1-2 cm variations due to manual measurement.</li>\n</ul>\n</div>\n<div>\n<p><strong>Shipping Info</strong></p>\n<ul>\n<li>Estimated Processing time: 2-6 business days.</li>\n<li>Estimated US Shipping time: 4-9 business days.</li>\n<li>Estimated EU &amp; UK Shipping time: 10-13 business days.</li>\n<li>Estimated CA Shipping time: 10-15 business days.</li>\n</ul>\n<br /><strong>Replacement/Return Policy</strong><br />\n<ul>\n<li>If you are not completely satisfied with your purchase, we will implement to replace another within 30 days without fee if the item is defective, damaged, or an error is made on our end. We do our best to process as quickly as possible.</li>\n<li>If for any reason you are unsatisfied with the item you buy, please contact us so that we can talk about the sollution for you. If you send us the proof like an image, it is easier for us to handle your issue.</li>\n</ul>\n<br /><strong>WE DO NOT SHIP TO HI PR ALASKA PO.BOX We can't accept changing/refunding request if you just do not like this material. This is fan made jersey. The letters are 3D printed.</strong></div>",
-// 			"short_description": "",
-// 			"featured_image_id": 6615552,
-// 			"price": 33.5,
-// 			"compare_at_price": 50,
-// 			"cost_per_item": 16.5,
-// 			"expedite_shipping": null,
-// 			"charge_tax": 1,
-// 			"media_gallery": [
-// 				{
-// 					"id": 6615552,
-// 					"alt": "new-jordan-love-bay-10-packers-2023-24-green-jersey-print-fanmade-shirt (1).jpeg"
-// 				},
-// 				{
-// 					"id": 6615553,
-// 					"alt": "new-jordan-love-bay-10-packers-2023-24-green-jersey-print-fanmade-shirt.jpeg"
-// 				},
-// 				{
-// 					"id": 6615587,
-// 					"alt": "football-jersey.jpeg"
-// 				},
-// 				{
-// 					"id": 6615585,
-// 					"alt": "1689827303_DJu3ws.jpeg"
-// 				},
-// 				{
-// 					"id": 6615586,
-// 					"alt": "1692537798_c7xRTQ.png"
-// 				}
-// 			],
-// 			"seo_title": "NEW! Jordan Love Bay 10 Packers 2023-24 Green Jersey Print F",
-// 			"seo_description": "Product Information  \n       All Over Print Football Jersey &ndash; V-Next Shirt \n \n High-quality materials without fading, cracking, peeling, or flaking vibran",
-// 			"slug": "New-Jordan-Love-Bay-10-Packers-2023-24-Green-Jersey",
-// 			"rating": null,
-// 			"rating_count": null,
-// 			"is_online_channel": 0,
-// 			"status": {
-// 				"id": 2,
-// 				"name": "Approved"
-// 			},
-// 			"adult_status": 0,
-// 			"product_promotion_id": 0,
-// 			"tags": [],
-// 			"product_type": null,
-// 			"vendor": "PrintMasters",
-// 			"seller_id": 21061,
-// 			"stock": 11,
-// 			"inventory": null,
-// 			"variants": [
-// 				{
-// 					"id": 125123224,
-// 					"_id": 0,
-// 					"product_id": 3606448,
-// 					"sku": "BMPBVKO8I5-1",
-// 					"seller_sku": "BMPBVKO8I5-1",
-// 					"compare_at_price": 50,
-// 					"is_continue_sell": 0,
-// 					"available_quantity": 25,
-// 					"title": "S",
-// 					"price": 33.5,
-// 					"image": null,
-// 					"position": 1,
-// 					"attributes": [
-// 						{
-// 							"label": "S",
-// 							"id": "S",
-// 							"text": "S",
-// 							"value_index": 104,
-// 							"code": "size"
-// 						}
-// 					],
-// 					"is_enabled": true,
-// 					"taxable": true,
-// 					"weight": null,
-// 					"weight_unit": null,
-// 					"requires_shipping": true,
-// 					"stock": 11
-// 				},
-// 				{
-// 					"id": 125123225,
-// 					"_id": 0,
-// 					"product_id": 3606448,
-// 					"sku": "BMPBVKO8I5-2",
-// 					"seller_sku": "BMPBVKO8I5-2",
-// 					"compare_at_price": 50,
-// 					"is_continue_sell": 0,
-// 					"available_quantity": 24,
-// 					"title": "M",
-// 					"price": 33.5,
-// 					"image": null,
-// 					"position": 2,
-// 					"attributes": [
-// 						{
-// 							"label": "M",
-// 							"id": "M",
-// 							"text": "M",
-// 							"value_index": 107,
-// 							"code": "size"
-// 						}
-// 					],
-// 					"is_enabled": true,
-// 					"taxable": true,
-// 					"weight": null,
-// 					"weight_unit": null,
-// 					"requires_shipping": true,
-// 					"stock": 11
-// 				},
-// 				{
-// 					"id": 125123226,
-// 					"_id": 0,
-// 					"product_id": 3606448,
-// 					"sku": "BMPBVKO8I5-3",
-// 					"seller_sku": "BMPBVKO8I5-3",
-// 					"compare_at_price": 50,
-// 					"is_continue_sell": 0,
-// 					"available_quantity": 25,
-// 					"title": "L",
-// 					"price": 35.23,
-// 					"image": null,
-// 					"position": 3,
-// 					"attributes": [
-// 						{
-// 							"label": "L",
-// 							"id": "L",
-// 							"text": "L",
-// 							"value_index": 111,
-// 							"code": "size"
-// 						}
-// 					],
-// 					"is_enabled": true,
-// 					"taxable": true,
-// 					"weight": null,
-// 					"weight_unit": null,
-// 					"requires_shipping": true,
-// 					"stock": 11
-// 				},
-// 				{
-// 					"id": 125123227,
-// 					"_id": 0,
-// 					"product_id": 3606448,
-// 					"sku": "BMPBVKO8I5-4",
-// 					"seller_sku": "BMPBVKO8I5-4",
-// 					"compare_at_price": 50,
-// 					"is_continue_sell": 0,
-// 					"available_quantity": 22,
-// 					"title": "XL",
-// 					"price": 35.23,
-// 					"image": null,
-// 					"position": 4,
-// 					"attributes": [
-// 						{
-// 							"label": "XL",
-// 							"id": "XL",
-// 							"text": "XL",
-// 							"value_index": 116,
-// 							"code": "size"
-// 						}
-// 					],
-// 					"is_enabled": true,
-// 					"taxable": true,
-// 					"weight": null,
-// 					"weight_unit": null,
-// 					"requires_shipping": true,
-// 					"stock": 11
-// 				},
-// 				{
-// 					"id": 125123228,
-// 					"_id": 0,
-// 					"product_id": 3606448,
-// 					"sku": "BMPBVKO8I5-5",
-// 					"seller_sku": "BMPBVKO8I5-5",
-// 					"compare_at_price": 79.66,
-// 					"is_continue_sell": 0,
-// 					"available_quantity": 24,
-// 					"title": "2XL",
-// 					"price": 37.68,
-// 					"image": null,
-// 					"position": 5,
-// 					"attributes": [
-// 						{
-// 							"label": "2XL",
-// 							"id": "2XL",
-// 							"text": "2XL",
-// 							"value_index": 122,
-// 							"code": "size"
-// 						}
-// 					],
-// 					"is_enabled": true,
-// 					"taxable": true,
-// 					"weight": null,
-// 					"weight_unit": null,
-// 					"requires_shipping": true,
-// 					"stock": 11
-// 				},
-// 				{
-// 					"id": 125123230,
-// 					"_id": 0,
-// 					"product_id": 3606448,
-// 					"sku": "BMPBVKO8I5-6",
-// 					"seller_sku": "BMPBVKO8I5-6",
-// 					"compare_at_price": 79.66,
-// 					"is_continue_sell": 0,
-// 					"available_quantity": 25,
-// 					"title": "3XL",
-// 					"price": 37.68,
-// 					"image": null,
-// 					"position": 6,
-// 					"attributes": [
-// 						{
-// 							"label": "3XL",
-// 							"id": "3XL",
-// 							"text": "3XL",
-// 							"value_index": 129,
-// 							"code": "size"
-// 						}
-// 					],
-// 					"is_enabled": true,
-// 					"taxable": true,
-// 					"weight": null,
-// 					"weight_unit": null,
-// 					"requires_shipping": true,
-// 					"stock": 11
-// 				},
-// 				{
-// 					"id": 125123232,
-// 					"_id": 0,
-// 					"product_id": 3606448,
-// 					"sku": "BMPBVKO8I5-7",
-// 					"seller_sku": "BMPBVKO8I5-7",
-// 					"compare_at_price": 79.66,
-// 					"is_continue_sell": 0,
-// 					"available_quantity": 25,
-// 					"title": "4XL",
-// 					"price": 39.99,
-// 					"image": null,
-// 					"position": 7,
-// 					"attributes": [
-// 						{
-// 							"label": "4XL",
-// 							"id": "4XL",
-// 							"text": "4XL",
-// 							"value_index": 137,
-// 							"code": "size"
-// 						}
-// 					],
-// 					"is_enabled": true,
-// 					"taxable": true,
-// 					"weight": null,
-// 					"weight_unit": null,
-// 					"requires_shipping": true,
-// 					"stock": 11
-// 				},
-// 				{
-// 					"id": 125123234,
-// 					"_id": 0,
-// 					"product_id": 3606448,
-// 					"sku": "BMPBVKO8I5-8",
-// 					"seller_sku": "BMPBVKO8I5-8",
-// 					"compare_at_price": 79.66,
-// 					"is_continue_sell": 0,
-// 					"available_quantity": 25,
-// 					"title": "5XL",
-// 					"price": 41.69,
-// 					"image": null,
-// 					"position": 8,
-// 					"attributes": [
-// 						{
-// 							"label": "5XL",
-// 							"id": "5XL",
-// 							"text": "5XL",
-// 							"value_index": 146,
-// 							"code": "size"
-// 						}
-// 					],
-// 					"is_enabled": true,
-// 					"taxable": true,
-// 					"weight": null,
-// 					"weight_unit": null,
-// 					"requires_shipping": true,
-// 					"stock": 11
-// 				}
-// 			],
-// 			"categories": [
-// 				17,
-// 				262
-// 			],
-// 			"product_options": [
-// 				{
-// 					"position": 0,
-// 					"label": "size",
-// 					"attribute_code": "size",
-// 					"swatcherType": "text",
-// 					"values": [
-// 						{
-// 							"id": "S",
-// 							"text": "S",
-// 							"value_index": 104,
-// 							"label": "S"
-// 						},
-// 						{
-// 							"id": "M",
-// 							"text": "M",
-// 							"value_index": 107,
-// 							"label": "M"
-// 						},
-// 						{
-// 							"id": "L",
-// 							"text": "L",
-// 							"value_index": 111,
-// 							"label": "L"
-// 						},
-// 						{
-// 							"id": "XL",
-// 							"text": "XL",
-// 							"value_index": 116,
-// 							"label": "XL"
-// 						},
-// 						{
-// 							"id": "2XL",
-// 							"text": "2XL",
-// 							"value_index": 122,
-// 							"label": "2XL"
-// 						},
-// 						{
-// 							"id": "3XL",
-// 							"text": "3XL",
-// 							"value_index": 129,
-// 							"label": "3XL"
-// 						},
-// 						{
-// 							"id": "4XL",
-// 							"text": "4XL",
-// 							"value_index": 137,
-// 							"label": "4XL"
-// 						},
-// 						{
-// 							"id": "5XL",
-// 							"text": "5XL",
-// 							"value_index": 146,
-// 							"label": "5XL"
-// 						}
-// 					],
-// 					"type": "selector"
-// 				}
-// 			],
-// 			"is_personalization": 0,
-// 			"handmade": 0,
-// 			"made_to_order": 0,
-// 			"personalization_optional": 0,
-// 			"personalization_description": "",
-// 			"processing_time": 7,
-// 			"approved_by": null,
-// 			"zone_id": 21606,
-// 			"created_at": "2023-09-13T10:16:22.000000Z",
-// 			"_media_gallery": [
-// 				{
-// 					"id": 6615552,
-// 					"url": "https://cdn.inspireuplift.com/uploads/images/seller_products/1694600149_new-jordan-love-bay-10-packers-2023-24-green-jersey-print-fanmade-shirt1.jpeg",
-// 					"alt": "new-jordan-love-bay-10-packers-2023-24-green-jersey-print-fanmade-shirt (1).jpeg"
-// 				},
-// 				{
-// 					"id": 6615553,
-// 					"url": "https://cdn.inspireuplift.com/uploads/images/seller_products/1694600150_new-jordan-love-bay-10-packers-2023-24-green-jersey-print-fanmade-shirt.jpeg",
-// 					"alt": "new-jordan-love-bay-10-packers-2023-24-green-jersey-print-fanmade-shirt.jpeg"
-// 				},
-// 				{
-// 					"id": 6615587,
-// 					"url": "https://cdn.inspireuplift.com/uploads/images/seller_products/1694600178_football-jersey.jpeg",
-// 					"alt": "football-jersey.jpeg"
-// 				},
-// 				{
-// 					"id": 6615585,
-// 					"url": "https://cdn.inspireuplift.com/uploads/images/seller_products/1694600177_1689827303_DJu3ws.jpeg",
-// 					"alt": "1689827303_DJu3ws.jpeg"
-// 				},
-// 				{
-// 					"id": 6615586,
-// 					"url": "https://cdn.inspireuplift.com/uploads/images/seller_products/1694600178_1692537798_c7xRTQ.png",
-// 					"alt": "1692537798_c7xRTQ.png"
-// 				}
-// 			],
-// 			"gallery_id": 3676061,
-// 			"printful_product": false,
-// 			"hasVariants": true,
-// 			"hasProductOptions": false,
-// 			"bought_with_products": []
-// 		}
-// 	]
-// }
-
 export default function ({ Identifier }: any) {
-	const { currentDocker, currentToken, templateId, urlRestApi } = UiContext.UseUIContext();
+	const { currentDocker, currentToken, templateId, urlRestApi, $x } = UiContext.UseUIContext();
 
 	const [pathname, setPathname] = useState(window.location.pathname);
 
@@ -579,40 +176,16 @@ export default function ({ Identifier }: any) {
 			ordersForSync = [order];
 		}
 		setLoading(true);
-		Promise.all(
+		Promise.allSettled(
 			map(ordersForSync, (order) => {
-				return fetch(
-					`https://sellercentral-api.inspireuplift.com/api/v1/seller/orders/${get(order, 'id', '')}?is_seller=true`,
-					{
-						headers: {
-							accept: 'application/json',
-							'accept-language': 'en-US,en;q=0.9',
-							'sec-ch-ua': '"Chromium";v="116", "Not)A;Brand";v="24", "Google Chrome";v="116"',
-							'sec-ch-ua-mobile': '?0',
-							'sec-ch-ua-platform': '"Windows"',
-							'sec-fetch-dest': 'empty',
-							'sec-fetch-mode': 'cors',
-							'sec-fetch-site': 'same-site',
-						},
-						referrer: 'https://sellercentral.inspireuplift.com/',
-						referrerPolicy: 'strict-origin-when-cross-origin',
-						body: null,
-						method: 'GET',
-						mode: 'cors',
-						credentials: 'include',
-					}
-				)
-					.then((response) => response.json())
-					.then((data) => {
-						const orderData = get(data, 'data', {});
-						if (!get(orderData, 'order_number') || !get(orderData, 'seller_order_number')) {
-							throw 'Cannot find order data. Try again.';
-						}
-						return fetch('https://sellercentral-api.inspireuplift.com/api/v1/seller/staff/info?is_seller=true', {
+				return (
+					fetch(
+						`https://sellercentral-api.inspireuplift.com/api/v1/seller/orders/${get(order, 'id', '')}?is_seller=true`,
+						{
 							headers: {
 								accept: 'application/json',
 								'accept-language': 'en-US,en;q=0.9',
-								'sec-ch-ua': '"Chromium";v="118", "Google Chrome";v="118", "Not=A?Brand";v="99"',
+								'sec-ch-ua': '"Chromium";v="116", "Not)A;Brand";v="24", "Google Chrome";v="116"',
 								'sec-ch-ua-mobile': '?0',
 								'sec-ch-ua-platform': '"Windows"',
 								'sec-fetch-dest': 'empty',
@@ -625,76 +198,92 @@ export default function ({ Identifier }: any) {
 							method: 'GET',
 							mode: 'cors',
 							credentials: 'include',
-						})
-							.then((response) => response.json())
-							.then((data) => {
-								const userData = data;
-								if (!get(userData, 'email', '')) {
-									throw 'Cannot find user data. Try again.';
-								}
-								return {
-									orderData: orderData,
-									userData: userData,
-									dataRequest: {
-										order_id: get(orderData, 'order_number', ''),
-										identifier: Identifier,
-										fulfillment_note: get(orderData, 'note', ''),
-										shipping_total: get(orderData, ['payment_info', 'shipping'], ''),
-										total_tax: get(orderData, ['payment_info', 'tax'], ''),
-										account_id: get(userData, 'email', ''),
-										account_name: get(userData, 'business_name', ''),
-										account_type: 'Inspireuplift',
-										shipping_info: {
-											full_name: get(orderData, ['contact_info', 'name'], ''),
-											address_1: get(orderData, ['contact_info', 'shipping_address', 'address1'], ''),
-											address_2: get(orderData, ['contact_info', 'shipping_address', 'address2'], ''),
-											company: '',
-											city: get(orderData, ['contact_info', 'shipping_address', 'city'], ''),
-											state: get(orderData, ['contact_info', 'shipping_address', 'province'], ''),
-											postcode: get(orderData, ['contact_info', 'shipping_address', 'zip'], ''),
-											country: get(orderData, ['contact_info', 'shipping_address', 'country_code'], ''),
-											email: get(orderData, ['contact_info', 'email'], ''),
-											phone: get(orderData, ['contact_info', 'shipping_address', 'phone'], ''),
-										},
-										items: map(get(orderData, 'line_items', []), (li) => {
-											return {
-												name: get(li, 'name', ''),
-												product_id: get(li, 'product_id', ''),
-												sku: get(li, 'sku', ''),
-												quantity: get(li, 'quantity', ''),
-												price: get(li, 'price_per_item', ''),
-												currency: 'USD',
-												image: get(head(get(li, 'media', [])), 'url', ''),
-											};
-										}),
-									},
-								};
+						}
+					)
+						.then((response) => response.json())
+						.then((data) => {
+							const orderData = get(data, 'data', {});
+							if (!get(orderData, 'order_number') || !get(orderData, 'seller_order_number')) {
+								throw 'Cannot find order data. Try again.';
+							}
+							return fetch('https://sellercentral-api.inspireuplift.com/api/v1/seller/staff/info?is_seller=true', {
+								headers: {
+									accept: 'application/json',
+									'accept-language': 'en-US,en;q=0.9',
+									'sec-ch-ua': '"Chromium";v="118", "Google Chrome";v="118", "Not=A?Brand";v="99"',
+									'sec-ch-ua-mobile': '?0',
+									'sec-ch-ua-platform': '"Windows"',
+									'sec-fetch-dest': 'empty',
+									'sec-fetch-mode': 'cors',
+									'sec-fetch-site': 'same-site',
+								},
+								referrer: 'https://sellercentral.inspireuplift.com/',
+								referrerPolicy: 'strict-origin-when-cross-origin',
+								body: null,
+								method: 'GET',
+								mode: 'cors',
+								credentials: 'include',
 							})
-							.catch(() => {
-								throw 'Cannot find user data. Try again.';
-							});
-					})
-					.then(async (data) => {
-						return await Promise.all(
-							map(
-								unionBy(
-									map(get(data, ['orderData', 'line_items'], []), (li) => {
-										return {
-											productId: get(li, 'product_id', ''),
-											itemName: get(li, 'name', ''),
-										};
-									}),
-									'productId'
-								),
-								async (item) => {
-									const productId = item?.productId;
-									const itemName = item?.itemName;
-									if (!productId || !itemName) {
+								.then((response) => response.json())
+								.then((data) => {
+									const userData = data;
+									if (!get(userData, 'email', '')) {
+										throw 'Cannot find user data. Try again.';
+									}
+									return {
+										orderData: orderData,
+										userData: userData,
+										dataRequest: {
+											order_id: get(orderData, 'order_number', ''),
+											identifier: Identifier,
+											fulfillment_note: get(orderData, 'note', ''),
+											shipping_total: get(orderData, ['payment_info', 'shipping'], ''),
+											total_tax: get(orderData, ['payment_info', 'tax'], ''),
+											account_id: get(userData, 'email', ''),
+											account_name: get(userData, 'business_name', ''),
+											account_type: 'Inspireuplift',
+											shipping_info: {
+												full_name: get(orderData, ['contact_info', 'name'], ''),
+												address_1: get(orderData, ['contact_info', 'shipping_address', 'address1'], ''),
+												address_2: get(orderData, ['contact_info', 'shipping_address', 'address2'], ''),
+												company: '',
+												city: get(orderData, ['contact_info', 'shipping_address', 'city'], ''),
+												state: get(orderData, ['contact_info', 'shipping_address', 'province'], ''),
+												postcode: get(orderData, ['contact_info', 'shipping_address', 'zip'], ''),
+												country: get(orderData, ['contact_info', 'shipping_address', 'country_code'], ''),
+												email: get(orderData, ['contact_info', 'email'], ''),
+												phone: get(orderData, ['contact_info', 'shipping_address', 'phone'], ''),
+											},
+											items: map(get(orderData, 'line_items', []), (li) => {
+												return {
+													name: get(li, 'name', ''),
+													product_id: get(li, 'product_id', ''),
+													order_line_item_id: get(li, 'variant_id', ''),
+													variation_id: get(li, 'variant_id', ''),
+													sku: get(li, 'sku', ''),
+													quantity: get(li, 'quantity', ''),
+													price: get(li, 'price_per_item', ''),
+													currency: 'USD',
+													image: get(head(get(li, 'media', [])), 'url', ''),
+												};
+											}),
+										},
+									};
+								})
+								.catch(() => {
+									throw 'Cannot find user data. Try again.';
+								});
+						})
+						.then(async (data) => {
+							return await Promise.all(
+								map(unionBy(get(data, ['orderData', 'line_items'], []), 'product_id'), async (item: any) => {
+									console.log('item: ', item);
+									if (!item?.product_id || !item?.name) {
 										setErrorMsg('Cannot find item, try again');
 										throw 'Cannot find item, try again';
 									}
 									return fetch(
-										`https://sellercentral-api.inspireuplift.com/api/v1/seller/marketplace/products/list?is_seller=true&search=${itemName}`,
+										`https://sellercentral-api.inspireuplift.com/api/v1/seller/marketplace/products/list?is_seller=true&search=${item?.name}`,
 										{
 											headers: {
 												accept: 'application/json',
@@ -715,9 +304,9 @@ export default function ({ Identifier }: any) {
 										}
 									)
 										.then((response) => response.json())
-										.then((response) => {
+										.then(async (response) => {
 											const itemInfo = find(get(response, ['data', 'data'], []), (itemInfo) => {
-												return get(itemInfo, 'product_id') === productId;
+												return get(itemInfo, 'product_id') === item?.product_id;
 											});
 											const itemId = get(itemInfo, 'id', '');
 											if (!itemId) {
@@ -752,143 +341,167 @@ export default function ({ Identifier }: any) {
 										.catch((error) => {
 											console.log('error: ', error);
 										});
-								}
-							)
-						).then((items) => {
-							return {
-								...data,
-								itemsData: items,
-							};
-						});
-					})
-					.then(async (dataTotal) => {
-						
-						return new Promise((resolve, reject) => {
-							const getTransactionRequest = (page = 1) => {
-								return fetch(`https://sellercentral-api.inspireuplift.com/api/v1/seller/transactions?page=${page}&is_seller=true`, {
-									"headers": {
-										"accept": "application/json",
-										"accept-language": "en-US,en;q=0.9",
-										"sec-ch-ua": "\"Chromium\";v=\"118\", \"Google Chrome\";v=\"118\", \"Not=A?Brand\";v=\"99\"",
-										"sec-ch-ua-mobile": "?0",
-										"sec-ch-ua-platform": "\"Windows\"",
-										"sec-fetch-dest": "empty",
-										"sec-fetch-mode": "cors",
-										"sec-fetch-site": "same-site"
-									},
-									"referrer": "https://sellercentral.inspireuplift.com/",
-									"referrerPolicy": "strict-origin-when-cross-origin",
-									"body": null,
-									"method": "GET",
-									"mode": "cors",
-									"credentials": "include"
 								})
-									.then((response) => response.json())
-									.then(data => {
-										const transactions = get(data, ['data', 'transactions', 'data'])
-										const lastPage = get(data, ['data', 'transactions', 'last_page'])
-										if (page === lastPage) {
-											reject("Cannot find transactions")
-										} else {
-											const transactionData = find(transactions, trans => {
-												console.log(get(trans, 'type', ''));
-												console.log(`Seller_Order # ${get(data, ['orderData', 'seller_order_number'], '')}`);
-												return get(trans, 'type', '') === `Seller_Order # ${get(dataTotal, ['orderData', 'seller_order_number'], '')}`
-											})
-											if (transactionData) {
-												resolve(transactionData)
-											} else {
-												getTransactionRequest(page + 1)
-											}
-										}
-									}).catch(error => {
-										reject("Cannot find transactions")
-									})
-							}
-							getTransactionRequest(1)
-						}).then(transactionsData => {
-							return {
-								...dataTotal,
-								transactionsData: transactionsData
-							}
-						}).catch(error => {
-							throw "Cannot find transactions"
-						})
-						
-					})
-					.then((data) => {
-						console.log('data: ', data);
-						const items = get(data, 'itemsData', []);
-						const transactionData = get(data, 'transactionsData', {});
-						if (findIndex(items, (item) => !item) >= 0 || !Array.isArray(items) || !items.length) {
-							const newOrder = map(orders, (o) => {
-								return order.id === o.id
-									? {
-										...o,
-										ErrorMsg: 'Cannot find items, or item has been deleted. Pls import in order detail page',
-									}
-									: o;
-							});
-							setSuccessMsg('');
-							setErrorMsg('Some orders had errors when imported');
-							return setOrders(newOrder);
-						}
-						const dataRequest = {
-							...get(data, 'dataRequest', {}),
-							total_fee: (parseFloat(get(transactionData, 'commission_fee', '0')) + parseFloat(get(transactionData, 'processing_fee', '0'))).toFixed(2),
-							items: map(get(data, ['dataRequest', 'items'], []), (li) => {
-								const itemData = find(items, (item) => get(item, 'product_id') === get(li, 'product_id', ''));
-								const variants = find(
-									get(itemData, 'variants', []),
-									(va) => get(va, 'id') === get(li, 'variant_id', '')
-								);
+							).then((items) => {
+								if (findIndex(items, (item) => !item) >= 0 || !Array.isArray(items) || !items.length) {
+									throw 'Some orders had errors when imported'
+									throw {
+										order_fail: order.id,
+										msg: 'Some orders had errors when imported',
+									};
+								}
 
 								return {
-									...li,
-									attributes: map(get(variants, 'attributes', []), (va) => {
-										return {
-											name: get(va, 'code', ''),
-											option: get(va, 'text', ''),
-										};
-									}),
+									...data,
+									itemsData: items,
 								};
-							}),
-						};
-						return new Promise((resolve, reject) => {
-							const settings = {
-								method: 'POST',
-								url: `${currentDocker?.domain ? `${urlRestApi}/order/create` : '/api/order/create'}`,
-								data: dataRequest,
-								timeout: 0,
-								headers: {
-									Authorization: `Bearer ${currentToken.token}`,
-								},
-							};
-							$.ajax(settings)
-								.done(function (response) {
-									setSuccessMsg('Success');
-									setErrorMsg('');
-									resolve(true);
+							});
+						})
+						// if (isDetail()) {
+						// 	const attrTemp = $(head($x(`//span[text()="${item?.sku}"]/parent::p/parent::div/following-sibling::div[1]//p[1]/div`)) as any)?.text()
+						// 	console.log('attrTemp: ', attrTemp);
+						// 	if (attrTemp) {
+						// 		return {
+						// 			product_id: item?.product_id,
+						// 			// variants: []
+						// 		}
+						// 	}
+						// }
+						.then(async (dataTotal) => {
+							return new Promise(async (resolve, reject) => {
+								const getTransactionRequest = async (page = 1) => {
+									return fetch(
+										`https://sellercentral-api.inspireuplift.com/api/v1/seller/transactions?page=${page}&is_seller=true`,
+										{
+											headers: {
+												accept: 'application/json',
+												'accept-language': 'en-US,en;q=0.9',
+												'sec-ch-ua': '"Chromium";v="118", "Google Chrome";v="118", "Not=A?Brand";v="99"',
+												'sec-ch-ua-mobile': '?0',
+												'sec-ch-ua-platform': '"Windows"',
+												'sec-fetch-dest': 'empty',
+												'sec-fetch-mode': 'cors',
+												'sec-fetch-site': 'same-site',
+											},
+											referrer: 'https://sellercentral.inspireuplift.com/',
+											referrerPolicy: 'strict-origin-when-cross-origin',
+											body: null,
+											method: 'GET',
+											mode: 'cors',
+											credentials: 'include',
+										}
+									)
+										.then((response) => response.json())
+										.then((data) => {
+											const transactions = get(data, ['data', 'transactions', 'data']);
+											const lastPage = get(data, ['data', 'transactions', 'last_page']);
+											const transactionData = find(transactions, (trans) => {
+												console.log(get(trans, 'type', ''));
+												console.log(`Seller_Order # ${get(data, ['orderData', 'seller_order_number'], '')}`);
+												return (
+													get(trans, 'type', '') ===
+													`Seller_Order # ${get(dataTotal, ['orderData', 'seller_order_number'], '')}`
+												);
+											});
+											if (transactionData) {
+												resolve(transactionData);
+											} else {
+												if (page === lastPage) {
+													reject('Cannot find transactions');
+												} else {
+													getTransactionRequest(page + 1);
+												}
+											}
+										})
+										.catch((error) => {
+											console.log('error: ', error);
+											reject('Cannot find transactions.');
+										});
+								};
+								getTransactionRequest(1);
+							})
+								.then((transactionsData) => {
+									return {
+										...dataTotal,
+										transactionsData: transactionsData,
+									};
 								})
-								.fail((response) => {
-									setSuccessMsg('');
-									setErrorMsg(response.responseJSON.error);
-									resolve(true);
+								.catch((error) => {
+									console.log('error: ', error);
+									throw 'Cannot find transactions';
 								});
-						});
-					})
-					.catch((error) => {
-						console.log('error: ', error);
-						setLoading(false);
-						setErrorMsg(
-							typeof error === 'string' ? error : error?.toString() ? error?.toString() : JSON.stringify(error)
-						);
-					});
+						})
+						.then((data) => {
+							console.log('data: ', data);
+							const items = get(data, 'itemsData', []);
+							const transactionData = get(data, 'transactionsData', {});
+							const dataRequest = {
+								...get(data, 'dataRequest', {}),
+								total_fee: (
+									parseFloat(get(transactionData, 'commission_fee', '0')) +
+									parseFloat(get(transactionData, 'processing_fee', '0'))
+								).toFixed(2),
+								items: map(get(data, ['dataRequest', 'items'], []), (li) => {
+									const itemData = find(items, (item) => get(item, 'product_id') === get(li, 'product_id', ''));
+									console.log('itemData: ', itemData);
+									const variants = find(
+										get(itemData, 'variants', []),
+										(va) => get(va, 'id') === get(li, 'variation_id', '')
+									);
+									console.log('variants: ', variants);
+
+									return {
+										...li,
+										item_sku: get(itemData, 'sku', ''),
+										attributes: map(get(variants, 'attributes', []), (va) => {
+											return {
+												name: get(va, 'code', ''),
+												option: get(va, 'text', ''),
+											};
+										}),
+									};
+								}),
+							};
+							return new Promise((resolve, reject) => {
+								const settings = {
+									method: 'POST',
+									url: `${currentDocker?.domain ? `${urlRestApi}/order/create` : '/api/order/create'}`,
+									data: dataRequest,
+									timeout: 0,
+									headers: {
+										Authorization: `Bearer ${currentToken.token}`,
+									},
+								};
+								$.ajax(settings)
+									.done(function (response) {
+										setSuccessMsg('Success');
+										setErrorMsg('');
+										resolve(true);
+									})
+									.fail((response) => {
+										setSuccessMsg('');
+										setErrorMsg(response.responseJSON.error);
+										resolve(true);
+									});
+							});
+						})
+						.catch((error) => {
+							setLoading(false);
+							setErrorMsg(
+								typeof error === 'string' ? error : error?.toString() ? error?.toString() : JSON.stringify(error)
+							);
+						})
+				);
 			})
-		).then(() => {
-			setLoading(false);
-			handleGetOrderSync();
-		});
+		)
+			.then(() => {
+				setLoading(false);
+				handleGetOrderSync();
+			})
+			.catch((error) => {
+				setLoading(false);
+				handleGetOrderSync();
+			});
 	}
 
 	return (
