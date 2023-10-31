@@ -261,15 +261,16 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	const sleep = (ms: any) => {
 		return new Promise((resolve) => setTimeout(() => resolve(ms), ms));
 	};
-	const movingOnElm = async (selector: any) => {
+	const movingOnElm = async (selector: any, parrentSelector: any = null, offset: any = 50) => {
 		try {
 			if (typeof selector !== 'string') return;
 			let elm = $(selector).first() as any;
-			if (elm && elm?.offset()?.top) {
+			let top = parrentSelector ? elm?.position()?.top : elm?.offset()?.top
+			if (elm && top) {
 				await sleep(50);
-				$([document.documentElement, document.body]).animate(
+				$(parrentSelector ? parrentSelector : [document.documentElement, document.body]).animate(
 					{
-						scrollTop: elm.offset().top - 50,
+						scrollTop: top - parseInt(offset),
 					},
 					50
 				);
@@ -364,7 +365,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	};
 	const clickButton = async (selector: string) => {
 		try {
-			const elm = $(selector).first() as any;
+			const elm = head($(selector)) as any;
 			if (elm) {
 				elm.click();
 			}

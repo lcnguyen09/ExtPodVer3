@@ -1178,6 +1178,7 @@ export type Fulfilment = {
   geargag_config?: Maybe<Geargag>;
   gearment_config?: Maybe<Gearment>;
   geekpod_config?: Maybe<Geekpod>;
+  lenful_config?: Maybe<Lenful>;
   merchize_config?: Maybe<Merchize>;
   name?: Maybe<Scalars['String']>;
   onos_config?: Maybe<Onos>;
@@ -1199,6 +1200,7 @@ export type FulfilmentInput = {
   geargag_config?: InputMaybe<GeargagInput>;
   gearment_config?: InputMaybe<GearmentInput>;
   geekpod_config?: InputMaybe<GeekpodInput>;
+  lenful_config?: InputMaybe<LenfulInput>;
   merchize_config?: InputMaybe<MerchizeInput>;
   onos_config?: InputMaybe<OnosInput>;
   printify_config?: InputMaybe<PrintifyInput>;
@@ -1636,6 +1638,22 @@ export type LabelDetails = {
   url?: Maybe<Scalars['String']>;
 };
 
+export type Lenful = {
+  __typename?: 'Lenful';
+  email?: Maybe<Scalars['String']>;
+  key?: Maybe<Scalars['String']>;
+  lenful_store?: Maybe<Scalars['String']>;
+  password?: Maybe<Scalars['String']>;
+};
+
+/** input for create or update */
+export type LenfulInput = {
+  email?: InputMaybe<Scalars['String']>;
+  key?: InputMaybe<Scalars['String']>;
+  lenful_store?: InputMaybe<Scalars['String']>;
+  password?: InputMaybe<Scalars['String']>;
+};
+
 export type LineItem = {
   __typename?: 'LineItem';
   custom?: Maybe<Scalars['Boolean']>;
@@ -1960,7 +1978,12 @@ export type NetworkAccount = {
   _id: Scalars['String'];
   created_at: Scalars['Date'];
   deleted_at?: Maybe<Scalars['Date']>;
+  expires_in?: Maybe<Scalars['Int']>;
+  id?: Maybe<Scalars['String']>;
   nicename?: Maybe<Scalars['String']>;
+  refresh_token?: Maybe<Scalars['String']>;
+  scope?: Maybe<Scalars['String']>;
+  token_type?: Maybe<Scalars['String']>;
   type: Scalars['String'];
   updated_at: Scalars['Date'];
   username?: Maybe<Scalars['String']>;
@@ -2026,6 +2049,7 @@ export type Order = {
   email_alias?: Maybe<Scalars['String']>;
   estimated_delivery?: Maybe<Scalars['Int']>;
   external_transaction_id?: Maybe<Scalars['String']>;
+  fee_modified?: Maybe<Scalars['Boolean']>;
   fulfilment_auto_at?: Maybe<Scalars['Int']>;
   fulfilment_state?: Maybe<Scalars['String']>;
   identity?: Maybe<Scalars['String']>;
@@ -2472,6 +2496,7 @@ export type ProductPreset = {
   prety_attributes?: Maybe<Array<Maybe<PretyAttribute>>>;
   price?: Maybe<Scalars['Float']>;
   price_addition?: Maybe<Scalars['Float']>;
+  print_area_id?: Maybe<Scalars['String']>;
   print_areas?: Maybe<Array<Maybe<PrintAreas>>>;
   print_template?: Maybe<Scalars['String']>;
   provider?: Maybe<Scalars['String']>;
@@ -2503,6 +2528,7 @@ export type ProductPresetMockupProviderCount = {
 
 export type ProviderProductType = {
   __typename?: 'ProviderProductType';
+  _id?: Maybe<Scalars['String']>;
   attribute_specifics?: Maybe<Array<Maybe<SpecificAttribute>>>;
   description?: Maybe<Scalars['String']>;
   id?: Maybe<Scalars['String']>;
@@ -2512,6 +2538,12 @@ export type ProviderProductType = {
   name?: Maybe<Scalars['String']>;
   /** for mockup */
   prety_attributes?: Maybe<Array<Maybe<PretyAttribute>>>;
+};
+
+export type ProviderProductTypePrintArea = {
+  __typename?: 'ProviderProductTypePrintArea';
+  id?: Maybe<Scalars['String']>;
+  title?: Maybe<Scalars['String']>;
 };
 
 export type ProviderProductTypeProvider = {
@@ -2671,9 +2703,11 @@ export type RootMutation = {
   notificationMake?: Maybe<Array<Maybe<Notification>>>;
   notificationReadAll?: Maybe<Array<Maybe<Notification>>>;
   productPresetCreate?: Maybe<ProductPreset>;
+  productPresetCreateByJson?: Maybe<ProductPreset>;
   productPresetPaste?: Maybe<ProductPreset>;
   productPresetRemove?: Maybe<ProductPreset>;
   productPresetUpdate?: Maybe<ProductPreset>;
+  putItemToStore?: Maybe<ItemInfo>;
   queueItem?: Maybe<Array<Maybe<Item>>>;
   queueRemoveItem?: Maybe<Array<Maybe<ItemInfo>>>;
   removeClipart?: Maybe<Clipart>;
@@ -2756,6 +2790,7 @@ export type RootMutationBulkItemInfoArgs = {
   collections?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   custom_preset_id?: InputMaybe<Scalars['String']>;
   description?: InputMaybe<Scalars['String']>;
+  include_extend_images?: InputMaybe<Scalars['Boolean']>;
   include_size_chart?: InputMaybe<Scalars['Boolean']>;
   params?: InputMaybe<Array<InputMaybe<ItemInfoUpdate>>>;
   platform_category?: InputMaybe<Array<InputMaybe<PlatformCategoryInput>>>;
@@ -3231,6 +3266,9 @@ export type RootMutationMakeOrderArgs = {
   remember_print_attribute?: InputMaybe<Scalars['Boolean']>;
   shipping?: InputMaybe<AddressInput>;
   status?: InputMaybe<Scalars['String']>;
+  total_fee?: InputMaybe<Scalars['String']>;
+  total_fee_ad?: InputMaybe<Scalars['String']>;
+  total_fee_ex?: InputMaybe<Scalars['String']>;
   tracking?: InputMaybe<TrackingInput>;
 };
 
@@ -3420,7 +3458,7 @@ export type RootMutationMakeUserGroupsArgs = {
 
 
 export type RootMutationNetworkAuthorizeArgs = {
-  type?: InputMaybe<Scalars['String']>;
+  account_id?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -3431,9 +3469,15 @@ export type RootMutationNotificationMakeArgs = {
 
 
 export type RootMutationProductPresetCreateArgs = {
+  print_area_id?: InputMaybe<Scalars['String']>;
   product_type_id: Scalars['String'];
   provider: Scalars['String'];
   provider_id?: InputMaybe<Scalars['String']>;
+};
+
+
+export type RootMutationProductPresetCreateByJsonArgs = {
+  data: Scalars['String'];
 };
 
 
@@ -3483,6 +3527,15 @@ export type RootMutationProductPresetUpdateArgs = {
   tax_fee?: InputMaybe<Scalars['Float']>;
   tax_fee_fix?: InputMaybe<Scalars['Float']>;
   weight?: InputMaybe<Scalars['Float']>;
+};
+
+
+export type RootMutationPutItemToStoreArgs = {
+  _id?: InputMaybe<Scalars['String']>;
+  account_id?: InputMaybe<Scalars['String']>;
+  account_name?: InputMaybe<Scalars['String']>;
+  account_type?: InputMaybe<Scalars['String']>;
+  store_id?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -3967,6 +4020,7 @@ export type RootQuery = {
   /** product type mockup template */
   productPresetMockupCountProvider?: Maybe<ProductPresetMockupProviderCount>;
   providerProductType?: Maybe<Array<Maybe<ProviderProductType>>>;
+  providerProductTypePrintArea?: Maybe<Array<Maybe<ProviderProductTypePrintArea>>>;
   providerProductTypeProvider?: Maybe<Array<Maybe<ProviderProductTypeProvider>>>;
   /** Search order item query: added by task-manager */
   searchOrderItems?: Maybe<Array<Maybe<LineItem>>>;
@@ -4357,6 +4411,7 @@ export type RootQueryItemsArgs = {
 export type RootQueryItemsInfoArgs = {
   _id?: InputMaybe<Scalars['String']>;
   collection?: InputMaybe<Scalars['String']>;
+  identities?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   identity?: InputMaybe<Scalars['String']>;
   name?: InputMaybe<Scalars['String']>;
   search?: InputMaybe<Scalars['String']>;
@@ -4625,6 +4680,12 @@ export type RootQueryProductPresetCountProviderArgs = {
 
 export type RootQueryProviderProductTypeArgs = {
   id?: InputMaybe<Scalars['String']>;
+  provider: Scalars['String'];
+};
+
+
+export type RootQueryProviderProductTypePrintAreaArgs = {
+  product_type_id: Scalars['String'];
   provider: Scalars['String'];
 };
 
@@ -5057,6 +5118,7 @@ export type Store = {
   dispatch_time_max?: Maybe<Scalars['String']>;
   ebay_template_id?: Maybe<Scalars['String']>;
   etsy_shipping?: Maybe<EtsyShipping>;
+  fetched_at?: Maybe<Scalars['Int']>;
   global_shipping?: Maybe<Scalars['String']>;
   ignore_publish?: Maybe<Scalars['Boolean']>;
   ignore_watermark?: Maybe<Scalars['Boolean']>;
@@ -5386,6 +5448,7 @@ export type TrackingType = {
   fulfilment_name?: Maybe<Scalars['String']>;
   multrans_logistics?: Maybe<Shipment>;
   order_platform_id?: Maybe<Scalars['String']>;
+  order_platform_id_short?: Maybe<Scalars['String']>;
   shipping_country_code?: Maybe<Scalars['String']>;
   tracking?: Maybe<Scalars['String']>;
   tracking_at?: Maybe<Scalars['Int']>;
@@ -5651,6 +5714,16 @@ export type UserFragment = { __typename?: 'User', _id?: string | null, email?: s
 
 export type AuthDockerFragment = { __typename?: 'AuthDocker', docker_id?: string | null, docker?: { __typename?: 'Docker', _id?: string | null, domain?: string | null, label?: string | null, server?: string | null, sku?: string | null } | null };
 
+export type PutItemToStoreMutationVariables = Exact<{
+  _id?: InputMaybe<Scalars['String']>;
+  account_id?: InputMaybe<Scalars['String']>;
+  account_name?: InputMaybe<Scalars['String']>;
+  account_type?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type PutItemToStoreMutation = { __typename?: 'RootMutation', putItemToStore?: { __typename?: 'ItemInfo', _id?: string | null, identity?: string | null, name?: string | null, description?: string | null, description_ai?: string | null, description_ai_pos?: string | null, front?: string | null, back?: string | null, sleeve?: string | null, hood?: string | null, type?: string | null, plf_price?: number | null, tags?: Array<string | null> | null, collections?: Array<string | null> | null, size_chart?: string | null, fix_profit?: number | null, fixed_profit?: number | null, tax_fee_fix?: number | null, tax_fee?: number | null, include_size_chart?: boolean | null, custom_name?: boolean | null, include_extend_images?: boolean | null, ebay_template_id?: string | null, sku?: string | null, barcode?: string | null, barcode_type?: string | null, price_addition?: number | null, price?: number | null, images?: Array<{ __typename?: 'Image', src?: string | null } | null> | null, prety_attributes?: Array<{ __typename?: 'PretyAttribute', attribute_type?: string | null, plf_attribute_name?: string | null, options?: Array<{ __typename?: 'PretyAttributeOption', ffm_value?: string | null, plf_value?: string | null, plf_price?: number | null, hex?: string | null, default?: boolean | null } | null> | null } | null> | null, specifics?: Array<{ __typename?: 'ItemSpecific', key?: string | null, value?: string | null, required?: string | null } | null> | null, attribute_specifics?: Array<{ __typename?: 'SpecificAttribute', sale_price?: number | null, base_price?: number | null, fix_profit?: number | null, fixed_profit?: number | null, sku?: string | null, barcode?: string | null, name_value?: Array<{ __typename?: 'NameValueType', name?: string | null, type?: string | null, value?: string | null } | null> | null } | null> | null, attribute_specifics_modify?: Array<{ __typename?: 'SpecificAttribute', sale_price?: number | null, base_price?: number | null, fix_profit?: number | null, fixed_profit?: number | null, sku?: string | null, barcode?: string | null, name_value?: Array<{ __typename?: 'NameValueType', name?: string | null, type?: string | null, value?: string | null } | null> | null } | null> | null, shipping_preset_info?: { __typename?: 'ShippingPreset', dispatch_time_max?: string | null, shipping_time_max?: string | null, location?: string | null, location_detail?: string | null, country?: string | null, shipping_service?: string | null, shipping_cost?: string | null, shipping_additional_cost?: string | null, return_accept?: string | null, global_shipping?: string | null, international_shipping_time_max?: string | null, international_location?: string | null, international_shipping_service?: string | null, international_shipping_cost?: string | null, international_shipping_additional_cost?: string | null, international_return_accept?: string | null, default_quantity?: string | null } | null, platform_category?: Array<{ __typename?: 'PlatformCategory', type?: string | null, category_selected?: Array<{ __typename?: 'PlatformCategorySelected', id?: string | null, level?: string | null, name?: string | null, parent?: string | null } | null> | null } | null> | null, platform_specifics?: Array<{ __typename?: 'PlatformItemSpecific', platform?: string | null, specifics?: Array<{ __typename?: 'ItemSpecific', key?: string | null, value?: string | null, required?: string | null } | null> | null } | null> | null, extend_images?: Array<{ __typename?: 'Image', src?: string | null } | null> | null } | null };
+
 export type InfoQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -5658,6 +5731,7 @@ export type InfoQuery = { __typename?: 'RootQuery', info?: { __typename?: 'Info'
 
 export type ItemsInfoQueryVariables = Exact<{
   identity?: InputMaybe<Scalars['String']>;
+  identities?: InputMaybe<Array<InputMaybe<Scalars['String']>> | InputMaybe<Scalars['String']>>;
 }>;
 
 
@@ -5880,6 +5954,47 @@ export const OrderFragmentDoc = gql`
   status
 }
     `;
+export const PutItemToStoreDocument = gql`
+    mutation PutItemToStore($_id: String, $account_id: String, $account_name: String, $account_type: String) {
+  putItemToStore(
+    _id: $_id
+    account_id: $account_id
+    account_name: $account_name
+    account_type: $account_type
+  ) {
+    ...ItemInfo
+  }
+}
+    ${ItemInfoFragmentDoc}`;
+export type PutItemToStoreMutationFn = Apollo.MutationFunction<PutItemToStoreMutation, PutItemToStoreMutationVariables>;
+
+/**
+ * __usePutItemToStoreMutation__
+ *
+ * To run a mutation, you first call `usePutItemToStoreMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `usePutItemToStoreMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [putItemToStoreMutation, { data, loading, error }] = usePutItemToStoreMutation({
+ *   variables: {
+ *      _id: // value for '_id'
+ *      account_id: // value for 'account_id'
+ *      account_name: // value for 'account_name'
+ *      account_type: // value for 'account_type'
+ *   },
+ * });
+ */
+export function usePutItemToStoreMutation(baseOptions?: Apollo.MutationHookOptions<PutItemToStoreMutation, PutItemToStoreMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<PutItemToStoreMutation, PutItemToStoreMutationVariables>(PutItemToStoreDocument, options);
+      }
+export type PutItemToStoreMutationHookResult = ReturnType<typeof usePutItemToStoreMutation>;
+export type PutItemToStoreMutationResult = Apollo.MutationResult<PutItemToStoreMutation>;
+export type PutItemToStoreMutationOptions = Apollo.BaseMutationOptions<PutItemToStoreMutation, PutItemToStoreMutationVariables>;
 export const InfoDocument = gql`
     query Info {
   info {
@@ -5915,8 +6030,8 @@ export type InfoQueryHookResult = ReturnType<typeof useInfoQuery>;
 export type InfoLazyQueryHookResult = ReturnType<typeof useInfoLazyQuery>;
 export type InfoQueryResult = Apollo.QueryResult<InfoQuery, InfoQueryVariables>;
 export const ItemsInfoDocument = gql`
-    query ItemsInfo($identity: String) {
-  itemsInfo(identity: $identity) {
+    query ItemsInfo($identity: String, $identities: [String]) {
+  itemsInfo(identity: $identity, identities: $identities) {
     ...ItemInfo
   }
 }
@@ -5935,6 +6050,7 @@ export const ItemsInfoDocument = gql`
  * const { data, loading, error } = useItemsInfoQuery({
  *   variables: {
  *      identity: // value for 'identity'
+ *      identities: // value for 'identities'
  *   },
  * });
  */

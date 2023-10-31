@@ -1,5 +1,5 @@
-query ItemsInfo($identity: String) {
-    itemsInfo(identity: $identity) {
+query ItemsInfo($identity: String, $identities: [String]) {
+    itemsInfo(identity: $identity, identities: $identities) {
         ...ItemInfo
     }
 }

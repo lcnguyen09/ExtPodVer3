@@ -1,0 +1,5 @@
+mutation PutItemToStore($_id: String, $account_id: String, $account_name: String, $account_type: String) {
+    putItemToStore(_id: $_id, account_id: $account_id, account_name: $account_name, account_type: $account_type) {
+        ...ItemInfo
+    }
+}

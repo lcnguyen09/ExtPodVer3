@@ -48,10 +48,11 @@ export default function Layout({ children }: { children: ReactNode }) {
                             : false
                     }
                 >
-                    <CardTitle className='mb-0'>
+                    <CardTitle className='mb-0 d-flex align-items-center'>
                         <a href='https://account.podorders.store' target='_blank' rel='noreferrer' className='d-block'>
                             <div className='brand-logo' />
                         </a>
+                        <span className='ml-1'>v3.3.2</span>
                     </CardTitle>
                     <div className='actions d-flex justify-content-end align-items-center'>
                         <RotateCw cursor='pointer' size={13} onClick={() => {

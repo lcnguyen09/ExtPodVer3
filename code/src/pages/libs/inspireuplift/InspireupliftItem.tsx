@@ -2,16 +2,17 @@ import { useEffect, useState } from 'react';
 import { Button, Col, Input, Label, Row, Spinner } from 'reactstrap';
 import { PlusCircle } from 'react-feather';
 import UiContext from './../../../contexts/ui.context';
-import { useItemsInfoLazyQuery } from '../../../graphql/graphql';
+import { useItemsInfoLazyQuery, usePutItemToStoreMutation } from '../../../graphql/graphql';
 import Notification from './../../../components/Notification';
 import BottomBar from './../../../components/BottomBar';
 import $ from 'jquery';
 import { filter, find, flatMapDeep, get, head, map, startsWith, toLower, toUpper, trim } from 'lodash';
 
-export default function (Identifier: any) {
+export default function ({ Identifier, storeData }: any) {
 	const {
 		appMode,
 		sleep,
+		$x,
 		movingOnElm,
 		fillTextInput,
 		fillTextArea,
@@ -25,6 +26,7 @@ export default function (Identifier: any) {
 	} = UiContext.UseUIContext();
 
 	const [itemsInfoQuery] = useItemsInfoLazyQuery({ fetchPolicy: 'network-only' });
+	const [putItemToStoreMutation] = usePutItemToStoreMutation({ fetchPolicy: 'network-only' });
 
 	const { currentDocker, currentToken } = UiContext.UseUIContext();
 
@@ -61,46 +63,27 @@ export default function (Identifier: any) {
 
 	const handleClearData = async () => {
 		return new Promise(async (resolve, reject) => {
-			let timeout = 0;
+			let index = 0;
 			if ($(`img[src="/images/icons/cancel-icon.svg"]`).length) {
 				const promisesAttrClear: any = [];
-				timeout = 0;
-				filter($(`img[src="/images/icons/cancel-icon.svg"]`), (index: number) => {
-					timeout += 2000;
-					promisesAttrClear.push(
-						new Promise(async (resolve, reject) => {
-							await sleep(timeout);
-							await clickButton(`img[src="/images/icons/cancel-icon.svg"]`);
-							return resolve(true);
-						})
-					);
-					timeout += 3000;
-					promisesAttrClear.push(
-						new Promise(async (resolve, reject) => {
-							await sleep(timeout);
-							await clickButton(`button.rrt-ok-btn`);
-							return resolve(true);
-						})
-					);
-				});
-				await Promise.allSettled(promisesAttrClear);
+				index = 0;
+				while ($(`img[src="/images/icons/cancel-icon.svg"]`)[index]) {
+					await sleep(2000);
+					await clickButton(`img[src="/images/icons/cancel-icon.svg"]`);
+					await sleep(1000);
+					await clickButton(`button.rrt-ok-btn`);
+					index++;
+				}
 				await sleep(1000);
 			}
 
 			if ($(`img[src="/images/icons/red-cross.svg"]`).length) {
-				const promisesImgClear: any = [];
-				timeout = 0;
-				filter($(`img[src="/images/icons/red-cross.svg"]`), (index: number) => {
-					timeout += 500;
-					promisesImgClear.push(
-						new Promise(async (resolve, reject) => {
-							await sleep(timeout);
-							await clickButton(`img[src="/images/icons/red-cross.svg"]`);
-							return resolve(true);
-						})
-					);
-				});
-				await Promise.allSettled(promisesImgClear);
+				index = 0;
+				while ($(`img[src="/images/icons/red-cross.svg"]`)[index]) {
+					await sleep(500);
+					await clickButton(`img[src="/images/icons/red-cross.svg"]`);
+					index++;
+				}
 				await sleep(3000);
 			}
 
@@ -109,7 +92,7 @@ export default function (Identifier: any) {
 	};
 
 	const handleFillData = async () => {
-		let timeout = 0;
+		let index = 0;
 		setErrorMsg('');
 		setSuccessMsg('');
 		setWarningMsg([]);
@@ -121,6 +104,17 @@ export default function (Identifier: any) {
 
 		if (get(itemInfo, 'description', '').length > 3000) {
 			errorMsg.push('Item description is too long');
+		}
+		const isWorldWideShip = get(itemInfo, ['shipping_preset_info', 'global_shipping'], '') === 'Accepted';
+
+		if (isWorldWideShip) {
+			if (!head($x(`//option[text()="World Wide"]`))) {
+				errorMsg.push('Shipping Zone is no option to ship World Wide');
+			}
+		} else {
+			if (!head($x(`//option[text()="United States"]`)) && !head($x(`//option[text()="US"]`))) {
+				errorMsg.push('Shipping Zone is no option to ship to (US/United States)');
+			}
 		}
 
 		if (errorMsg.length) {
@@ -195,9 +189,17 @@ export default function (Identifier: any) {
 		await handleClearData();
 
 		await fillTextInput(`input#product-title[name="title"]`, titleReplace);
-		await fillTextArea(`textarea`, description);
 		await fillTextInput(`input#product-price[name="price"]`, minPrice.toFixed(2));
-		await fillSelect(`select[name="zone_id"]`, 'World Wide');
+
+		if (isWorldWideShip) {
+			await fillSelect(`select[name="zone_id"]`, 'World Wide');
+		} else {
+			if (head($x(`//option[text()="United States"]`))) {
+				await fillSelect(`select[name="zone_id"]`, 'United States');
+			} else {
+				await fillSelect(`select[name="zone_id"]`, 'US');
+			}
+		}
 		await fillSelect(`select[name="processing_time"]`, dispatchTime + ' days');
 		await fillCheckbox(`input#sell-stock[name="continueSelling"][type="checkbox"]`, true);
 		if (Array.isArray(itemInfo?.prety_attributes) && itemInfo?.prety_attributes.length) {
@@ -209,93 +211,68 @@ export default function (Identifier: any) {
 		const undefinedAttrs = filter(itemInfo?.prety_attributes, (prety_attribute, index) => {
 			return prety_attribute?.attribute_type !== 'Color' && prety_attribute?.attribute_type !== 'Size';
 		});
-		timeout = 0;
-		await Promise.allSettled(
-			map([...determinedAttrs, ...undefinedAttrs], async (prety_attribute, index) => {
-				if (index) {
-					timeout += 100;
-					let selector = `//button[text()="Add Option"]`;
-					if (prety_attribute?.attribute_type !== 'Color' && prety_attribute?.attribute_type !== 'Size') {
-						selector = `//button[text()="Add Custom Option"]`;
-					}
-					await sleep(timeout);
-					await clickXButton(selector);
+		index = 0;
+		const allAttr = [...determinedAttrs, ...undefinedAttrs];
+		while (allAttr[index]) {
+			if (index) {
+				const prety_attribute = allAttr[index];
+				let selector = `//button[text()="Add Option"]`;
+				if (prety_attribute?.attribute_type !== 'Color' && prety_attribute?.attribute_type !== 'Size') {
+					selector = `//button[text()="Add Custom Option"]`;
 				}
-				return Promise.resolve();
-			})
-		);
+				await sleep(100);
+				await clickXButton(selector);
+			}
+			index++;
+		}
 
-		timeout = 0;
-		await Promise.allSettled(
-			map(determinedAttrs, async (prety_attribute, index) => {
-				timeout += 150;
-				const elm = head($(`option[value="${toLower(prety_attribute?.attribute_type)}"]:eq(${index})`)) as any;
-				await sleep(timeout);
-				await fillSelect(elm.parentElement, prety_attribute?.attribute_type);
-				return Promise.resolve();
-			})
-		);
+		index = 0;
+		while (determinedAttrs[index]) {
+			const prety_attribute = determinedAttrs[index];
+			const elm = head($(`option[value="${toLower(prety_attribute?.attribute_type)}"]:eq(${index})`)) as any;
+			await sleep(150);
+			await fillSelect(elm.parentElement, prety_attribute?.attribute_type);
+			index++;
+		}
 
-		timeout = 0;
-		await Promise.allSettled(
-			map(undefinedAttrs, async (prety_attribute, index) => {
-				timeout += 150;
-				await sleep(timeout);
-				await fillTextInput(`input#option-title:eq(${index})`, prety_attribute?.attribute_type);
-				return Promise.resolve();
-			})
-		);
+		index = 0;
+		while (undefinedAttrs[index]) {
+			const prety_attribute = undefinedAttrs[index];
+			await sleep(150);
+			await fillTextInput(`input#option-title:eq(${index})`, prety_attribute?.attribute_type);
+			index++;
+		}
 
 		let quantity = Array.isArray(itemInfo?.attribute_specifics_modify)
 			? itemInfo?.attribute_specifics_modify.length
 			: 9;
 		await fillTextInput(`input#product-available-inventory`, quantity ? quantity : 1);
 
-		const promises: any = [];
-		timeout = 0;
-		filter([...determinedAttrs, ...undefinedAttrs], (prety_attribute, index: number) => {
-			filter(get(prety_attribute, 'options', []), (op, idx: number) => {
-				const promise = new Promise(async (resolve, reject) => {
-					timeout += 300;
-					await sleep(timeout);
-					await ($(`input.ReactTags__tagInputField:eq(${index})`).first() as any)?.focus();
-					await fillTextInput(`input.ReactTags__tagInputField:eq(${index})`, op?.plf_value);
-					await ($('input#ext-item-id-input').first() as any)?.focus();
-					return resolve(true);
-				});
-				promises.push(promise);
-			});
-		});
-		await sleep(3000);
-		await Promise.allSettled(promises);
+		await sleep(2000);
+		index = 0;
+		while (allAttr[index]) {
+			const prety_attribute = allAttr[index];
+			let idx = 0;
+			const options = get(prety_attribute, 'options', []);
+			while (options[idx]) {
+				const op = options[idx];
+				await sleep(300);
+				await ($(`input.ReactTags__tagInputField:eq(${index})`).first() as any)?.focus();
+				await fillTextInput(`input.ReactTags__tagInputField:eq(${index})`, op?.plf_value);
+				await sleep(100);
+				await ($('input#ext-item-id-input').first() as any)?.focus();
+				idx++;
+			}
+			index++;
+		}
+
 		const selectorQuery = `table.variants-table-container input[name='price']:not([id*="product-price"]):visible`;
 		const selector = $(selectorQuery);
 		const selectorQuantity = `table.variants-table-container input[name='quantity']:not([id*="product-price"])`;
 		const button = `table.variants-table-container button[type='button']`;
-		timeout = 0;
-		const promisesPrice: any = [];
-		const promisesAttrRemove: any = [];
-		filter(selector, (elm, index) => {
-			let valMerge = $(`input[name="variantCheck"]:eq(${index})`).first().val();
-			const valueAttr = find(itemInfo?.attribute_specifics_modify, (attribute_specifics_modify) => {
-				return (
-					toUpper(map(attribute_specifics_modify?.name_value, (name_value) => name_value?.value).join('-')) === valMerge
-				);
-			});
-			const price = valueAttr?.sale_price;
-			const promise = new Promise(async (resolve, reject) => {
-				timeout += 250;
-				await sleep(timeout);
-				await fillTextInput(`${selectorQuery}:eq(${index})`, parseFloat(price ? price : maxPrice).toFixed(2));
-				await fillTextInput(`${selectorQuantity}:eq(${index})`, 1);
-				return resolve(true);
-			});
-			promisesPrice.push(promise);
-		});
-		await Promise.allSettled(promisesPrice);
 
-		timeout = 0;
-		filter(selector, (elm, index) => {
+		index = 0;
+		while (selector[index]) {
 			let valMerge = $(`input[name="variantCheck"]:eq(${index})`).first().val();
 			const valueAttr = find(itemInfo?.attribute_specifics_modify, (attribute_specifics_modify) => {
 				return (
@@ -303,18 +280,27 @@ export default function (Identifier: any) {
 				);
 			});
 			const price = valueAttr?.sale_price;
-			const promise = new Promise(async (resolve, reject) => {
-				timeout += 50;
-				if (!price && $(`${button}:eq(${index})`).first().attr('aria-checked') === 'true') {
-					timeout += 50;
-					await sleep(timeout);
-					await clickButton(`${button}:eq(${index})`);
-				}
-				return resolve(true);
+			await sleep(250);
+			await fillTextInput(`${selectorQuery}:eq(${index})`, parseFloat(price ? price : maxPrice).toFixed(2));
+			await fillTextInput(`${selectorQuantity}:eq(${index})`, 1);
+			index++;
+		}
+
+		index = 0;
+		while (selector[index]) {
+			let valMerge = $(`input[name="variantCheck"]:eq(${index})`).first().val();
+			const valueAttr = find(itemInfo?.attribute_specifics_modify, (attribute_specifics_modify) => {
+				return (
+					toUpper(map(attribute_specifics_modify?.name_value, (name_value) => name_value?.value).join('-')) === valMerge
+				);
 			});
-			promisesAttrRemove.push(promise);
-		});
-		await Promise.allSettled(promisesAttrRemove);
+			const price = valueAttr?.sale_price;
+			if (!price && $(`${button}:eq(${index})`).first().attr('aria-checked') === 'true') {
+				await sleep(100);
+				await clickButton(`${button}:eq(${index})`);
+			}
+			index++;
+		}
 
 		if (get(platform_category, [0, 'name'])) {
 			await fillSelect(`select[name="productMain"]:eq(0)`, trim(get(platform_category, [0, 'name'])));
@@ -337,40 +323,43 @@ export default function (Identifier: any) {
 			await sleep(500);
 		}
 
+		await fillTextArea(`textarea`, description);
+
 		await sleep(2000);
 		const resImg = await fillInputFile(`input[type="file"]:not([id*="my-image-file"])`, pictures);
 
-		const warningMsg = WarningMsg;
-		if (filter(resImg, (res) => res === false)) {
+		const warningMsg = [];
+		// if (filter(resImg, (res) => res === false)) {
+		// 	warningMsg.push('Image upload wrong, check again');
+		// }
+		// if (filter(resImg, (res) => res === 'webp')) {
+		// 	warningMsg.push('Webp image not support, check again');
+		// }
+		// setWarningMsg(warningMsg);
+
+		while ($x(`//div[text()="Uploading Images"]`).length) {
+			await sleep(2000);
+		}
+
+		await sleep(3000);
+		if ($(`.get-files-primary .main-img-container`).length !== pictures.length) {
 			warningMsg.push('Image upload wrong, check again');
+			setWarningMsg(warningMsg);
 		}
-		if (filter(resImg, (res) => res === 'webp')) {
-			warningMsg.push('Webp image not support, check again');
+
+		if (autoSave) {
+			await clickXButton(`//button/span[text()="Save"]`);
 		}
-		setWarningMsg(warningMsg);
+		setOnFillData(false);
+		setSuccessMsg('Fill data done.');
+
+		while (!head($x(`//span[text()="Duplicate"]`))) {
+			await sleep(3000);
+		}
+		setOnFillData(true);
+		await handlePutItemToStore()
 		setOnFillData(false);
 
-		if (autoSave && warningMsg.length) {
-			let count = 0;
-			const intVal = setInterval(async () => {
-				if ($(`.get-files-primary .main-img-container`).length === pictures.length) {
-					setSuccessMsg('Saving...');
-					await sleep(2000);
-					await clickXButton(`//button/span[text()="Save"]`);
-					clearInterval(intVal);
-				} else if (
-					$(`.get-files-primary .main-img-container`).length &&
-					$(`.get-files-primary .main-img-container`).length !== pictures.length
-				) {
-					count++;
-					if (count > 5) {
-						return setErrorMsg('Some image upload failed, please check again then click save product');
-					}
-				}
-			}, 500);
-			return setSuccessMsg('Fill data done.');
-		}
-		setSuccessMsg('Fill data done.');
 	};
 
 	const handleGetItemData = () => {
@@ -403,6 +392,33 @@ export default function (Identifier: any) {
 				.catch(() => {
 					setErrorMsg('Fail to get item info');
 					setLoading(false);
+					reject(false);
+				});
+		});
+	};
+
+	const handlePutItemToStore = async () => {
+		if (!itemInfo?._id || !storeData?.account_id || !storeData?.account_name) {
+			return;
+		}
+		console.log(itemInfo);
+		return new Promise((resolve, reject) => {
+			setGraphqlForHub()
+				.then(() =>
+					putItemToStoreMutation({
+						variables: {
+							_id: itemInfo?._id,
+							account_id: storeData?.account_id,
+							account_name: storeData?.account_name,
+							account_type: 'Inspireuplift'
+						},
+						fetchPolicy: 'network-only',
+					})
+				)
+				.then((response: any) => {
+					resolve(true);
+				})
+				.catch(() => {
 					reject(false);
 				});
 		});
@@ -465,10 +481,10 @@ export default function (Identifier: any) {
 							}
 						)}
 						{itemInfo?.include_size_chart &&
-						itemInfo?.size_chart &&
-						itemInfo?.size_chart !== '' &&
-						itemInfo?.size_chart !== null &&
-						startsWith(itemInfo?.size_chart, 'http') ? (
+							itemInfo?.size_chart &&
+							itemInfo?.size_chart !== '' &&
+							itemInfo?.size_chart !== null &&
+							startsWith(itemInfo?.size_chart, 'http') ? (
 							<Col sm={4} className='mb-2 px-1 ext-imgs-list'>
 								<img
 									src={itemInfo?.size_chart}
@@ -483,26 +499,26 @@ export default function (Identifier: any) {
 						)}
 						{itemInfo?.include_extend_images && itemInfo?.extend_images && Array.isArray(itemInfo?.extend_images)
 							? map(
-									filter(
-										map(itemInfo?.extend_images, ({ src }) =>
-											startsWith(src, '//') ? window.location.protocol + src : src
-										),
-										(src) => !startsWith(src, 'data:image')
+								filter(
+									map(itemInfo?.extend_images, ({ src }) =>
+										startsWith(src, '//') ? window.location.protocol + src : src
 									),
-									(img, index) => {
-										return (
-											<Col sm={4} className='mb-2 px-1 ext-imgs-list' key={`extend-${index}`}>
-												<img
-													src={img}
-													alt={img}
-													width='100%'
-													height='100%'
-													className={`cursor-pointer border rounded border-3`}
-												/>
-											</Col>
-										);
-									}
-							  )
+									(src) => !startsWith(src, 'data:image')
+								),
+								(img, index) => {
+									return (
+										<Col sm={4} className='mb-2 px-1 ext-imgs-list' key={`extend-${index}`}>
+											<img
+												src={img}
+												alt={img}
+												width='100%'
+												height='100%'
+												className={`cursor-pointer border rounded border-3`}
+											/>
+										</Col>
+									);
+								}
+							)
 							: false}
 					</Row>
 				) : (

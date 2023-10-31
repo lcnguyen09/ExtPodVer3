@@ -1,32 +1,48 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button, Spinner, Table } from 'reactstrap';
-import { RefreshCw, UploadCloud } from 'react-feather';
+import { DownloadCloud, RefreshCw, Save, UploadCloud } from 'react-feather';
 import UiContext from './../../../contexts/ui.context';
 import Notification from './../../../components/Notification';
 import BottomBar from './../../../components/BottomBar';
 import $ from 'jquery';
-import { filter, find, findIndex, get, head, last, map, unionBy } from 'lodash';
+import { filter, find, findIndex, get, head, last, map, set, trim, unionBy } from 'lodash';
 
-export default function ({ Identifier }: any) {
-	const { currentDocker, currentToken, templateId, urlRestApi, $x } = UiContext.UseUIContext();
+export default function ({ Identifier, storeData }: any) {
+	const { currentDocker, currentToken, templateId, urlRestApi, $x, fillTextInput, clickXButton, clickButton, sleep } =
+		UiContext.UseUIContext();
 
 	const [pathname, setPathname] = useState(window.location.pathname);
 
-	const [Loading, setLoading] = useState<boolean>(true);
+	const [Loading, setLoading] = useState<boolean>(false);
 	const [LoadingStatus, setLoadingStatus] = useState<boolean>(true);
 	const [ErrorMsg, setErrorMsg] = useState('');
 	const [SuccessMsg, setSuccessMsg] = useState('');
+	const [onFillData, setOnFillData] = useState<boolean>(false);
 
 	const [orders, setOrders] = useState<any[]>([]);
 	const [ordersSync, setOrdersSync] = useState<any[]>([]);
+	const [currentQueryString, setCurrentQueryString] = useState<any>(window.location.search);
 
 	useEffect(() => {
 		setPathname(window.location.pathname);
-	}, [window.location.pathname, window.location.href]);
+	}, [window.location.pathname, window.location.href, window.location.search]);
 
 	useEffect(() => {
-		handleGetOrderData();
+		if ((window as any).myInterval) {
+			clearInterval((window as any).myInterval);
+		}
 	}, []);
+
+	useEffect(() => {
+		if (
+			window.location.pathname === '/order/list' ||
+			window.location.pathname.startsWith('/order/view') ||
+			!orders.length
+		) {
+			handleGetOrderData();
+		}
+		loopGetOrderData();
+	}, [currentQueryString]);
 
 	useEffect(() => {
 		if (currentDocker?.domain && orders && orders.length) {
@@ -42,11 +58,26 @@ export default function ({ Identifier }: any) {
 		return pathname.startsWith('/order/view');
 	}
 
+	function isTracking() {
+		return pathname.startsWith('/order/fulfillment') && pathname.endsWith('/create');
+	}
+
+	function loopGetOrderData() {
+		(window as any).myInterval = setInterval(() => {
+			if (currentQueryString !== window.location.search) {
+				setCurrentQueryString(window.location.search);
+			}
+		}, 1000);
+	}
+
 	function handleGetOrderData() {
 		setLoading(true);
 		new Promise((resolve, reject) => {
-			if (isDetail()) {
-				const id = last(window.location.pathname.split('/'));
+			if (isDetail() || isTracking()) {
+				let id = isDetail() ? last(window.location.pathname.split('/')) : null;
+				id = isTracking()
+					? get(window.location.pathname.split('/'), window.location.pathname.split('/').length - 2)
+					: id;
 				return fetch(`https://sellercentral-api.inspireuplift.com/api/v1/seller/orders/${id}?is_seller=true`, {
 					headers: {
 						accept: 'application/json',
@@ -170,43 +201,236 @@ export default function ({ Identifier }: any) {
 			});
 	}
 
-	function handleSaveOrder(order = null) {
+	function handleSaveOrder(orderSignle = null, index = 0, orderState = orders) {
 		let ordersForSync = filter(orders, (o) => o.checked);
-		if (order) {
-			ordersForSync = [order];
+		if (orderSignle) {
+			ordersForSync = [orderSignle];
 		}
 		setLoading(true);
-		Promise.allSettled(
-			map(ordersForSync, (order) => {
-				return (
-					fetch(
-						`https://sellercentral-api.inspireuplift.com/api/v1/seller/orders/${get(order, 'id', '')}?is_seller=true`,
-						{
-							headers: {
-								accept: 'application/json',
-								'accept-language': 'en-US,en;q=0.9',
-								'sec-ch-ua': '"Chromium";v="116", "Not)A;Brand";v="24", "Google Chrome";v="116"',
-								'sec-ch-ua-mobile': '?0',
-								'sec-ch-ua-platform': '"Windows"',
-								'sec-fetch-dest': 'empty',
-								'sec-fetch-mode': 'cors',
-								'sec-fetch-site': 'same-site',
-							},
-							referrer: 'https://sellercentral.inspireuplift.com/',
-							referrerPolicy: 'strict-origin-when-cross-origin',
-							body: null,
-							method: 'GET',
-							mode: 'cors',
-							credentials: 'include',
+		const order = get(ordersForSync, index);
+		if (!order) {
+			handleGetOrderSync();
+			return setLoading(false);
+		}
+
+		return fetch(
+			`https://sellercentral-api.inspireuplift.com/api/v1/seller/orders/${get(order, 'id', '')}?is_seller=true`,
+			{
+				headers: {
+					accept: 'application/json',
+					'accept-language': 'en-US,en;q=0.9',
+					'sec-ch-ua': '"Chromium";v="116", "Not)A;Brand";v="24", "Google Chrome";v="116"',
+					'sec-ch-ua-mobile': '?0',
+					'sec-ch-ua-platform': '"Windows"',
+					'sec-fetch-dest': 'empty',
+					'sec-fetch-mode': 'cors',
+					'sec-fetch-site': 'same-site',
+				},
+				referrer: 'https://sellercentral.inspireuplift.com/',
+				referrerPolicy: 'strict-origin-when-cross-origin',
+				body: null,
+				method: 'GET',
+				mode: 'cors',
+				credentials: 'include',
+			}
+		)
+			.then((response) => response.json())
+			.then(async (data) => {
+				const orderData = get(data, 'data', {});
+				if (!get(orderData, 'order_number') || !get(orderData, 'seller_order_number')) {
+					throw 'Cannot find order data. Try again.';
+				}
+				return {
+					orderData: orderData,
+					dataRequest: {
+						order_id: get(orderData, 'order_number', ''),
+						identifier: Identifier,
+						fulfillment_note: get(orderData, 'note', ''),
+						shipping_total: get(orderData, ['payment_info', 'shipping'], ''),
+						total_tax: get(orderData, ['payment_info', 'tax'], ''),
+						account_id: get(storeData, 'account_id', ''),
+						account_name: get(storeData, 'account_name', ''),
+						account_type: 'Inspireuplift',
+						shipping_info: {
+							full_name: get(orderData, ['contact_info', 'name'], ''),
+							address_1: get(orderData, ['contact_info', 'shipping_address', 'address1'], ''),
+							address_2: get(orderData, ['contact_info', 'shipping_address', 'address2'], ''),
+							company: '',
+							city: get(orderData, ['contact_info', 'shipping_address', 'city'], ''),
+							state: get(orderData, ['contact_info', 'shipping_address', 'province'], ''),
+							postcode: get(orderData, ['contact_info', 'shipping_address', 'zip'], ''),
+							country: get(orderData, ['contact_info', 'shipping_address', 'country_code'], ''),
+							email: get(orderData, ['contact_info', 'email'], ''),
+							phone: get(orderData, ['contact_info', 'shipping_address', 'phone'], ''),
+						},
+						items: map(get(orderData, 'line_items', []), (li) => {
+							return {
+								name: get(li, 'name', ''),
+								product_id: get(li, 'product_id', ''),
+								order_line_item_id: get(li, 'variant_id', ''),
+								variation_id: get(li, 'variant_id', ''),
+								sku: get(li, 'sku', ''),
+								quantity: get(li, 'quantity', ''),
+								price: get(li, 'price_per_item', ''),
+								currency: 'USD',
+								image: get(head(get(li, 'media', [])), 'url', ''),
+							};
+						}),
+					},
+				};
+			})
+			.then(async (data) => {
+				return await Promise.all(
+					map(unionBy(get(data, ['orderData', 'line_items'], []), 'product_id'), async (item: any) => {
+						if (!item?.product_id || !item?.name) {
+							throw 'Cannot find item, try again';
 						}
-					)
-						.then((response) => response.json())
-						.then((data) => {
-							const orderData = get(data, 'data', {});
-							if (!get(orderData, 'order_number') || !get(orderData, 'seller_order_number')) {
-								throw 'Cannot find order data. Try again.';
+						return fetch(
+							`https://sellercentral-api.inspireuplift.com/api/v1/seller/marketplace/products/list?is_seller=true&search=${item?.name}`,
+							{
+								headers: {
+									accept: 'application/json',
+									'accept-language': 'en-US,en;q=0.9',
+									'sec-ch-ua': '"Chromium";v="116", "Not)A;Brand";v="24", "Google Chrome";v="116"',
+									'sec-ch-ua-mobile': '?0',
+									'sec-ch-ua-platform': '"Windows"',
+									'sec-fetch-dest': 'empty',
+									'sec-fetch-mode': 'cors',
+									'sec-fetch-site': 'same-site',
+								},
+								referrer: 'https://sellercentral.inspireuplift.com/',
+								referrerPolicy: 'strict-origin-when-cross-origin',
+								body: null,
+								method: 'GET',
+								mode: 'cors',
+								credentials: 'include',
 							}
-							return fetch('https://sellercentral-api.inspireuplift.com/api/v1/seller/staff/info?is_seller=true', {
+						)
+							.then((response) => response.json())
+							.then(async (response) => {
+								const itemInfo = find(get(response, ['data', 'data'], []), (itemInfo) => {
+									return get(itemInfo, 'product_id') === item?.product_id;
+								});
+								const itemId = get(itemInfo, 'id', '');
+								if (!itemId) {
+									return Promise.resolve(null);
+								}
+								return fetch(
+									`https://sellercentral-api.inspireuplift.com/api/v1/seller/marketplace/products/${itemId}?is_seller=true`,
+									{
+										headers: {
+											accept: 'application/json',
+											'accept-language': 'en-US,en;q=0.9',
+											'sec-ch-ua': '"Chromium";v="116", "Not)A;Brand";v="24", "Google Chrome";v="116"',
+											'sec-ch-ua-mobile': '?0',
+											'sec-ch-ua-platform': '"Windows"',
+											'sec-fetch-dest': 'empty',
+											'sec-fetch-mode': 'cors',
+											'sec-fetch-site': 'same-site',
+										},
+										referrer: 'https://sellercentral.inspireuplift.com/',
+										referrerPolicy: 'strict-origin-when-cross-origin',
+										body: null,
+										method: 'GET',
+										mode: 'cors',
+										credentials: 'include',
+									}
+								)
+									.then((response) => response.json())
+									.catch((error) => {
+										console.log('error: ', error);
+									});
+							})
+							.catch((error) => {
+								console.log('error: ', error);
+							});
+					})
+				)
+					.then(async (items) => {
+						if (findIndex(items, (item) => !item) >= 0 || !Array.isArray(items) || !items.length) {
+							if (isDetail()) {
+								return await Promise.all(
+									map(unionBy(get(data, ['orderData', 'line_items'], []), 'sku'), async (item: any) => {
+										const attrTemp = $(
+											head(
+												$x(`//span[text()="${item?.sku}"]/parent::p/parent::div/following-sibling::div[1]//p[1]/div`)
+											) as any
+										)?.text();
+										console.log('attrTemp: ', attrTemp);
+										if (attrTemp) {
+											return {
+												product_id: item?.product_id,
+												variant_id: item?.variant_id,
+												variant_attributes: map(attrTemp.split('/'), (attr, index) => {
+													return {
+														code: 'ATTR-' + index,
+														text: trim(attr),
+													};
+												}),
+											};
+										}
+										return null;
+									})
+								).then((items) => {
+									let newItems: any = [];
+									console.log('items: ', items);
+									filter(items, (item: any) => {
+										if (item) {
+											const currentNewItem = find(newItems, (nItem: any) => nItem?.product_id === item?.product_id);
+											const currentNewItemIndex = findIndex(
+												newItems,
+												(nItem: any) => nItem?.product_id === item?.product_id
+											);
+
+											if (!currentNewItem) {
+												newItems.push({
+													product_id: item?.product_id,
+													variants: [
+														{
+															id: item?.variant_id,
+															attributes: item?.variant_attributes,
+														},
+													],
+												});
+											} else {
+												set(
+													newItems,
+													[currentNewItemIndex, 'variants'],
+													[
+														...currentNewItem?.variants,
+														{
+															id: item?.variant_id,
+															attributes: item?.variant_attributes,
+														},
+													]
+												);
+											}
+										} else {
+											newItems.push(false);
+										}
+									});
+									return newItems;
+								});
+							}
+						}
+						return items;
+					})
+					.then((items) => {
+						if (findIndex(items, (item) => !item) >= 0 || !Array.isArray(items) || !items.length) {
+							throw 'The product attribute cannot be determined because the product has been deleted. try again in order detail';
+						}
+						return {
+							...data,
+							itemsData: items,
+						};
+					});
+			})
+			.then(async (dataTotal) => {
+				return new Promise(async (resolve, reject) => {
+					const getTransactionRequest = async (page = 1) => {
+						return fetch(
+							`https://sellercentral-api.inspireuplift.com/api/v1/seller/transactions?page=${page}&is_seller=true`,
+							{
 								headers: {
 									accept: 'application/json',
 									'accept-language': 'en-US,en;q=0.9',
@@ -223,285 +447,188 @@ export default function ({ Identifier }: any) {
 								method: 'GET',
 								mode: 'cors',
 								credentials: 'include',
-							})
-								.then((response) => response.json())
-								.then((data) => {
-									const userData = data;
-									if (!get(userData, 'email', '')) {
-										throw 'Cannot find user data. Try again.';
-									}
-									return {
-										orderData: orderData,
-										userData: userData,
-										dataRequest: {
-											order_id: get(orderData, 'order_number', ''),
-											identifier: Identifier,
-											fulfillment_note: get(orderData, 'note', ''),
-											shipping_total: get(orderData, ['payment_info', 'shipping'], ''),
-											total_tax: get(orderData, ['payment_info', 'tax'], ''),
-											account_id: get(userData, 'email', ''),
-											account_name: get(userData, 'business_name', ''),
-											account_type: 'Inspireuplift',
-											shipping_info: {
-												full_name: get(orderData, ['contact_info', 'name'], ''),
-												address_1: get(orderData, ['contact_info', 'shipping_address', 'address1'], ''),
-												address_2: get(orderData, ['contact_info', 'shipping_address', 'address2'], ''),
-												company: '',
-												city: get(orderData, ['contact_info', 'shipping_address', 'city'], ''),
-												state: get(orderData, ['contact_info', 'shipping_address', 'province'], ''),
-												postcode: get(orderData, ['contact_info', 'shipping_address', 'zip'], ''),
-												country: get(orderData, ['contact_info', 'shipping_address', 'country_code'], ''),
-												email: get(orderData, ['contact_info', 'email'], ''),
-												phone: get(orderData, ['contact_info', 'shipping_address', 'phone'], ''),
-											},
-											items: map(get(orderData, 'line_items', []), (li) => {
-												return {
-													name: get(li, 'name', ''),
-													product_id: get(li, 'product_id', ''),
-													order_line_item_id: get(li, 'variant_id', ''),
-													variation_id: get(li, 'variant_id', ''),
-													sku: get(li, 'sku', ''),
-													quantity: get(li, 'quantity', ''),
-													price: get(li, 'price_per_item', ''),
-													currency: 'USD',
-													image: get(head(get(li, 'media', [])), 'url', ''),
-												};
-											}),
-										},
-									};
-								})
-								.catch(() => {
-									throw 'Cannot find user data. Try again.';
-								});
-						})
-						.then(async (data) => {
-							return await Promise.all(
-								map(unionBy(get(data, ['orderData', 'line_items'], []), 'product_id'), async (item: any) => {
-									console.log('item: ', item);
-									if (!item?.product_id || !item?.name) {
-										setErrorMsg('Cannot find item, try again');
-										throw 'Cannot find item, try again';
-									}
-									return fetch(
-										`https://sellercentral-api.inspireuplift.com/api/v1/seller/marketplace/products/list?is_seller=true&search=${item?.name}`,
-										{
-											headers: {
-												accept: 'application/json',
-												'accept-language': 'en-US,en;q=0.9',
-												'sec-ch-ua': '"Chromium";v="116", "Not)A;Brand";v="24", "Google Chrome";v="116"',
-												'sec-ch-ua-mobile': '?0',
-												'sec-ch-ua-platform': '"Windows"',
-												'sec-fetch-dest': 'empty',
-												'sec-fetch-mode': 'cors',
-												'sec-fetch-site': 'same-site',
-											},
-											referrer: 'https://sellercentral.inspireuplift.com/',
-											referrerPolicy: 'strict-origin-when-cross-origin',
-											body: null,
-											method: 'GET',
-											mode: 'cors',
-											credentials: 'include',
-										}
-									)
-										.then((response) => response.json())
-										.then(async (response) => {
-											const itemInfo = find(get(response, ['data', 'data'], []), (itemInfo) => {
-												return get(itemInfo, 'product_id') === item?.product_id;
-											});
-											const itemId = get(itemInfo, 'id', '');
-											if (!itemId) {
-												return Promise.resolve(null);
-											}
-											return fetch(
-												`https://sellercentral-api.inspireuplift.com/api/v1/seller/marketplace/products/${itemId}?is_seller=true`,
-												{
-													headers: {
-														accept: 'application/json',
-														'accept-language': 'en-US,en;q=0.9',
-														'sec-ch-ua': '"Chromium";v="116", "Not)A;Brand";v="24", "Google Chrome";v="116"',
-														'sec-ch-ua-mobile': '?0',
-														'sec-ch-ua-platform': '"Windows"',
-														'sec-fetch-dest': 'empty',
-														'sec-fetch-mode': 'cors',
-														'sec-fetch-site': 'same-site',
-													},
-													referrer: 'https://sellercentral.inspireuplift.com/',
-													referrerPolicy: 'strict-origin-when-cross-origin',
-													body: null,
-													method: 'GET',
-													mode: 'cors',
-													credentials: 'include',
-												}
-											)
-												.then((response) => response.json())
-												.catch((error) => {
-													console.log('error: ', error);
-												});
-										})
-										.catch((error) => {
-											console.log('error: ', error);
-										});
-								})
-							).then((items) => {
-								if (findIndex(items, (item) => !item) >= 0 || !Array.isArray(items) || !items.length) {
-									throw 'Some orders had errors when imported'
-									throw {
-										order_fail: order.id,
-										msg: 'Some orders had errors when imported',
-									};
-								}
-
-								return {
-									...data,
-									itemsData: items,
-								};
-							});
-						})
-						// if (isDetail()) {
-						// 	const attrTemp = $(head($x(`//span[text()="${item?.sku}"]/parent::p/parent::div/following-sibling::div[1]//p[1]/div`)) as any)?.text()
-						// 	console.log('attrTemp: ', attrTemp);
-						// 	if (attrTemp) {
-						// 		return {
-						// 			product_id: item?.product_id,
-						// 			// variants: []
-						// 		}
-						// 	}
-						// }
-						.then(async (dataTotal) => {
-							return new Promise(async (resolve, reject) => {
-								const getTransactionRequest = async (page = 1) => {
-									return fetch(
-										`https://sellercentral-api.inspireuplift.com/api/v1/seller/transactions?page=${page}&is_seller=true`,
-										{
-											headers: {
-												accept: 'application/json',
-												'accept-language': 'en-US,en;q=0.9',
-												'sec-ch-ua': '"Chromium";v="118", "Google Chrome";v="118", "Not=A?Brand";v="99"',
-												'sec-ch-ua-mobile': '?0',
-												'sec-ch-ua-platform': '"Windows"',
-												'sec-fetch-dest': 'empty',
-												'sec-fetch-mode': 'cors',
-												'sec-fetch-site': 'same-site',
-											},
-											referrer: 'https://sellercentral.inspireuplift.com/',
-											referrerPolicy: 'strict-origin-when-cross-origin',
-											body: null,
-											method: 'GET',
-											mode: 'cors',
-											credentials: 'include',
-										}
-									)
-										.then((response) => response.json())
-										.then((data) => {
-											const transactions = get(data, ['data', 'transactions', 'data']);
-											const lastPage = get(data, ['data', 'transactions', 'last_page']);
-											const transactionData = find(transactions, (trans) => {
-												console.log(get(trans, 'type', ''));
-												console.log(`Seller_Order # ${get(data, ['orderData', 'seller_order_number'], '')}`);
-												return (
-													get(trans, 'type', '') ===
-													`Seller_Order # ${get(dataTotal, ['orderData', 'seller_order_number'], '')}`
-												);
-											});
-											if (transactionData) {
-												resolve(transactionData);
-											} else {
-												if (page === lastPage) {
-													reject('Cannot find transactions');
-												} else {
-													getTransactionRequest(page + 1);
-												}
-											}
-										})
-										.catch((error) => {
-											console.log('error: ', error);
-											reject('Cannot find transactions.');
-										});
-								};
-								getTransactionRequest(1);
-							})
-								.then((transactionsData) => {
-									return {
-										...dataTotal,
-										transactionsData: transactionsData,
-									};
-								})
-								.catch((error) => {
-									console.log('error: ', error);
-									throw 'Cannot find transactions';
-								});
-						})
-						.then((data) => {
-							console.log('data: ', data);
-							const items = get(data, 'itemsData', []);
-							const transactionData = get(data, 'transactionsData', {});
-							const dataRequest = {
-								...get(data, 'dataRequest', {}),
-								total_fee: (
-									parseFloat(get(transactionData, 'commission_fee', '0')) +
-									parseFloat(get(transactionData, 'processing_fee', '0'))
-								).toFixed(2),
-								items: map(get(data, ['dataRequest', 'items'], []), (li) => {
-									const itemData = find(items, (item) => get(item, 'product_id') === get(li, 'product_id', ''));
-									console.log('itemData: ', itemData);
-									const variants = find(
-										get(itemData, 'variants', []),
-										(va) => get(va, 'id') === get(li, 'variation_id', '')
+							}
+						)
+							.then((response) => response.json())
+							.then((data) => {
+								const transactions = get(data, ['data', 'transactions', 'data']);
+								const lastPage = get(data, ['data', 'transactions', 'last_page']);
+								const transactionData = find(transactions, (trans) => {
+									console.log(get(trans, 'type', ''));
+									console.log(`Seller_Order # ${get(data, ['orderData', 'seller_order_number'], '')}`);
+									return (
+										get(trans, 'type', '') ===
+										`Seller_Order # ${get(dataTotal, ['orderData', 'seller_order_number'], '')}`
 									);
-									console.log('variants: ', variants);
-
-									return {
-										...li,
-										item_sku: get(itemData, 'sku', ''),
-										attributes: map(get(variants, 'attributes', []), (va) => {
-											return {
-												name: get(va, 'code', ''),
-												option: get(va, 'text', ''),
-											};
-										}),
-									};
-								}),
-							};
-							return new Promise((resolve, reject) => {
-								const settings = {
-									method: 'POST',
-									url: `${currentDocker?.domain ? `${urlRestApi}/order/create` : '/api/order/create'}`,
-									data: dataRequest,
-									timeout: 0,
-									headers: {
-										Authorization: `Bearer ${currentToken.token}`,
-									},
-								};
-								$.ajax(settings)
-									.done(function (response) {
-										setSuccessMsg('Success');
-										setErrorMsg('');
-										resolve(true);
-									})
-									.fail((response) => {
-										setSuccessMsg('');
-										setErrorMsg(response.responseJSON.error);
-										resolve(true);
-									});
+								});
+								if (transactionData) {
+									resolve(transactionData);
+								} else {
+									if (page === lastPage) {
+										reject('Cannot find transactions');
+									} else {
+										getTransactionRequest(page + 1);
+									}
+								}
+							})
+							.catch((error) => {
+								console.log('error: ', error);
+								reject('Cannot find transactions.');
 							});
-						})
-						.catch((error) => {
-							setLoading(false);
-							setErrorMsg(
-								typeof error === 'string' ? error : error?.toString() ? error?.toString() : JSON.stringify(error)
-							);
-						})
-				);
+					};
+					getTransactionRequest(1);
+				})
+					.then((transactionsData) => {
+						return {
+							...dataTotal,
+							transactionsData: transactionsData,
+						};
+					})
+					.catch((error) => {
+						console.log('error: ', error);
+						throw 'Cannot find transactions';
+					});
 			})
-		)
-			.then(() => {
-				setLoading(false);
-				handleGetOrderSync();
+			.then(async (data) => {
+				console.log('data: ', data);
+				const items = get(data, 'itemsData', []);
+				const transactionData = get(data, 'transactionsData', {});
+				const dataRequest = {
+					...get(data, 'dataRequest', {}),
+					total_fee: (
+						parseFloat(get(transactionData, 'commission_fee', '0')) +
+						parseFloat(get(transactionData, 'processing_fee', '0'))
+					).toFixed(2),
+					items: map(get(data, ['dataRequest', 'items'], []), (li) => {
+						const itemData = find(items, (item) => get(item, 'product_id') === get(li, 'product_id', ''));
+						console.log('itemData: ', itemData);
+						const variants = find(get(itemData, 'variants', []), (va) => get(va, 'id') === get(li, 'variation_id', ''));
+						console.log('variants: ', variants);
+
+						return {
+							...li,
+							item_sku: get(itemData, 'sku', ''),
+							attributes: map(get(variants, 'attributes', []), (va) => {
+								return {
+									name: get(va, 'code', ''),
+									option: get(va, 'text', ''),
+								};
+							}),
+						};
+					}),
+				};
+				console.log('dataRequest: ', dataRequest);
+				return new Promise((resolve, reject) => {
+					const settings = {
+						method: 'POST',
+						url: `${currentDocker?.domain ? `${urlRestApi}/order/create` : '/api/order/create'}`,
+						data: dataRequest,
+						timeout: 0,
+						headers: {
+							Authorization: `Bearer ${currentToken.token}`,
+						},
+					};
+					$.ajax(settings)
+						.done(function (response) {
+							setSuccessMsg('Success');
+							setErrorMsg('');
+							resolve(true);
+						})
+						.fail((response) => {
+							setSuccessMsg('');
+							setErrorMsg(response.responseJSON.error);
+							resolve(true);
+						});
+				}).then(() => {
+					handleSaveOrder(orderSignle, index + 1, orderState);
+				});
 			})
 			.catch((error) => {
-				setLoading(false);
-				handleGetOrderSync();
+				const errorMsg =
+					typeof error === 'string' ? error : error?.toString() ? error?.toString() : JSON.stringify(error);
+				orderState = map(orderState, (o) => {
+					return o?.id === order?.id
+						? {
+							...o,
+							ErrorMsg: errorMsg,
+						}
+						: o;
+				});
+				setOrders(orderState);
+				handleSaveOrder(orderSignle, index + 1, orderState);
 			});
+	}
+
+	function handleFillTracking(orderSignle = null) {
+		if (!orderSignle) {
+			orderSignle = head(orders);
+		}
+		const orderSyns = find(
+			ordersSync,
+			(oS) => String(oS.external_number) === String(get(orderSignle, 'order_number', ''))
+		);
+		return new Promise(async (resolve, reject) => {
+			setOnFillData(true);
+			let timeout = 0;
+			// await handleClearData();
+			await fillTextInput(`input#tracking-number`, get(orderSyns, 'tracking_number', ''));
+			await clickXButton(`//label[text()="Shipping Carriers"]/following-sibling::div/div`);
+			await sleep(1000);
+			await fillTextInput(
+				head($x(`//label[text()="Shipping Carriers"]/following-sibling::div/div//input`)),
+				get(orderSyns, 'tracking_company', '')
+			);
+			timeout = 0;
+			await sleep(1000);
+			await new Promise(async (resolve, reject) => {
+				const tryClick = async () => {
+					console.log('tryClick: ');
+					await sleep(1000);
+					await clickXButton(
+						`//label[text()="Shipping Carriers"]/following-sibling::div/div//div[text()="${get(
+							orderSyns,
+							'tracking_company',
+							''
+						)}"]`
+					);
+					console.log(
+						head(
+							$x(
+								`//label[text()="Shipping Carriers"]/following-sibling::div/div[text()="${get(
+									orderSyns,
+									'tracking_company',
+									''
+								)}"]`
+							)
+						)
+					);
+					if (
+						!head(
+							$x(
+								`//label[text()="Shipping Carriers"]/following-sibling::div/div[text()="${get(
+									orderSyns,
+									'tracking_company',
+									''
+								)}"]`
+							)
+						)
+					) {
+						tryClick();
+					} else {
+						resolve(true);
+					}
+				};
+				tryClick();
+			});
+
+			await sleep(1000);
+			await fillTextInput(`input.rc-input-number-input`, 1);
+			await sleep(2000);
+			await clickButton(`button[type="submit"]`);
+			resolve(true);
+		}).then(() => {
+			setOnFillData(false);
+		});
 	}
 
 	return (
@@ -558,9 +685,16 @@ export default function ({ Identifier }: any) {
 								default:
 							}
 							color = order?.ErrorMsg ? 'danger' : color;
+							let rowSpan = 1;
+							if (orderSyns && get(orderSyns, 'status', 'New') !== 'Trash' && orderSyns?.tracking_number) {
+								rowSpan++;
+							}
+							if (order?.ErrorMsg) {
+								rowSpan++;
+							}
 							return [
 								<tr key={get(order, 'order_number', '') + index}>
-									<td rowSpan={order?.ErrorMsg ? 2 : 1}>
+									<td rowSpan={rowSpan}>
 										<input
 											type='checkbox'
 											checked={!!order.checked}
@@ -574,7 +708,7 @@ export default function ({ Identifier }: any) {
 											}
 										/>
 									</td>
-									<td className={`${order?.ErrorMsg ? 'border-bottom-none' : ''}`}>
+									<td className={`${rowSpan > 1 ? 'border-bottom-none' : ''}`}>
 										<strong
 											className='cursor-pointer'
 											onClick={() =>
@@ -588,7 +722,7 @@ export default function ({ Identifier }: any) {
 											{get(order, 'order_number', '')}-{get(order, 'seller_order_number', '')}
 										</strong>
 									</td>
-									<td className={`text-center ${order?.ErrorMsg ? 'border-bottom-none' : ''}`}>
+									<td className={`text-center ${rowSpan > 1 ? 'border-bottom-none' : ''}`}>
 										{LoadingStatus ? (
 											<Spinner />
 										) : (
@@ -597,9 +731,22 @@ export default function ({ Identifier }: any) {
 											</span>
 										)}
 									</td>
-									<td className={`text-center ${order?.ErrorMsg ? 'border-bottom-none' : ''}`}>
-										{orderSyns ? (
-											false
+									<td className={`text-center ${rowSpan > 1 ? 'border-bottom-none' : ''}`}>
+										{orderSyns &&
+											get(orderSyns, 'status', 'New') !== 'Trash' &&
+											orderSyns?.tracking_number &&
+											isTracking() ? (
+											<Button
+												size='sm'
+												color='primary'
+												className=''
+												onClick={() => {
+													handleFillTracking(order);
+												}}
+												disabled={!currentDocker?.domain}
+											>
+												<DownloadCloud size={14} />
+											</Button>
 										) : (
 											<Button
 												size='sm'
@@ -610,11 +757,27 @@ export default function ({ Identifier }: any) {
 												}}
 												disabled={!currentDocker?.domain}
 											>
-												<UploadCloud size={14} />
+												<Save size={14} />
 											</Button>
 										)}
 									</td>
 								</tr>,
+								(() => {
+									return orderSyns && get(orderSyns, 'status', 'New') !== 'Trash' && orderSyns?.tracking_number ? (
+										<tr key={get(orderSyns, '_id', '') + index + 'tracking'}>
+											<td colSpan={3}>
+												<p className='text-right mb-1'>
+													Tracking Number: <strong>{orderSyns?.tracking_number}</strong>
+												</p>
+												<p className='text-right mb-1'>
+													Tracking Carrier: <strong>{orderSyns?.tracking_company}</strong>
+												</p>
+											</td>
+										</tr>
+									) : (
+										false
+									);
+								})(),
 								(() => {
 									return order?.ErrorMsg ? (
 										<tr key={get(order, 'order_number', '') + index + 'noti'}>
@@ -630,25 +793,60 @@ export default function ({ Identifier }: any) {
 						})}
 					</tbody>
 				</Table>
+				{onFillData ? (
+					<div
+						style={{
+							position: 'fixed',
+							top: 0,
+							bottom: 0,
+							left: 0,
+							right: 0,
+							zIndex: '2147483647 !important',
+							background: '#6c757d52',
+							display: 'flex',
+							justifyContent: 'center',
+							alignItems: 'center',
+						}}
+					>
+						<Spinner color='info' />
+					</div>
+				) : (
+					false
+				)}
 			</div>
 			<BottomBar>
 				<Button
 					size='xs'
 					color='primary'
-					className='py-1 d-flex justify-content-center align-items-center'
-					onClick={() => handleGetOrderData()}
+					className='py-1 d-flex justify-content-center align-items-center flex-column'
+					onClick={() => {
+						handleGetOrderData();
+						setSuccessMsg('');
+						setErrorMsg('');
+					}}
 				>
-					<RefreshCw size={14} /> <span style={{ marginLeft: '3px' }}>Reload order data</span>
+					<RefreshCw size={14} /> <span style={{ marginLeft: '3px' }}>Reload data</span>
 				</Button>
-				<Button
-					size='xs'
-					color='success'
-					className='py-1 d-flex justify-content-center align-items-center'
-					onClick={() => handleSaveOrder()}
-					disabled={!currentDocker?.domain || !find(orders, (order) => order.checked)}
-				>
-					<UploadCloud size={14} /> <span style={{ marginLeft: '3px' }}>Sync checked orders</span>
-				</Button>
+				{isTracking() ? (
+					<Button
+						size='xs'
+						color='primary'
+						className='py-1 d-flex justify-content-center align-items-center flex-column'
+						onClick={() => handleFillTracking()}
+					>
+						<Save size={14} /> <span style={{ marginLeft: '3px' }}>Fill tracking</span>
+					</Button>
+				) : (
+					<Button
+						size='xs'
+						color='success'
+						className='py-1 d-flex justify-content-center align-items-center flex-column'
+						onClick={() => handleSaveOrder()}
+						disabled={!currentDocker?.domain || !find(orders, (order) => order.checked)}
+					>
+						<Save size={14} /> <span style={{ marginLeft: '3px' }}>Save orders</span>
+					</Button>
+				)}
 			</BottomBar>
 		</>
 	);
