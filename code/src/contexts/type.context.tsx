@@ -58,6 +58,10 @@ export type ACTION =
         currentDocker: DOCKER | null
     }
     | {
+        type: "SET_CURRENT_SERVER"
+        currentServer: String | null
+    }
+    | {
         type: "SET_TEMPLATE_ID"
         templateId: string | null
     }

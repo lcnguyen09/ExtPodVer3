@@ -12,7 +12,7 @@ const colourStyles: StylesConfig = {
 };
 
 export default function NavUser() {
-    const { currentUser, setCurrentUser, currentToken, setCurrentToken, currentDocker, setCurrentDocker, templateId, setTemplateId } = UiContext.UseUIContext()
+    const { currentUser, setCurrentUser, currentToken, setCurrentToken, currentDocker, setCurrentDocker, setCurrentServer, templateId, setTemplateId } = UiContext.UseUIContext()
     const [popoverOpen, togglePopoverOpen] = useState<boolean>(false)
     const wrapperRef = useRef<any>(null);
     useEffect(() => {
@@ -37,6 +37,7 @@ export default function NavUser() {
         setCurrentToken()
         setCurrentUser()
         setCurrentDocker({ _id: "" })
+        setCurrentServer('podorders.store')
     }
 
 

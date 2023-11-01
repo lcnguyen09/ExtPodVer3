@@ -52,7 +52,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                         <a href='https://account.podorders.store' target='_blank' rel='noreferrer' className='d-block'>
                             <div className='brand-logo' />
                         </a>
-                        <span className='ml-1'>v3.3.2</span>
+                        <span className='ml-1 p-2'>v3.3.3</span>
                     </CardTitle>
                     <div className='actions d-flex justify-content-end align-items-center'>
                         <RotateCw cursor='pointer' size={13} onClick={() => {

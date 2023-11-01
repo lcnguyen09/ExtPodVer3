@@ -2,7 +2,13 @@ import React, { ReactNode, createContext, useReducer, useContext, useEffect, use
 import { WINDOW_VIEWS, PAGE_ROUTES, ACTION, TOKEN, CURRENT_USER, DOCKER } from './type.context';
 import { find, get, head } from 'lodash';
 import $ from 'jquery';
-import { APP_MODE, URL_ACCOUNT_GRAPHQL, URL_GRAPHQL, URL_REST_API } from './contants';
+import {
+	APP_MODE,
+	URL_ACCOUNT_GRAPHQL_PODORDER,
+	URL_ACCOUNT_GRAPHQL_SALEHUNTER,
+	URL_GRAPHQL,
+	URL_REST_API,
+} from './contants';
 import convertBlob from './function';
 import { Spinner } from 'reactstrap';
 import reactTriggerChange from './reacttrigger';
@@ -22,6 +28,7 @@ export interface State {
 	currentUser: CURRENT_USER | null;
 	currentToken: TOKEN | null;
 	currentDocker: DOCKER | null;
+	currentServer: String | null;
 	templateId: string | null;
 }
 
@@ -36,6 +43,7 @@ const initialState = {
 	currentUser: null,
 	currentToken: null,
 	currentDocker: null,
+	currentServer: 'podorders.store',
 	templateId: null,
 };
 
@@ -66,6 +74,9 @@ function uiReducer(state: State, action: ACTION) {
 		}
 		case 'SET_CURRENT_DOCKER': {
 			return { ...state, currentDocker: action.currentDocker };
+		}
+		case 'SET_CURRENT_SERVER': {
+			return { ...state, currentServer: action.currentServer };
 		}
 		case 'SET_TEMPLATE_ID': {
 			return { ...state, templateId: action.templateId };
@@ -133,15 +144,22 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	const [init, setInit]: [boolean, (val: boolean) => void] = useState(false);
 	const [token, setToken]: [string | null, (val: string) => void] = useStorage('_pod_ext_token');
 	const [docker, setDocker]: [string | null, (val: string) => void] = useStorage('_pod_ext_docker');
+	const [server, setServer]: [string | null, (val: string) => void] = useStorage('_pod_ext_server');
 	const [windowViewStorage, setWindowViewStorage]: [string | null, (val: string) => void] = useStorage('_pod_ext_view');
 	const [templateIdStorage, setTemplateIdStorage]: [string | null, (val: string) => void] =
 		useStorage('_pod_template_id');
 
 	useEffect(() => {
-		if (token !== null && docker !== null && windowViewStorage !== null && templateIdStorage !== null) {
+		if (
+			token !== null &&
+			docker !== null &&
+			windowViewStorage !== null &&
+			templateIdStorage !== null &&
+			server !== null
+		) {
 			setInit(true);
 		}
-	}, [token, docker, windowViewStorage, templateIdStorage]);
+	}, [token, docker, server, windowViewStorage, templateIdStorage]);
 
 	useEffect(() => {
 		if (init) {
@@ -151,6 +169,8 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 				});
 			if (windowViewStorage !== null) setWindowView(windowViewStorage);
 			if (docker !== null) setCurrentDocker(docker ? { _id: docker } : undefined);
+			if (server !== null) setCurrentServer(server ? server : 'podorders.store');
+
 			if (templateIdStorage !== null) setTemplateId(templateIdStorage);
 		}
 	}, [init]);
@@ -190,10 +210,13 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		if (state.currentDocker?._id !== undefined) {
 			setDocker(state.currentDocker?._id);
 		}
+		if (state.currentServer !== undefined) {
+			setServer(state.currentServer);
+		}
 		if (state.currentToken?.token !== undefined && !!!state.currentToken?.token) {
 			setPageRoute('LOGIN');
 		}
-	}, [state.currentToken?.token, state.currentUser, state.currentDocker?._id]);
+	}, [state.currentToken?.token, state.currentUser, state.currentDocker?._id, state.currentServer]);
 
 	useEffect(() => {
 		if (state.currentDocker?._id && state.currentUser?.docker) {
@@ -226,7 +249,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		dispatch({ type: 'SET_URL_GRAPHQL', urlGraphql });
 	};
 	const setGraphqlForAccount = async () => {
-		setUrlGraphql(URL_ACCOUNT_GRAPHQL);
+		setUrlGraphql(isSaleHunter() ? URL_ACCOUNT_GRAPHQL_SALEHUNTER : URL_ACCOUNT_GRAPHQL_PODORDER);
 	};
 	const setGraphqlForHub = async () => {
 		setUrlGraphql(URL_GRAPHQL(state.currentDocker));
@@ -246,9 +269,14 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	const setCurrentDocker = (currentDocker?: DOCKER) => {
 		dispatch({ type: 'SET_CURRENT_DOCKER', currentDocker });
 	};
+	const setCurrentServer = (currentServer?: String) => {
+		dispatch({ type: 'SET_CURRENT_SERVER', currentServer });
+	};
 	const setTemplateId = (templateId?: string) => {
 		dispatch({ type: 'SET_TEMPLATE_ID', templateId });
 	};
+
+	const isSaleHunter = () => state.currentServer === 'salehunter.io';
 
 	const $x = (xpath: any) => {
 		let results = [];
@@ -265,7 +293,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		try {
 			if (typeof selector !== 'string') return;
 			let elm = $(selector).first() as any;
-			let top = parrentSelector ? elm?.position()?.top : elm?.offset()?.top
+			let top = parrentSelector ? elm?.position()?.top : elm?.offset()?.top;
 			if (elm && top) {
 				await sleep(50);
 				$(parrentSelector ? parrentSelector : [document.documentElement, document.body]).animate(
@@ -457,7 +485,9 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 			setCurrentUser,
 			setCurrentToken,
 			setCurrentDocker,
+			setCurrentServer,
 			setTemplateId,
+			isSaleHunter,
 			$x,
 			sleep,
 			movingOnElm,

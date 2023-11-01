@@ -126,6 +126,12 @@ html {
                         display: inline-block !important;
                     }
 
+                    input[type="radio"] {
+                        min-width: 16px !important;
+                        min-height: 16px !important;
+                        display: inline-block !important;
+                    }
+
                     .overlay-div {
                         z-index: 2147483647;
                         background-color: rgba(0, 0, 0, 0.5);

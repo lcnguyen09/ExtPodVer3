@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import {
 	Button,
 	Form,
@@ -14,20 +14,25 @@ import {
 import UiContext from '../contexts/ui.context';
 import { Eye, EyeOff } from 'react-feather';
 import $ from 'jquery';
-import { URL_ACCOUNT_PODORDER } from './../contexts/contants';
+import { URL_AUTH_PODORDER, URL_AUTH_SALEHUNTER } from './../contexts/contants';
 import { drop, head, map } from 'lodash';
 
 function Login() {
 	const [loading, setLoading]: [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(false);
-	const [email, setEmail]: [string, Dispatch<SetStateAction<string>>] = useState<string>(process.env.REACT_APP_APP_MODE === 'dev' ? 'lechinguyen09@gmail.com' : '');
-	const [password, setPassword]: [string, Dispatch<SetStateAction<string>>] = useState<string>(process.env.REACT_APP_APP_MODE === 'dev' ? 'abc123' : '');
+	const [email, setEmail]: [string, Dispatch<SetStateAction<string>>] = useState<string>(
+		process.env.REACT_APP_APP_MODE === 'dev' ? 'lechinguyen09@gmail.com' : ''
+	);
+	const [password, setPassword]: [string, Dispatch<SetStateAction<string>>] = useState<string>(
+		process.env.REACT_APP_APP_MODE === 'dev' ? 'abc123' : ''
+	);
 	const [errorMsg, setErrorMsg]: [string, Dispatch<SetStateAction<string>>] = useState<string>('');
 	const [pwdVisible, setPwdVisible]: [boolean, Dispatch<SetStateAction<boolean>>] = useState<boolean>(false);
-	const { setPageRoute, setCurrentUser, setCurrentToken } = UiContext.UseUIContext();
+	const { setPageRoute, setCurrentUser, setCurrentToken, currentServer, setCurrentServer, isSaleHunter } =
+		UiContext.UseUIContext();
 
 	function signIn() {
 		$.ajax({
-			url: URL_ACCOUNT_PODORDER,
+			url: isSaleHunter() ? URL_AUTH_SALEHUNTER : URL_AUTH_PODORDER,
 			method: 'POST',
 			data: {
 				email: email,
@@ -87,6 +92,25 @@ function Login() {
 				<i>Please sign-in to your account and start the adventure</i>
 			</p>
 			<Form className='auth-login-form mt-2'>
+				<FormGroup className='mb-2'>
+					<Label>Server: </Label>
+					<div className='d-flex justify-content-around align-items-center'>
+						<div className='d-flex align-items-center'>
+							<Input type='radio' className='mt-0' name='server' id='server-podorders' checked={currentServer !== 'salehunter.io'} onChange={(e) => {
+								if (e.target.checked) {
+									setCurrentServer('podorders.store')
+								}
+							}} /> <Label for='server-podorders' className='p-2'>PodOrders</Label>
+						</div>
+						<div className='d-flex align-items-center'>
+							<Input type='radio' className='mt-0' name='server' id='server-salehunter' checked={currentServer === 'salehunter.io'} onChange={(e) => {
+								if (e.target.checked) {
+									setCurrentServer('salehunter.io')
+								}
+							}} /> <Label for='server-salehunter' className='p-2'>SaleHunter</Label>
+						</div>
+					</div>
+				</FormGroup>
 				<FormGroup>
 					<Label for='login-email'>
 						<i>Email</i>
