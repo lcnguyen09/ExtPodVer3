@@ -26,7 +26,7 @@ import {
 } from 'lodash';
 
 export default function NomalItem() {
-	const { setAppHide, setGraphqlForAccount, movingOnElm, $x } = UiContext.UseUIContext();
+	const { appMode, setAppHide, setGraphqlForAccount, movingOnElm, $x } = UiContext.UseUIContext();
 
 	const [infoQuery] = useInfoLazyQuery({ fetchPolicy: 'network-only' });
 
@@ -81,7 +81,7 @@ export default function NomalItem() {
 	useEffect(() => {
 		if (HasCheck) {
 			if (!item?.name && !items.length) {
-				setAppHide(true);
+				setAppHide(appMode !== 'dev');
 			}
 		}
 	}, [HasCheck]);
@@ -103,6 +103,7 @@ export default function NomalItem() {
 	]);
 
 	function getItemInfo(htmlDOM: any = null) {
+		console.log('Start getItemInfo');
 		const item = {
 			id: getOriginID(htmlDOM),
 			name: getItemName(htmlDOM),
@@ -120,6 +121,7 @@ export default function NomalItem() {
 	}
 
 	function getItemsInfo(htmlDOM: any = null) {
+		console.log('Start getItem(s)Info');
 		if (!htmlDOM) htmlDOM = $('html');
 		const getItemsFromSite = (configRules: any, index: number = 0): any => {
 			const configRule = get(configRules, index, null);
@@ -291,7 +293,7 @@ export default function NomalItem() {
 			<h3 className='text-center'>Item crawl</h3>
 
 			{item?.name ? (
-				<div className='container-fluid mt-2'>
+				<div className='mt-2'>
 					{item?.id ? (
 						<div className='d-flex'>
 							<strong>#ID:</strong>
@@ -342,7 +344,7 @@ export default function NomalItem() {
 					</Row>
 				</div>
 			) : (
-				<div className='container-fluid mt-2'>
+				<div className='mt-2'>
 					<Table bordered>
 						<thead>
 							<tr>

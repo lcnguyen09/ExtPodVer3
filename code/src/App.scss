@@ -106,9 +106,96 @@ html {
                 border-bottom-right-radius: 0px;
                 border-top-right-radius: 0px;
 
+                h3 {
+                    font-size: 20px !important;
+                }
+
+                th {
+                    padding: 6px !important;
+                }
+                td {
+                    padding: 6px !important;
+                }
+
+                label {
+                    margin: 0px !important;
+                }
+
+                button {
+                    padding: 6px !important;
+                }
+
+                input {
+                    padding: 6px !important;
+                }
+
+                img {
+                    border-radius: 6px !important;
+                }
+
+                .row {
+                    margin-left: 6px !important;
+                    margin-right: 6px !important;
+                }
+
+                .col-sm-12 {
+                    padding-left: 6px !important;
+                    padding-right: 6px !important;
+                }
+
+                .p-1 {
+                    padding: 3px !important;
+                }
+
+                .px-1 {
+                    padding-left: 3px !important;
+                    padding-right: 3px !important;
+                }
+
+                .p-2 {
+                    padding: 6px !important;
+                }
+
+                .p-3 {
+                    padding: 9px !important;
+                }
+
+                .mb-1 {
+                    margin-bottom: 3px !important;
+                }
+
+                .mb-2 {
+                    margin-bottom: 6px !important;
+                }
+
+                .mb-3 {
+                    margin-bottom: 9px !important;
+                }
+
+                .mt-1 {
+                    margin-top: 3px !important;
+                }
+
+                .mt-2 {
+                    margin-top: 6px !important;
+                }
+
+                .mt-3 {
+                    margin-top: 9px !important;
+                }
+
+                .mx-3 {
+                    margin-left: 9px !important;
+                    margin-right: 9px !important;
+                }
+
                 #podorder-ext-app-header {
-                    z-index: 2147483647;
-                    height: 35px;
+                    z-index: 2147483647 !important;
+                    height: 35px !important;
+                    display: flex !important;
+                    justify-content: space-between !important;
+                    flex-direction: row !important;
+                    flex-wrap: nowrap !important;
                 }
 
                 #podorder-ext-app-body {

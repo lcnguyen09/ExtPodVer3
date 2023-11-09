@@ -105,7 +105,7 @@ export default function ({ Identifier, storeData }: any) {
 		if (get(itemInfo, 'description', '').length > 3000) {
 			errorMsg.push('Item description is too long');
 		}
-		const isWorldWideShip = get(itemInfo, ['shipping_preset_info', 'global_shipping'], '') === 'Accepted';
+		const isWorldWideShip = get(itemInfo, ['shipping_preset_info', 'global_shipping'], '') === 'Accepted' || !get(itemInfo, 'shipping_preset_info');
 
 		if (isWorldWideShip) {
 			if (!head($x(`//option[text()="World Wide"]`))) {
@@ -265,6 +265,7 @@ export default function ({ Identifier, storeData }: any) {
 			}
 			index++;
 		}
+		await sleep(1000);
 
 		const selectorQuery = `table.variants-table-container input[name='price']:not([id*="product-price"]):visible`;
 		const selector = $(selectorQuery);
@@ -280,12 +281,12 @@ export default function ({ Identifier, storeData }: any) {
 				);
 			});
 			const price = valueAttr?.sale_price;
-			await sleep(250);
+			await sleep(200);
 			await fillTextInput(`${selectorQuery}:eq(${index})`, parseFloat(price ? price : maxPrice).toFixed(2));
 			await fillTextInput(`${selectorQuantity}:eq(${index})`, 1);
 			index++;
 		}
-
+		await sleep(1000);
 		index = 0;
 		while (selector[index]) {
 			let valMerge = $(`input[name="variantCheck"]:eq(${index})`).first().val();
