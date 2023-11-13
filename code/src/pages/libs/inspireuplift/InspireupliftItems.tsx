@@ -325,6 +325,7 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
 			}
 			index++;
 		}
+		await sleep(1000);
 
         const selectorQuery = `table.variants-table-container input[name='price']:not([id*="product-price"]):visible`;
         const selector = $(selectorQuery);
