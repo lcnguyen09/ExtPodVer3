@@ -186,7 +186,7 @@ export default function ({ Identifier, storeData }: any) {
 			method: 'GET',
 			url: `${urlRestApi}/order/orders?${map(orders, (o) => `external_numbers[]=${get(o, 'order_number', '')}`).join(
 				'&'
-			)}&identifier=${Identifier}`,
+			)}&identifier=${Identifier}&store=${get(storeData, 'account_id', '')}&store_type=Inspireuplift`,
 			headers: {
 				Authorization: `Bearer ${currentToken.token}`,
 			},

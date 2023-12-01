@@ -25,6 +25,12 @@ import {
 	union,
 } from 'lodash';
 
+var getLocation = function(href: any) {
+    var l = document.createElement("a");
+    l.href = href;
+    return l;
+};
+
 export default function NomalItem() {
 	const { appMode, setAppHide, setGraphqlForAccount, movingOnElm, $x } = UiContext.UseUIContext();
 
@@ -129,9 +135,11 @@ export default function NomalItem() {
 				return [];
 			}
 			const items: Array<any> = [];
+			console.log(htmlDOM.find(get(configRule, 'block', '')).first());
 			$.each(
 				htmlDOM.find(get(configRule, 'block', '')).first().find(get(configRule, 'loop', '')),
 				(index: number, element: any) => {
+					console.log('element: ', element);
 					const name = trim($(element).find(get(configRule, 'name', '')).first().text());
 					let itemUrl = $(element)
 						.find(get(configRule, 'url', ''))
@@ -224,6 +232,7 @@ export default function NomalItem() {
 		if (!useVar) {
 			return trim(htmlDOM.find(get(ExtensionRule, 'name', '')).first().text());
 		}
+		console.log(htmlDOM.find(get(ExtensionRule, 'name', '')).first());
 		return __INITIAL_STATE__?.product?.product?.title
 			? __INITIAL_STATE__?.product?.product?.title
 			: __NEXT_DATA__?.props?.pageProps?.product?.title
@@ -246,9 +255,18 @@ export default function NomalItem() {
 					const attrIndex = findIndex(get(configRule, 'attr', []), (attr: any) => {
 						return $(element).attr(attr);
 					});
-					const imgAttrTmp = $(element).attr(get(configRule, ['attr', attrIndex], '')) as any;
+					let imgAttrTmp = $(element).attr(get(configRule, ['attr', attrIndex], '')) as any;
+					try {
+						var l = getLocation(imgAttrTmp);
+						const params = new URLSearchParams(l.search)
+						params.delete('width')
+						l.search = params.toString()
+						imgAttrTmp = l.toString()
+						console.log('imgAttrTmp: ', imgAttrTmp);
+					} catch (error) {
+						
+					}
 					let imgUrl = find(split(imgAttrTmp, ' '), (src) => src) as any;
-					console.log('imgUrl: ', imgUrl);
 					try {
 						if (imgUrl && imgUrl.match(/{width}x/gmi)) {
 							let size = '180'
@@ -478,115 +496,106 @@ function NomalItemSave({
 	setErrorMsg: Dispatch<SetStateAction<string>>;
 	setItems: Dispatch<SetStateAction<Array<any>>>;
 }) {
-	const { currentDocker, currentToken, templateId, urlRestApi } = UiContext.UseUIContext();
+	const { currentDocker, currentToken, templateId, urlRestApi, sleep } = UiContext.UseUIContext();
 	const [ForceCreateNew, setForceCreateNew] = useState<boolean>(false);
 
-	function handleSave() {
+	const handleSave = async () => {
 		if (!templateId) {
 			return setErrorMsg('Template item ID not setup!');
 		}
 		if (Items.length) {
 			setLoading(true);
-			return Promise.all(
-				map(Items, (item, index) => {
-					if (!item.checked) {
-						return Promise.resolve(false);
-					}
-					if (!item.itemUrl) {
+			Items = Items.map(i => {
+				return { ...i, done: false }
+			})
+			setItems(Items);
+			let itemDone = []
+			console.log(Items);
+			while (find(Items, item => !item.done && item.checked && item.itemUrl)) {
+				let item = find(Items, item => !item.done && item.checked && item.itemUrl)
+				console.log('item: ', item);
+				let index = findIndex(Items, item => !item.done && item.checked && item.itemUrl)
+
+
+				await new Promise((resolve, reject) => {
+					$.ajax({
+						url: item.itemUrl,
+						method: 'GET',
+					})
+						.done((res) => {
+							const el = document.createElement('html');
+							el.innerHTML = res;
+							const detailDom = $(el);
+							const itemInfo = getItemInfo(detailDom);
+							resolve({
+								...item,
+								...itemInfo,
+							});
+						})
+						.fail((error) => {
+							console.log('error: ', error);
+							resolve(null);
+						});
+				}).then((itemInfo: any) => {
+					console.log('itemInfo: ', itemInfo);
+					if (!itemInfo || !itemInfo?.name || !itemInfo?.images || !itemInfo?.images?.length) {
+						set(Items, [index, 'status'], 'Error');
+						set(Items, [index, 'done'], true);
+						setItems(Items);
 						return Promise.resolve(false);
 					}
 					return new Promise((resolve, reject) => {
-						setTimeout(() => {
-							resolve(true);
-						}, index * 100);
-					})
-						.then(() => {
-							return new Promise((resolve, reject) => {
-								if (item.done) {
-									return resolve({
-										...item,
-										image: item.image,
-									});
+						var settings = {
+							url: `${urlRestApi}/item-clone`,
+							data: {
+								id: templateId,
+								name: itemInfo?.name,
+								url: itemInfo?.itemUrl,
+								images: itemInfo?.images,
+								origin_id: ForceCreateNew ? '' : itemInfo?.id || '',
+							},
+							method: 'GET',
+							timeout: 0,
+							headers: {
+								Authorization: `Bearer ${currentToken.token}`,
+							},
+						};
+						$.ajax(settings)
+							.done((response) => {
+								set(Items, [index, 'done'], true);
+								if (get(response, 'data', '').includes('OK, New Identity is')) {
+									set(Items, [index, 'status'], 'Done');
+									console.log(
+										`%c=======>>> ${get(itemInfo, 'name', '')} ==> ${get(response, 'data', '')}`,
+										'background: #222; color: #bada55'
+									);
+									resolve('0');
+								} else if (get(response, 'data', '') === 'Item not found!') {
+									setErrorMsg('Template item ID not setup!');
+									Items = Items.map(i => {
+										return { ...i, done: true }
+									})
+									setItems(Items);
+									resolve('1');
+								} else if (get(response, 'data', '') === 'Item has exist!') {
+									set(Items, [index, 'status'], 'Exist');
+									console.log(
+										`%c=======>>> ${get(itemInfo, 'name', '')} ==> ${get(response, 'data', '')}`,
+										'background: #222; color: #c73c3c'
+									);
+									resolve('2');
 								}
-								$.ajax({
-									url: item.itemUrl,
-									method: 'GET',
-								})
-									.done((res) => {
-										const el = document.createElement('html');
-										el.innerHTML = res;
-										const detailDom = $(el);
-										const itemInfo = getItemInfo(detailDom);
-										resolve({
-											...item,
-											...itemInfo,
-										});
-									})
-									.fail((error) => {
-										console.log('error: ', error);
-										resolve(null);
-									});
-							});
-						})
-						.then((itemInfo: any) => {
-							console.log('itemInfo: ', itemInfo);
-							if (!itemInfo || !itemInfo?.name || !itemInfo?.images || !itemInfo?.images?.length) {
-								set(Items, [index, 'status'], 'Error');
 								setItems(Items);
-								return Promise.resolve(false);
-							}
-							return new Promise((resolve, reject) => {
-								var settings = {
-									url: `${urlRestApi}/item-clone`,
-									data: {
-										id: templateId,
-										name: itemInfo?.name,
-										url: itemInfo?.itemUrl,
-										images: itemInfo?.images,
-										origin_id: ForceCreateNew ? '' : itemInfo?.id || '',
-									},
-									method: 'GET',
-									timeout: 0,
-									headers: {
-										Authorization: `Bearer ${currentToken.token}`,
-									},
-								};
-								$.ajax(settings)
-									.done((response) => {
-										if (get(response, 'data', '').includes('OK, New Identity is')) {
-											set(Items, [index, 'status'], 'Done');
-											console.log(
-												`%c=======>>> ${get(itemInfo, 'name', '')} ==> ${get(response, 'data', '')}`,
-												'background: #222; color: #bada55'
-											);
-											resolve('0');
-										} else if (get(response, 'data', '') === 'Item not found!') {
-											setErrorMsg('Template item ID not setup!');
-											resolve('1');
-										} else if (get(response, 'data', '') === 'Item has exist!') {
-											set(Items, [index, 'status'], 'Exist');
-											console.log(
-												`%c=======>>> ${get(itemInfo, 'name', '')} ==> ${get(response, 'data', '')}`,
-												'background: #222; color: #c73c3c'
-											);
-											resolve('2');
-										}
-										setItems(Items);
-									})
-									.fail(function () {
-										resolve('3');
-									});
+							})
+							.fail(function () {
+								set(Items, [index, 'done'], true);
+								setItems(Items);
+								resolve('3');
 							});
-						});
-				})
-			)
-				.then((res) => {
-					setLoading(false);
-				})
-				.catch((e) => {
-					console.log('e: ', e);
-					setLoading(false);
+					});
 				});
+			}
+			setLoading(false);
 		} else {
 			if (!ItemTitle) {
 				return setErrorMsg('Item name not found!');

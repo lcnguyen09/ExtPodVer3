@@ -304,8 +304,8 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
 		}
 
         let quantity = Array.isArray(itemInfo?.attribute_specifics_modify)
-            ? itemInfo?.attribute_specifics_modify.length
-            : 9;
+            ? itemInfo?.attribute_specifics_modify.length * 20
+            : 99;
         await fillTextInput(`input#product-available-inventory`, quantity ? quantity : 1);
 
         await sleep(2000);
@@ -342,7 +342,7 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
 			const price = valueAttr?.sale_price;
 			await sleep(250);
 			await fillTextInput(`${selectorQuery}:eq(${index})`, parseFloat(price ? price : maxPrice).toFixed(2));
-			await fillTextInput(`${selectorQuantity}:eq(${index})`, 1);
+			await fillTextInput(`${selectorQuantity}:eq(${index})`, 20);
 			index++;
 		}
 
@@ -526,7 +526,7 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
                             color='success'
                             className='py-1 d-flex justify-content-center align-items-center'
                             onClick={() => {
-                                if (itemIdTxt && itemIdTxt.split(';').length > 1) {
+                                if (itemIdTxt && itemIdTxt.split(';').length > 0) {
                                     setItemIdTxt('');
                                     handleGetItemData(itemIdTxt.split(';'));
                                 }

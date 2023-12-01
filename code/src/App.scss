@@ -12,6 +12,9 @@
 
 html {
     body {
+        iframe#webpack-dev-server-client-overlay {
+            display: none !important;
+        }
         #podorder-ext-app {
             all: unset;
 
