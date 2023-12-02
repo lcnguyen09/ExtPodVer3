@@ -25,10 +25,10 @@ import {
 	union,
 } from 'lodash';
 
-var getLocation = function(href: any) {
-    var l = document.createElement("a");
-    l.href = href;
-    return l;
+var getLocation = function (href: any) {
+	var l = document.createElement("a");
+	l.href = href;
+	return l;
 };
 
 export default function NomalItem() {
@@ -241,17 +241,22 @@ export default function NomalItem() {
 	}
 
 	function getItemImages(htmlDOM: any = null) {
+		console.log('Start getItemImages');
 		const useVar = htmlDOM ? false : true;
 		if (!htmlDOM) htmlDOM = $('html');
 		const getImageFromSite = (configRules: any, index: number = 0): any => {
+			console.log('Start getImageFromSite');
 			const configRule = get(configRules, index, null);
 			if (!configRule) {
 				return [];
 			}
+			console.log(htmlDOM.find(get(configRule, 'block', '')).first());
+			console.log(htmlDOM.find(get(configRule, 'block', '')).first().find(get(configRule, 'loop', '')));
 			const images: Array<any> = [];
 			$.each(
 				htmlDOM.find(get(configRule, 'block', '')).first().find(get(configRule, 'loop', '')),
 				(idx: number, element: any) => {
+					console.log('element: ', element);
 					const attrIndex = findIndex(get(configRule, 'attr', []), (attr: any) => {
 						return $(element).attr(attr);
 					});
@@ -264,9 +269,10 @@ export default function NomalItem() {
 						imgAttrTmp = l.toString()
 						console.log('imgAttrTmp: ', imgAttrTmp);
 					} catch (error) {
-						
+						console.log('error: ', error);
 					}
 					let imgUrl = find(split(imgAttrTmp, ' '), (src) => src) as any;
+					console.log('imgUrl: ', imgUrl);
 					try {
 						if (imgUrl && imgUrl.match(/{width}x/gmi)) {
 							let size = '180'
@@ -538,6 +544,12 @@ function NomalItemSave({
 						});
 				}).then((itemInfo: any) => {
 					console.log('itemInfo: ', itemInfo);
+					itemInfo.images = [
+						itemInfo?.imageUrl,
+						...filter(itemInfo.images, img => {
+							return img !== itemInfo?.imageUrl
+						})
+					]
 					if (!itemInfo || !itemInfo?.name || !itemInfo?.images || !itemInfo?.images?.length) {
 						set(Items, [index, 'status'], 'Error');
 						set(Items, [index, 'done'], true);
