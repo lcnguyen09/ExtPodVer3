@@ -23,10 +23,14 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
         fillInputFile,
         urlGraphql,
         setGraphqlForHub,
+        autoSave,
+        setAutoSave,
+        extendShippingPrice,
+        setExtendShippingPrice
     } = UiContext.UseUIContext();
 
     const [itemsInfoQuery] = useItemsInfoLazyQuery({ fetchPolicy: 'network-only' });
-	const [putItemToStoreMutation] = usePutItemToStoreMutation({ fetchPolicy: 'network-only' });
+    const [putItemToStoreMutation] = usePutItemToStoreMutation({ fetchPolicy: 'network-only' });
 
     const { currentDocker, currentToken } = UiContext.UseUIContext();
 
@@ -43,7 +47,6 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
     );
     const [itemInfos, setItemInfos] = useState<any>([]);
     const [onFillData, setOnFillData] = useState<boolean>(false);
-    const [autoSave, setAutoSave] = useState<boolean>(false);
 
     useEffect(() => {
         setLoading(false);
@@ -64,34 +67,34 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
     }, [window.location.pathname, window.location.href]);
 
     const handleClearData = async () => {
-		return new Promise(async (resolve, reject) => {
-			let index = 0;
-			if ($(`img[src="/images/icons/cancel-icon.svg"]`).length) {
-				const promisesAttrClear: any = [];
-				index = 0;
-				while ($(`img[src="/images/icons/cancel-icon.svg"]`)[index]) {
-					await sleep(2000);
-					await clickButton(`img[src="/images/icons/cancel-icon.svg"]`);
-					await sleep(1000);
-					await clickButton(`button.rrt-ok-btn`);
-					index++;
-				}
-				await sleep(1000);
-			}
+        return new Promise(async (resolve, reject) => {
+            let index = 0;
+            if ($(`img[src="/images/icons/cancel-icon.svg"]`).length) {
+                const promisesAttrClear: any = [];
+                index = 0;
+                while ($(`img[src="/images/icons/cancel-icon.svg"]`)[index]) {
+                    await sleep(2000);
+                    await clickButton(`img[src="/images/icons/cancel-icon.svg"]`);
+                    await sleep(1000);
+                    await clickButton(`button.rrt-ok-btn`);
+                    index++;
+                }
+                await sleep(1000);
+            }
 
-			if ($(`img[src="/images/icons/red-cross.svg"]`).length) {
-				index = 0;
-				while ($(`img[src="/images/icons/red-cross.svg"]`)[index]) {
-					await sleep(500);
-					await clickButton(`img[src="/images/icons/red-cross.svg"]`);
-					index++;
-				}
-				await sleep(3000);
-			}
+            if ($(`img[src="/images/icons/red-cross.svg"]`).length) {
+                index = 0;
+                while ($(`img[src="/images/icons/red-cross.svg"]`)[index]) {
+                    await sleep(500);
+                    await clickButton(`img[src="/images/icons/red-cross.svg"]`);
+                    index++;
+                }
+                await sleep(3000);
+            }
 
-			resolve(true);
-		});
-	};
+            resolve(true);
+        });
+    };
 
 
     const handleFillDatas = async () => {
@@ -110,7 +113,7 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
     };
 
     const handleFillData = async () => {
-		let index = 0;
+        let index = 0;
         setErrorMsg('');
         setSuccessMsg('');
         setWarningMsg([]);
@@ -143,7 +146,7 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
             return
         }
 
-        
+
 
         console.log('ItemInfos: ', ItemInfos);
         console.log(itemInfo);
@@ -161,17 +164,20 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
         }
         await sleep(3000);
 
+        let shippingCost = get(itemInfo, ['shipping_preset_info', 'shipping_cost'], '') ? get(itemInfo, ['shipping_preset_info', 'shipping_cost'], '') : '5'
+		shippingCost = parseFloat(shippingCost)
+
         const isWorldWideShip = get(itemInfo, ['shipping_preset_info', 'global_shipping'], '') === 'Accepted';
 
         if (isWorldWideShip) {
-			if (!head($x(`//option[text()="World Wide"]`))) {
-				errorMsg.push('Shipping Zone is no option to ship World Wide');
-			}
-		} else {
-			if (!head($x(`//option[text()="United States"]`)) && !head($x(`//option[text()="US"]`))) {
-				errorMsg.push('Shipping Zone is no option to ship to (US/United States)');
-			}
-		}
+            if (!head($x(`//option[text()="World Wide"]`))) {
+                errorMsg.push('Shipping Zone is no option to ship World Wide');
+            }
+        } else {
+            if (!head($x(`//option[text()="United States"]`)) && !head($x(`//option[text()="US"]`))) {
+                errorMsg.push('Shipping Zone is no option to ship to (US/United States)');
+            }
+        }
         if (errorMsg.length) {
             set(ItemInfos, [itemInfoIndex, 'errorMsg'], errorMsg.join('; '));
             setItemInfos(ItemInfos);
@@ -184,8 +190,8 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
             parseFloat(attribute_specifics.sale_price)
         );
         if (prices.length) {
-            minPrice = Math.min.apply(Math, prices);
-            maxPrice = Math.max.apply(Math, prices);
+            minPrice = Math.min.apply(Math, prices) + (extendShippingPrice ? shippingCost : 0);
+            maxPrice = Math.max.apply(Math, prices) + (extendShippingPrice ? shippingCost : 0);
         }
         // let minBasePrice = parseFloat(itemInfo?.price);
         // const basePrices = map(itemInfo?.attribute_specifics_modify, (attribute_specifics) =>
@@ -251,14 +257,14 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
         await fillTextInput(`input#product-price[name="price"]`, minPrice.toFixed(2));
 
         if (isWorldWideShip) {
-			await fillSelect(`select[name="zone_id"]`, 'World Wide');
-		} else {
-			if (head($x(`//option[text()="United States"]`))) {
-				await fillSelect(`select[name="zone_id"]`, 'United States');
-			} else {
-				await fillSelect(`select[name="zone_id"]`, 'US');
-			}
-		}
+            await fillSelect(`select[name="zone_id"]`, 'World Wide');
+        } else {
+            if (head($x(`//option[text()="United States"]`))) {
+                await fillSelect(`select[name="zone_id"]`, 'United States');
+            } else {
+                await fillSelect(`select[name="zone_id"]`, 'US');
+            }
+        }
 
         await fillSelect(`select[name="processing_time"]`, dispatchTime + ' days');
         await fillCheckbox(`input#sell-stock[name="continueSelling"][type="checkbox"]`, true);
@@ -272,36 +278,36 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
             return prety_attribute?.attribute_type !== 'Color' && prety_attribute?.attribute_type !== 'Size';
         });
         index = 0;
-		const allAttr = [...determinedAttrs, ...undefinedAttrs]
-		while (allAttr[index]) {
-			if (index) {
-				const prety_attribute = allAttr[index];
-				let selector = `//button[text()="Add Option"]`;
-				if (prety_attribute?.attribute_type !== 'Color' && prety_attribute?.attribute_type !== 'Size') {
-					selector = `//button[text()="Add Custom Option"]`;
-				}
-				await sleep(100);
-				await clickXButton(selector);
-			}
-			index++;
-		}
+        const allAttr = [...determinedAttrs, ...undefinedAttrs]
+        while (allAttr[index]) {
+            if (index) {
+                const prety_attribute = allAttr[index];
+                let selector = `//button[text()="Add Option"]`;
+                if (prety_attribute?.attribute_type !== 'Color' && prety_attribute?.attribute_type !== 'Size') {
+                    selector = `//button[text()="Add Custom Option"]`;
+                }
+                await sleep(100);
+                await clickXButton(selector);
+            }
+            index++;
+        }
 
-		index = 0
-		while (determinedAttrs[index]) {
-			const prety_attribute = determinedAttrs[index];
-			const elm = head($(`option[value="${toLower(prety_attribute?.attribute_type)}"]:eq(${index})`)) as any;
-			await sleep(150);
-			await fillSelect(elm.parentElement, prety_attribute?.attribute_type);
-			index++;
-		}
+        index = 0
+        while (determinedAttrs[index]) {
+            const prety_attribute = determinedAttrs[index];
+            const elm = head($(`option[value="${toLower(prety_attribute?.attribute_type)}"]:eq(${index})`)) as any;
+            await sleep(150);
+            await fillSelect(elm.parentElement, prety_attribute?.attribute_type);
+            index++;
+        }
 
-		index = 0
-		while (undefinedAttrs[index]) {
-			const prety_attribute = undefinedAttrs[index];
-			await sleep(150);
-			await fillTextInput(`input#option-title:eq(${index})`, prety_attribute?.attribute_type);
-			index++;
-		}
+        index = 0
+        while (undefinedAttrs[index]) {
+            const prety_attribute = undefinedAttrs[index];
+            await sleep(150);
+            await fillTextInput(`input#option-title:eq(${index})`, prety_attribute?.attribute_type);
+            index++;
+        }
 
         let quantity = Array.isArray(itemInfo?.attribute_specifics_modify)
             ? itemInfo?.attribute_specifics_modify.length * 20
@@ -309,58 +315,58 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
         await fillTextInput(`input#product-available-inventory`, quantity ? quantity : 1);
 
         await sleep(2000);
-		index = 0
-		while (allAttr[index]) {
-			const prety_attribute = allAttr[index];
-			let idx = 0
-			const options = get(prety_attribute, 'options', [])
-			while (options[idx]) {
-				const op = options[idx];
-				await sleep(300);
-				await ($(`input.ReactTags__tagInputField:eq(${index})`).first() as any)?.focus();
-				await fillTextInput(`input.ReactTags__tagInputField:eq(${index})`, op?.plf_value);
-				await sleep(100);
-				await ($('input#ext-item-id-input').first() as any)?.focus();
-				idx++;
-			}
-			index++;
-		}
-		await sleep(1000);
+        index = 0
+        while (allAttr[index]) {
+            const prety_attribute = allAttr[index];
+            let idx = 0
+            const options = get(prety_attribute, 'options', [])
+            while (options[idx]) {
+                const op = options[idx];
+                await sleep(300);
+                await ($(`input.ReactTags__tagInputField:eq(${index})`).first() as any)?.focus();
+                await fillTextInput(`input.ReactTags__tagInputField:eq(${index})`, op?.plf_value);
+                await sleep(100);
+                await ($('input#ext-item-id-input').first() as any)?.focus();
+                idx++;
+            }
+            index++;
+        }
+        await sleep(1000);
 
         const selectorQuery = `table.variants-table-container input[name='price']:not([id*="product-price"]):visible`;
         const selector = $(selectorQuery);
         const selectorQuantity = `table.variants-table-container input[name='quantity']:not([id*="product-price"])`;
         const button = `table.variants-table-container button[type='button']`;
         index = 0
-		while (selector[index]) {
-			let valMerge = $(`input[name="variantCheck"]:eq(${index})`).first().val();
-			const valueAttr = find(itemInfo?.attribute_specifics_modify, (attribute_specifics_modify) => {
-				return (
-					toUpper(map(attribute_specifics_modify?.name_value, (name_value) => name_value?.value).join('-')) === valMerge
-				);
-			});
-			const price = valueAttr?.sale_price;
-			await sleep(250);
-			await fillTextInput(`${selectorQuery}:eq(${index})`, parseFloat(price ? price : maxPrice).toFixed(2));
-			await fillTextInput(`${selectorQuantity}:eq(${index})`, 20);
-			index++;
-		}
+        while (selector[index]) {
+            let valMerge = $(`input[name="variantCheck"]:eq(${index})`).first().val();
+            const valueAttr = find(itemInfo?.attribute_specifics_modify, (attribute_specifics_modify) => {
+                return (
+                    toUpper(map(attribute_specifics_modify?.name_value, (name_value) => name_value?.value).join('-')) === valMerge
+                );
+            });
+            const price = valueAttr?.sale_price + (extendShippingPrice ? shippingCost : 0);
+            await sleep(250);
+            await fillTextInput(`${selectorQuery}:eq(${index})`, parseFloat(price ? price : maxPrice).toFixed(2));
+            await fillTextInput(`${selectorQuantity}:eq(${index})`, 20);
+            index++;
+        }
 
-		index = 0
-		while (selector[index]) {
-			let valMerge = $(`input[name="variantCheck"]:eq(${index})`).first().val();
-			const valueAttr = find(itemInfo?.attribute_specifics_modify, (attribute_specifics_modify) => {
-				return (
-					toUpper(map(attribute_specifics_modify?.name_value, (name_value) => name_value?.value).join('-')) === valMerge
-				);
-			});
-			const price = valueAttr?.sale_price;
-			if (!price && $(`${button}:eq(${index})`).first().attr('aria-checked') === 'true') {
-				await sleep(100);
-				await clickButton(`${button}:eq(${index})`);
-			}
-			index++;
-		}
+        index = 0
+        while (selector[index]) {
+            let valMerge = $(`input[name="variantCheck"]:eq(${index})`).first().val();
+            const valueAttr = find(itemInfo?.attribute_specifics_modify, (attribute_specifics_modify) => {
+                return (
+                    toUpper(map(attribute_specifics_modify?.name_value, (name_value) => name_value?.value).join('-')) === valMerge
+                );
+            });
+            const price = valueAttr?.sale_price + (extendShippingPrice ? shippingCost : 0);
+            if (!price && $(`${button}:eq(${index})`).first().attr('aria-checked') === 'true') {
+                await sleep(100);
+                await clickButton(`${button}:eq(${index})`);
+            }
+            index++;
+        }
 
         if (get(platform_category, [0, 'name'])) {
             await fillSelect(`select[name="productMain"]:eq(0)`, trim(get(platform_category, [0, 'name'])));
@@ -430,7 +436,7 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
             await handlePutItemToStore(itemInfo)
             return true
         }
-        
+
     };
 
     const handleGetItemData = (itemIds: any) => {
@@ -475,30 +481,30 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
     };
 
     const handlePutItemToStore = async (itemInfo: any) => {
-		if (!itemInfo?._id || !storeData?.account_id || !storeData?.account_name) {
-			return;
-		}
-		return new Promise((resolve, reject) => {
-			setGraphqlForHub()
-				.then(() =>
-					putItemToStoreMutation({
-						variables: {
-							_id: itemInfo?._id,
-							account_id: storeData?.account_id,
-							account_name: storeData?.account_name,
-							account_type: 'Inspireuplift'
-						},
-						fetchPolicy: 'network-only',
-					})
-				)
-				.then((response: any) => {
-					resolve(true);
-				})
-				.catch(() => {
-					reject(false);
-				});
-		});
-	};
+        if (!itemInfo?._id || !storeData?.account_id || !storeData?.account_name) {
+            return;
+        }
+        return new Promise((resolve, reject) => {
+            setGraphqlForHub()
+                .then(() =>
+                    putItemToStoreMutation({
+                        variables: {
+                            _id: itemInfo?._id,
+                            account_id: storeData?.account_id,
+                            account_name: storeData?.account_name,
+                            account_type: 'Inspireuplift'
+                        },
+                        fetchPolicy: 'network-only',
+                    })
+                )
+                .then((response: any) => {
+                    resolve(true);
+                })
+                .catch(() => {
+                    reject(false);
+                });
+        });
+    };
 
     return (
         <>
@@ -605,14 +611,24 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
                         id='autoSave'
                         type='checkbox'
                         value='autoSave'
-                        // onChange={(e) => {
-                        // 	setAutoSave(e.target.checked);
-                        // }}
                         checked={itemInfos.length > 1}
                         disabled={true}
                     />
                     <Label for='autoSave' className='pl-1'>
                         Auto save
+                    </Label>
+                    <Input
+                        id='extendShippingPrice'
+                        type='checkbox'
+                        value='extendShippingPrice'
+                        onChange={(e) => {
+                            setExtendShippingPrice(e.target.checked);
+                        }}
+                        checked={extendShippingPrice}
+                        disabled={onFillData}
+                    />
+                    <Label for='extendShippingPrice' className='pl-1'>
+                        Extend shipping price
                     </Label>
                 </div>
                 <Button

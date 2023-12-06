@@ -12,7 +12,7 @@ const colourStyles: StylesConfig = {
 };
 
 export default function NavUser() {
-    const { currentUser, setCurrentUser, currentToken, setCurrentToken, currentDocker, setCurrentDocker, setCurrentServer, templateId, setTemplateId } = UiContext.UseUIContext()
+    const { currentUser, setCurrentUser, currentToken, setCurrentToken, currentDocker, setCurrentDocker, setCurrentServer, templateId, setTemplateId, autoPage, setAutoPage } = UiContext.UseUIContext()
     const [popoverOpen, togglePopoverOpen] = useState<boolean>(false)
     const wrapperRef = useRef<any>(null);
     useEffect(() => {
@@ -114,6 +114,23 @@ export default function NavUser() {
                     style={{ fontSize: "initial" }}
                 />
             </div>
+            {
+                currentUser?.email === 'lechinguyen09@gmail.com'
+                    ? <div className='mb-3 d-flex align-items-center'>
+                        <Input
+                            id="checkAll"
+                            type="checkbox"
+                            value="checkAll"
+                            onChange={e => {
+                                setAutoPage(e.target.checked)
+                            }}
+                            checked={autoPage}
+                        />
+                        <Label>Auto: <i>(For printerval)</i></Label>
+                    </div>
+                    : false
+            }
+
 
             <div className='d-inline-flex flex-wrap justify-content-end align-items-center w-100 mb-2'>
                 <NavLink className='d-inline-flex flex-wrap justify-content-end align-content-center align-items-center' style={{ cursor: "pointer", paddingRight: "0px" }} onClick={handleLogout}>

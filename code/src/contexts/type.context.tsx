@@ -66,6 +66,18 @@ export type ACTION =
         templateId: string | null
     }
     | {
+        type: "SET_AUTO_PAGE"
+        autoPage: boolean | null
+    }
+    | {
+        type: "SET_EXTEND_SHIPPING_PRICE"
+        extendShippingPrice: boolean | null
+    }
+    | {
+        type: "SET_AUTO_SAVE"
+        autoSave: boolean | null
+    }
+    | {
         type: "SET_URL_GRAPHQL"
         urlGraphql: string
     }

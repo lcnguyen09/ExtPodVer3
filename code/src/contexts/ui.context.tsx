@@ -30,6 +30,9 @@ export interface State {
 	currentDocker: DOCKER | null;
 	currentServer: String | null;
 	templateId: string | null;
+	autoPage: boolean | null;
+	extendShippingPrice: boolean | null;
+	autoSave: boolean | null;
 }
 
 const initialState = {
@@ -45,6 +48,9 @@ const initialState = {
 	currentDocker: null,
 	currentServer: 'podorders.store',
 	templateId: null,
+	autoPage: false,
+	extendShippingPrice: false,
+	autoSave: false,
 };
 
 function uiReducer(state: State, action: ACTION) {
@@ -80,6 +86,15 @@ function uiReducer(state: State, action: ACTION) {
 		}
 		case 'SET_TEMPLATE_ID': {
 			return { ...state, templateId: action.templateId };
+		}
+		case 'SET_AUTO_PAGE': {
+			return { ...state, autoPage: action.autoPage };
+		}
+		case 'SET_EXTEND_SHIPPING_PRICE': {
+			return { ...state, extendShippingPrice: action.extendShippingPrice };
+		}
+		case 'SET_AUTO_SAVE': {
+			return { ...state, autoSave: action.autoSave };
 		}
 		case 'SET_URL_GRAPHQL': {
 			return { ...state, urlGraphql: action.urlGraphql };
@@ -148,6 +163,12 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	const [windowViewStorage, setWindowViewStorage]: [string | null, (val: string) => void] = useStorage('_pod_ext_view');
 	const [templateIdStorage, setTemplateIdStorage]: [string | null, (val: string) => void] =
 		useStorage('_pod_template_id');
+	const [autoPageStorage, setAutoPageStorage]: [string | null, (val: string) => void] =
+		useStorage('_pod_auto_page');
+	const [extendShippingPriceStorage, setExtendShippingPriceStorage]: [string | null, (val: string) => void] =
+		useStorage('_pod_extend_shipping_price');
+	const [autoSaveStorage, setAutoSaveStorage]: [string | null, (val: string) => void] =
+		useStorage('_pod_auto_save');
 
 	useEffect(() => {
 		if (
@@ -172,6 +193,9 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 			if (server !== null) setCurrentServer(server ? server : 'podorders.store');
 
 			if (templateIdStorage !== null) setTemplateId(templateIdStorage);
+			if (autoPageStorage !== null) setAutoPage(autoPageStorage === 'true');
+			if (extendShippingPriceStorage !== null) setExtendShippingPrice(extendShippingPriceStorage === 'true');
+			if (autoSaveStorage !== null) setAutoSave(autoSaveStorage === 'true');
 		}
 	}, [init]);
 
@@ -236,6 +260,18 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		setTemplateIdStorage(state.templateId);
 	}, [state.templateId]);
 
+	useEffect(() => {
+		setAutoPageStorage(state.autoPage ? 'true' : 'false');
+	}, [state.autoPage]);
+
+	useEffect(() => {
+		setExtendShippingPriceStorage(state.extendShippingPrice ? 'true' : 'false');
+	}, [state.extendShippingPrice]);
+
+	useEffect(() => {
+		setAutoSaveStorage(state.autoSave ? 'true' : 'false');
+	}, [state.autoSave]);
+
 	const setAppLoading = (appLoading: boolean) => {
 		dispatch({ type: 'SET_LOADING', appLoading });
 	};
@@ -275,6 +311,17 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	const setTemplateId = (templateId?: string) => {
 		dispatch({ type: 'SET_TEMPLATE_ID', templateId });
 	};
+	const setAutoPage = (autoPage?: boolean) => {
+		dispatch({ type: 'SET_AUTO_PAGE', autoPage });
+	};
+	const setExtendShippingPrice = (extendShippingPrice?: boolean) => {
+		dispatch({ type: 'SET_EXTEND_SHIPPING_PRICE', extendShippingPrice });
+	};
+	const setAutoSave = (autoSave?: boolean) => {
+		dispatch({ type: 'SET_AUTO_SAVE', autoSave });
+	};
+
+
 
 	const isSaleHunter = () => state.currentServer === 'salehunter.io';
 
@@ -360,8 +407,8 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 			if (elm) {
 				const valueForSet = text
 					? find($(elm)?.find('option'), (elm) => {
-							return $(elm)?.text() === text;
-					  })?.getAttribute('value')
+						return $(elm)?.text() === text;
+					})?.getAttribute('value')
 					: value;
 				if (valueForSet) {
 					elm.value = String(valueForSet);
@@ -487,6 +534,9 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 			setCurrentDocker,
 			setCurrentServer,
 			setTemplateId,
+			setAutoPage,
+			setExtendShippingPrice,
+			setAutoSave,
 			isSaleHunter,
 			$x,
 			sleep,

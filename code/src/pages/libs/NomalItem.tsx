@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { Alert, Button, Col, Input, Label, Row, Spinner, Table } from 'reactstrap';
-import { Save } from 'react-feather';
+import { ArrowDownRight, ArrowRight, Save } from 'react-feather';
 import UiContext from './../../contexts/ui.context';
 import { useInfoLazyQuery } from '../../graphql/graphql';
 import Notification from './../../components/Notification';
@@ -32,7 +32,7 @@ var getLocation = function (href: any) {
 };
 
 export default function NomalItem() {
-	const { appMode, setAppHide, setGraphqlForAccount, movingOnElm, $x } = UiContext.UseUIContext();
+	const { appMode, setAppHide, setGraphqlForAccount, movingOnElm, $x, autoPage } = UiContext.UseUIContext();
 
 	const [infoQuery] = useInfoLazyQuery({ fetchPolicy: 'network-only' });
 
@@ -191,7 +191,12 @@ export default function NomalItem() {
 			return
 		} catch (error) { }
 		const items = getItemsFromSite(get(ExtensionRule, 'items', []));
-		setItems(items);
+		setItems(map(items, item => {
+			return {
+				...item,
+				checked: autoPage
+			}
+		}));
 		setHasCheck(true);
 	}
 
@@ -466,6 +471,7 @@ export default function NomalItem() {
 
 			<BottomBar>
 				<NomalItemSave
+					Loading={Loading}
 					setLoading={setLoading}
 					ItemId={item?.id}
 					ItemTitle={item?.name}
@@ -482,6 +488,7 @@ export default function NomalItem() {
 }
 
 function NomalItemSave({
+	Loading,
 	setLoading,
 	ItemId,
 	ItemTitle,
@@ -492,6 +499,7 @@ function NomalItemSave({
 	setErrorMsg,
 	setItems,
 }: {
+	Loading: any;
 	setLoading: Dispatch<SetStateAction<boolean>>;
 	ItemId: any;
 	ItemTitle: string;
@@ -502,8 +510,18 @@ function NomalItemSave({
 	setErrorMsg: Dispatch<SetStateAction<string>>;
 	setItems: Dispatch<SetStateAction<Array<any>>>;
 }) {
-	const { currentDocker, currentToken, templateId, urlRestApi, sleep } = UiContext.UseUIContext();
+	const { currentUser, currentDocker, currentToken, templateId, urlRestApi, sleep, autoPage } = UiContext.UseUIContext();
 	const [ForceCreateNew, setForceCreateNew] = useState<boolean>(false);
+
+	useEffect(() => {
+		if (autoPage && Items.length && !Loading) {
+			handleSave()
+		}
+	}, [autoPage, Items])
+
+	const handleNext = async () => {
+		(head($("a[rel='next']").first()) as any).click()
+	}
 
 	const handleSave = async () => {
 		if (!templateId) {
@@ -540,16 +558,19 @@ function NomalItemSave({
 						})
 						.fail((error) => {
 							console.log('error: ', error);
-							resolve(null);
+							resolve(item);
 						});
 				}).then((itemInfo: any) => {
 					console.log('itemInfo: ', itemInfo);
-					itemInfo.images = [
-						itemInfo?.imageUrl,
-						...filter(itemInfo.images, img => {
-							return img !== itemInfo?.imageUrl
-						})
-					]
+					if (!itemInfo) {
+						return Promise.resolve('99');
+					}
+					if (!itemInfo?.images || !itemInfo?.images?.length) {
+						itemInfo.images = [
+							itemInfo?.imageUrl
+						]
+					}
+
 					if (!itemInfo || !itemInfo?.name || !itemInfo?.images || !itemInfo?.images?.length) {
 						set(Items, [index, 'status'], 'Error');
 						set(Items, [index, 'done'], true);
@@ -608,6 +629,7 @@ function NomalItemSave({
 				});
 			}
 			setLoading(false);
+			handleNext()
 		} else {
 			if (!ItemTitle) {
 				return setErrorMsg('Item name not found!');
@@ -683,6 +705,19 @@ function NomalItemSave({
 			>
 				<Save size={14} /> <span style={{ marginLeft: '3px' }}>Save</span>
 			</Button>
+			{
+				currentUser?.email === 'lechinguyen09@gmail.com'
+					? <Button
+						size='xs'
+						color='primary'
+						className='py-1 d-flex justify-content-center align-items-center'
+						onClick={handleNext}
+					>
+						<ArrowRight size={14} /> <span style={{ marginLeft: '3px' }}>Next</span>
+					</Button>
+					: false
+			}
+
 		</div>
 	);
 }

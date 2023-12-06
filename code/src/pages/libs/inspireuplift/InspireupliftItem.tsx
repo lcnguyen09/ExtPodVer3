@@ -23,6 +23,10 @@ export default function ({ Identifier, storeData }: any) {
 		fillInputFile,
 		urlGraphql,
 		setGraphqlForHub,
+		autoSave,
+		setAutoSave,
+		extendShippingPrice,
+		setExtendShippingPrice
 	} = UiContext.UseUIContext();
 
 	const [itemsInfoQuery] = useItemsInfoLazyQuery({ fetchPolicy: 'network-only' });
@@ -41,7 +45,6 @@ export default function ({ Identifier, storeData }: any) {
 	const [itemId, setItemId] = useState<string>('');
 	const [itemInfo, setItemInfo] = useState<any>();
 	const [onFillData, setOnFillData] = useState<boolean>(false);
-	const [autoSave, setAutoSave] = useState<boolean>(false);
 
 	useEffect(() => {
 		setLoading(false);
@@ -105,6 +108,9 @@ export default function ({ Identifier, storeData }: any) {
 		if (get(itemInfo, 'description', '').length > 3000) {
 			errorMsg.push('Item description is too long');
 		}
+		let shippingCost = get(itemInfo, ['shipping_preset_info', 'shipping_cost'], '') ? get(itemInfo, ['shipping_preset_info', 'shipping_cost'], '') : '5'
+		shippingCost = parseFloat(shippingCost)
+		let internationalShippingCost = get(itemInfo, ['shipping_preset_info', 'international_shipping_cost'], '') ? get(itemInfo, ['shipping_preset_info', 'international_shipping_cost'], '') : '9'
 		const isWorldWideShip = get(itemInfo, ['shipping_preset_info', 'global_shipping'], '') === 'Accepted' || !get(itemInfo, 'shipping_preset_info');
 
 		if (isWorldWideShip) {
@@ -127,8 +133,8 @@ export default function ({ Identifier, storeData }: any) {
 			parseFloat(attribute_specifics.sale_price)
 		);
 		if (prices.length) {
-			minPrice = Math.min.apply(Math, prices);
-			maxPrice = Math.max.apply(Math, prices);
+			minPrice = Math.min.apply(Math, prices) + (extendShippingPrice ? shippingCost : 0);
+			maxPrice = Math.max.apply(Math, prices) + (extendShippingPrice ? shippingCost : 0);
 		}
 		// let minBasePrice = parseFloat(itemInfo?.price);
 		// const basePrices = map(itemInfo?.attribute_specifics_modify, (attribute_specifics) =>
@@ -280,7 +286,7 @@ export default function ({ Identifier, storeData }: any) {
 					toUpper(map(attribute_specifics_modify?.name_value, (name_value) => name_value?.value).join('-')) === valMerge
 				);
 			});
-			const price = valueAttr?.sale_price;
+			const price = valueAttr?.sale_price + (extendShippingPrice ? shippingCost : 0);
 			await sleep(200);
 			await fillTextInput(`${selectorQuery}:eq(${index})`, parseFloat(price ? price : maxPrice).toFixed(2));
 			await fillTextInput(`${selectorQuantity}:eq(${index})`, 20);
@@ -295,7 +301,7 @@ export default function ({ Identifier, storeData }: any) {
 					toUpper(map(attribute_specifics_modify?.name_value, (name_value) => name_value?.value).join('-')) === valMerge
 				);
 			});
-			const price = valueAttr?.sale_price;
+			const price = valueAttr?.sale_price + (extendShippingPrice ? shippingCost : 0);
 			if (!price && $(`${button}:eq(${index})`).first().attr('aria-checked') === 'true') {
 				await sleep(100);
 				await clickButton(`${button}:eq(${index})`);
@@ -560,6 +566,19 @@ export default function ({ Identifier, storeData }: any) {
 					/>
 					<Label for='autoSave' className='pl-1'>
 						Auto save
+					</Label>
+					<Input
+						id='extendShippingPrice'
+						type='checkbox'
+						value='extendShippingPrice'
+						onChange={(e) => {
+							setExtendShippingPrice(e.target.checked);
+						}}
+						checked={extendShippingPrice}
+						disabled={onFillData}
+					/>
+					<Label for='extendShippingPrice' className='pl-1'>
+						Extend shipping price
 					</Label>
 				</div>
 				<Button
