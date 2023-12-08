@@ -146,6 +146,8 @@ export default function ({ Identifier, storeData }: any) {
 
 		let titleReplace = get(itemInfo, 'name', '');
 		titleReplace = titleReplace.replace(/(\[Your Company Name\])/g, '');
+		titleReplace = titleReplace.replaceAll(/[\!\&\*\(\)\_\-\.\/\\\|\,\.]/gi, '')
+		titleReplace = filter(titleReplace.replaceAll(/[\@\#\$\%\^\+\=\[\]\{\}\;\<\>\?\`\~]/gi, '').split(" "), a => a).join(" ")
 
 		let description = get(itemInfo, 'description', '');
 		description = description.replace(/PRODUCT_HEADER/g, '');
@@ -195,6 +197,7 @@ export default function ({ Identifier, storeData }: any) {
 		await handleClearData();
 
 		await fillTextInput(`input#product-title[name="title"]`, titleReplace);
+		// !&*()_-./\|,.
 		await fillTextInput(`input#product-price[name="price"]`, minPrice.toFixed(2));
 
 		if (isWorldWideShip) {

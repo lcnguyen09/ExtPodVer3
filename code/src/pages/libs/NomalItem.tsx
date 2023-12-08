@@ -404,7 +404,7 @@ export default function NomalItem() {
 						<tbody>
 							{map(items, (item, index) => {
 								return (
-									<tr key={index}>
+									<tr key={index} id={item?.name}>
 										<td width={30}>
 											<Input
 												id={`item-${index}`}
@@ -457,7 +457,7 @@ export default function NomalItem() {
 														} ${item?.status === 'Error' ? 'text-danger' : ''}`}
 													style={{ textAlign: 'justify' }}
 												>
-													{item?.name}
+													{item?.name}{item?.status ? ` - ${item?.status}` : ''}
 												</span>
 											</div>
 										</td>
@@ -510,7 +510,7 @@ function NomalItemSave({
 	setErrorMsg: Dispatch<SetStateAction<string>>;
 	setItems: Dispatch<SetStateAction<Array<any>>>;
 }) {
-	const { currentUser, currentDocker, currentToken, templateId, urlRestApi, sleep, autoPage } = UiContext.UseUIContext();
+	const { currentUser, currentDocker, movingOnElm, currentToken, templateId, urlRestApi, sleep, autoPage } = UiContext.UseUIContext();
 	const [ForceCreateNew, setForceCreateNew] = useState<boolean>(false);
 
 	useEffect(() => {
@@ -538,6 +538,20 @@ function NomalItemSave({
 			while (find(Items, item => !item.done && item.checked && item.itemUrl)) {
 				let item = find(Items, item => !item.done && item.checked && item.itemUrl)
 				console.log('item: ', item);
+
+				if (item?.itemUrl) {
+					if ($(`a[href="${item?.itemUrl}"]`)) {
+						movingOnElm(`a[href="${item?.itemUrl}"]`);
+						$(`a[href="${item?.itemUrl}"]`).css('border', '1px solid blue');
+					}
+					const sortUrl = item?.itemUrl.replace(window.location.origin, '');
+					console.log('sortUrl: ', sortUrl);
+					if ($(`a[href="${sortUrl}"]`)) {
+						movingOnElm(`a[href="${sortUrl}"]`);
+						$(`a[href="${sortUrl}"]`).css('border', '1px solid blue');
+					}
+				}
+
 				let index = findIndex(Items, item => !item.done && item.checked && item.itemUrl)
 
 
@@ -625,7 +639,38 @@ function NomalItemSave({
 								setItems(Items);
 								resolve('3');
 							});
-					});
+					}).then(res => {
+						let color = 'blue'
+						switch (res) {
+							case '0':
+								color = 'green'
+								break;
+							case '1':
+								color = 'red'
+								break;
+							case '2':
+								color = 'orange'
+								break;
+							case '3':
+								color = 'red'
+								break;
+							default:
+								break;
+						}
+
+						if (itemInfo?.itemUrl) {
+							if ($(`a[href="${itemInfo?.itemUrl}"]`)) {
+								movingOnElm(`a[href="${itemInfo?.itemUrl}"]`);
+								$(`a[href="${itemInfo?.itemUrl}"]`).css('border', '1px solid ' + color);
+							}
+							const sortUrl = itemInfo?.itemUrl.replace(window.location.origin, '');
+							if ($(`a[href="${sortUrl}"]`)) {
+								movingOnElm(`a[href="${sortUrl}"]`);
+								$(`a[href="${sortUrl}"]`).css('border', '1px solid ' + color);
+							}
+						}
+						return res
+					})
 				});
 			}
 			setLoading(false);

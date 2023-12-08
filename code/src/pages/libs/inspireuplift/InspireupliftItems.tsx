@@ -7,6 +7,13 @@ import Notification from './../../../components/Notification';
 import BottomBar from './../../../components/BottomBar';
 import $ from 'jquery';
 import { filter, find, findIndex, flatMapDeep, get, head, map, set, startsWith, toLower, toUpper, trim } from 'lodash';
+import Select, { StylesConfig } from 'react-select';
+
+const colourStyles: StylesConfig = {
+    control: (styles) => ({ ...styles, backgroundColor: 'white' }),
+    menu: (styles) => ({ ...styles, maxHeight: '150px', overflow: "hidden", padding: '0 6px' }),
+    option: (styles) => ({ ...styles, maxHeight: "150px" })
+};
 
 export default function ({ Identifier, storeData, setOnMulti }: any) {
     const {
@@ -50,6 +57,7 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
 
     useEffect(() => {
         setLoading(false);
+        handleGetProductType()
     }, []);
 
     // useEffect(() => {
@@ -165,7 +173,7 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
         await sleep(3000);
 
         let shippingCost = get(itemInfo, ['shipping_preset_info', 'shipping_cost'], '') ? get(itemInfo, ['shipping_preset_info', 'shipping_cost'], '') : '5'
-		shippingCost = parseFloat(shippingCost)
+        shippingCost = parseFloat(shippingCost)
 
         const isWorldWideShip = get(itemInfo, ['shipping_preset_info', 'global_shipping'], '') === 'Accepted';
 
@@ -203,6 +211,8 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
 
         let titleReplace = get(itemInfo, 'name', '');
         titleReplace = titleReplace.replace(/(\[Your Company Name\])/g, '');
+        titleReplace = filter(titleReplace.replaceAll(/[\@\#\$\%\^\+\=\[\]\{\}\;\<\>\?\`\~]/gi, '').split(" "), a => a).join(" ")
+
 
         let description = get(itemInfo, 'description', '');
         description = description.replace(/PRODUCT_HEADER/g, '');
@@ -439,6 +449,21 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
 
     };
 
+    const handleGetProductType = () => {
+        setGraphqlForHub()
+                .then(() =>
+                    itemsInfoQuery({
+                        variables: {
+                        },
+                        fetchPolicy: 'network-only',
+                    })
+                )
+                .then((response: any) => {
+                    console.log('response: ', response);
+
+                })
+    }
+
     const handleGetItemData = (itemIds: any) => {
         if (!itemIds) {
             return;
@@ -525,6 +550,34 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
                         valid={false}
                         style={{ fontSize: 'initial' }}
                         id='ext-item-id-input'
+                    />
+                    <Label>Product type: </Label>
+                    <Select
+                        className="basic-single w-100"
+                        classNamePrefix="ext-select"
+                        placeholder="Select your hub"
+                        isClearable={false}
+                        // isLoading={currentUser?.docker === null || currentUser?.docker === undefined}
+                        isSearchable={true}
+                        name="color"
+                        // options={map(currentUser?.docker, docker => {
+                        //     return {
+                        //         id: get(docker, "_id", ""),
+                        //         value: get(docker, "label", "") + " - " + get(docker, "domain", "") + "." + get(docker, "server", ""),
+                        //         label: <div className='d-flex flex-column'><strong>{get(docker, "label", "")}</strong><i>{get(docker, "domain", "") + "." + get(docker, "server", "")}</i></div>
+                        //     }
+                        // })}
+                        styles={colourStyles}
+                        // onChange={(data) => {
+                        //     setCurrentDocker(find(currentUser?.docker, docker => docker?._id === get(data, "id", "")))
+                        // }}
+                        value={
+                            {
+                                id: currentDocker?._id,
+                                value: currentDocker?._id ? get(currentDocker, "label", "") + " - " + get(currentDocker, "domain", "") + "." + get(currentDocker, "server", "") : "",
+                                label: currentDocker?._id ? <div className='d-flex flex-column'><strong>{get(currentDocker, "label", "")}</strong><i>{get(currentDocker, "domain", "") + "." + get(currentDocker, "server", "")}</i></div> : <></>
+                            }
+                        }
                     />
                     <p className='d-flex justify-content-end'>
                         <Button

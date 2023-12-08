@@ -1,0 +1,5 @@
+query productPreset($_id: String) {
+    productPreset(_id: $_id) {
+        ...ProductPreset
+    }
+}

@@ -39,20 +39,18 @@ export default function Layout({ children }: { children: ReactNode }) {
                 animation='false'
             >
                 <CardHeader
-                    className={`nav p-1 d-flex flex-row justify-content-between bg-light ${windowView === 'MIN' ? 'cursor-pointer' : ''
+                    className={`nav p-1 d-flex flex-row justify-content-between bg-light ${windowView === 'MIN' ? 'cursor-pointer' : 'cursor-pointer'
                         }`}
                     id='podorder-ext-app-header'
                     onClick={(e) =>
-                        (e.target as Element).id === 'podorder-ext-app-header' && windowView !== 'MAX'
+                        ((e.target as Element).id === 'podorder-ext-app-header' || (e.target as Element).id === 'podorder-ext-app-title' || (e.target as Element).id === 'podorder-ext-app-logo' || (e.target as Element).id === 'podorder-ext-app-version') && windowView !== 'MAX'
                             ? setWindowView(windowView === 'MIN' ? 'NOMAL' : 'MIN')
                             : false
                     }
                 >
-                    <CardTitle className='mb-0 d-flex align-items-center'>
-                        <a href='https://account.podorders.store' target='_blank' rel='noreferrer' className='d-block'>
-                            <div className='brand-logo' />
-                        </a>
-                        <span className='ml-1 p-2'>v3.3.9</span>
+                    <CardTitle className='mb-0 d-flex align-items-center' id='podorder-ext-app-title'>
+                        <div className='brand-logo' id='podorder-ext-app-logo' />
+                        <span className='ml-1 p-2' id='podorder-ext-app-version'>v3.4.1</span>
                     </CardTitle>
                     <div className='actions d-flex justify-content-end align-items-center'>
                         <RotateCw cursor='pointer' size={13} onClick={() => {
@@ -63,7 +61,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                                 },
                                 '*'
                             )
-                        }}/>
+                        }} />
                         {windowView === 'MAX' ? (
                             <Minimize2 cursor='pointer' className='mx-3' size={13} onClick={() => setWindowView('NOMAL')} />
                         ) : (

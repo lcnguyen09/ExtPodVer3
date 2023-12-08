@@ -44,6 +44,7 @@ export type Address = {
   email?: Maybe<Scalars['String']>;
   first_name?: Maybe<Scalars['String']>;
   last_name?: Maybe<Scalars['String']>;
+  owner?: Maybe<Scalars['String']>;
   phone?: Maybe<Scalars['String']>;
   postcode?: Maybe<Scalars['String']>;
   state?: Maybe<Scalars['String']>;
@@ -5710,6 +5711,8 @@ export type ItemSpecificFragment = { __typename?: 'ItemSpecific', key?: string |
 
 export type OrderFragment = { __typename?: 'Order', _id?: string | null, platform?: string | null, platform_id?: string | null, identity?: string | null, status?: string | null };
 
+export type ProductPresetFragment = { __typename?: 'ProductPreset', _id?: string | null, id?: string | null, name?: string | null };
+
 export type UserFragment = { __typename?: 'User', _id?: string | null, email?: string | null, name?: string | null, identity?: string | null, identity_label?: string | null, role?: string | null, created_at?: number | null, token?: string | null, auth_docker?: Array<{ __typename?: 'AuthDocker', docker_id?: string | null, docker?: { __typename?: 'Docker', _id?: string | null, domain?: string | null, label?: string | null, server?: string | null, sku?: string | null } | null } | null> | null };
 
 export type AuthDockerFragment = { __typename?: 'AuthDocker', docker_id?: string | null, docker?: { __typename?: 'Docker', _id?: string | null, domain?: string | null, label?: string | null, server?: string | null, sku?: string | null } | null };
@@ -5736,6 +5739,13 @@ export type ItemsInfoQueryVariables = Exact<{
 
 
 export type ItemsInfoQuery = { __typename?: 'RootQuery', itemsInfo?: Array<{ __typename?: 'ItemInfo', _id?: string | null, identity?: string | null, name?: string | null, description?: string | null, description_ai?: string | null, description_ai_pos?: string | null, front?: string | null, back?: string | null, sleeve?: string | null, hood?: string | null, type?: string | null, plf_price?: number | null, tags?: Array<string | null> | null, collections?: Array<string | null> | null, size_chart?: string | null, fix_profit?: number | null, fixed_profit?: number | null, tax_fee_fix?: number | null, tax_fee?: number | null, include_size_chart?: boolean | null, custom_name?: boolean | null, include_extend_images?: boolean | null, ebay_template_id?: string | null, sku?: string | null, barcode?: string | null, barcode_type?: string | null, price_addition?: number | null, price?: number | null, images?: Array<{ __typename?: 'Image', src?: string | null } | null> | null, prety_attributes?: Array<{ __typename?: 'PretyAttribute', attribute_type?: string | null, plf_attribute_name?: string | null, options?: Array<{ __typename?: 'PretyAttributeOption', ffm_value?: string | null, plf_value?: string | null, plf_price?: number | null, hex?: string | null, default?: boolean | null } | null> | null } | null> | null, specifics?: Array<{ __typename?: 'ItemSpecific', key?: string | null, value?: string | null, required?: string | null } | null> | null, attribute_specifics?: Array<{ __typename?: 'SpecificAttribute', sale_price?: number | null, base_price?: number | null, fix_profit?: number | null, fixed_profit?: number | null, sku?: string | null, barcode?: string | null, name_value?: Array<{ __typename?: 'NameValueType', name?: string | null, type?: string | null, value?: string | null } | null> | null } | null> | null, attribute_specifics_modify?: Array<{ __typename?: 'SpecificAttribute', sale_price?: number | null, base_price?: number | null, fix_profit?: number | null, fixed_profit?: number | null, sku?: string | null, barcode?: string | null, name_value?: Array<{ __typename?: 'NameValueType', name?: string | null, type?: string | null, value?: string | null } | null> | null } | null> | null, shipping_preset_info?: { __typename?: 'ShippingPreset', dispatch_time_max?: string | null, shipping_time_max?: string | null, location?: string | null, location_detail?: string | null, country?: string | null, shipping_service?: string | null, shipping_cost?: string | null, shipping_additional_cost?: string | null, return_accept?: string | null, global_shipping?: string | null, international_shipping_time_max?: string | null, international_location?: string | null, international_shipping_service?: string | null, international_shipping_cost?: string | null, international_shipping_additional_cost?: string | null, international_return_accept?: string | null, default_quantity?: string | null } | null, platform_category?: Array<{ __typename?: 'PlatformCategory', type?: string | null, category_selected?: Array<{ __typename?: 'PlatformCategorySelected', id?: string | null, level?: string | null, name?: string | null, parent?: string | null } | null> | null } | null> | null, platform_specifics?: Array<{ __typename?: 'PlatformItemSpecific', platform?: string | null, specifics?: Array<{ __typename?: 'ItemSpecific', key?: string | null, value?: string | null, required?: string | null } | null> | null } | null> | null, extend_images?: Array<{ __typename?: 'Image', src?: string | null } | null> | null } | null> | null };
+
+export type ProductPresetQueryVariables = Exact<{
+  _id?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type ProductPresetQuery = { __typename?: 'RootQuery', productPreset?: Array<{ __typename?: 'ProductPreset', _id?: string | null, id?: string | null, name?: string | null } | null> | null };
 
 export type CUserQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -5954,6 +5964,13 @@ export const OrderFragmentDoc = gql`
   status
 }
     `;
+export const ProductPresetFragmentDoc = gql`
+    fragment ProductPreset on ProductPreset {
+  _id
+  id
+  name
+}
+    `;
 export const PutItemToStoreDocument = gql`
     mutation PutItemToStore($_id: String, $account_id: String, $account_name: String, $account_type: String) {
   putItemToStore(
@@ -6065,6 +6082,41 @@ export function useItemsInfoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<
 export type ItemsInfoQueryHookResult = ReturnType<typeof useItemsInfoQuery>;
 export type ItemsInfoLazyQueryHookResult = ReturnType<typeof useItemsInfoLazyQuery>;
 export type ItemsInfoQueryResult = Apollo.QueryResult<ItemsInfoQuery, ItemsInfoQueryVariables>;
+export const ProductPresetDocument = gql`
+    query productPreset($_id: String) {
+  productPreset(_id: $_id) {
+    ...ProductPreset
+  }
+}
+    ${ProductPresetFragmentDoc}`;
+
+/**
+ * __useProductPresetQuery__
+ *
+ * To run a query within a React component, call `useProductPresetQuery` and pass it any options that fit your needs.
+ * When your component renders, `useProductPresetQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useProductPresetQuery({
+ *   variables: {
+ *      _id: // value for '_id'
+ *   },
+ * });
+ */
+export function useProductPresetQuery(baseOptions?: Apollo.QueryHookOptions<ProductPresetQuery, ProductPresetQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ProductPresetQuery, ProductPresetQueryVariables>(ProductPresetDocument, options);
+      }
+export function useProductPresetLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ProductPresetQuery, ProductPresetQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ProductPresetQuery, ProductPresetQueryVariables>(ProductPresetDocument, options);
+        }
+export type ProductPresetQueryHookResult = ReturnType<typeof useProductPresetQuery>;
+export type ProductPresetLazyQueryHookResult = ReturnType<typeof useProductPresetLazyQuery>;
+export type ProductPresetQueryResult = Apollo.QueryResult<ProductPresetQuery, ProductPresetQueryVariables>;
 export const CUserDocument = gql`
     query CUser {
   cUser {
