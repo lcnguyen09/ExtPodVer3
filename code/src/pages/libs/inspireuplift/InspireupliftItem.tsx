@@ -6,7 +6,14 @@ import { useItemsInfoLazyQuery, usePutItemToStoreMutation } from '../../../graph
 import Notification from './../../../components/Notification';
 import BottomBar from './../../../components/BottomBar';
 import $ from 'jquery';
-import { filter, find, flatMapDeep, get, head, map, startsWith, toLower, toUpper, trim } from 'lodash';
+import { cloneDeep, filter, find, flatMapDeep, get, head, map, startsWith, toLower, toUpper, trim } from 'lodash';
+import Select, { StylesConfig } from 'react-select';
+
+const colourStyles: StylesConfig = {
+	control: (styles) => ({ ...styles, backgroundColor: 'white' }),
+	menu: (styles) => ({ ...styles, maxHeight: '150px', overflow: "hidden", padding: '0 6px' }),
+	option: (styles) => ({ ...styles, maxHeight: "150px" })
+};
 
 export default function ({ Identifier, storeData }: any) {
 	const {
@@ -44,10 +51,13 @@ export default function ({ Identifier, storeData }: any) {
 
 	const [itemId, setItemId] = useState<string>('');
 	const [itemInfo, setItemInfo] = useState<any>();
+	const [itemTypes, setItemTypes] = useState<any>([]);
+	const [currentType, setCurrentType] = useState<any>({});
 	const [onFillData, setOnFillData] = useState<boolean>(false);
 
 	useEffect(() => {
 		setLoading(false);
+		handleGetTypeData()
 	}, []);
 
 	useEffect(() => {
@@ -63,6 +73,40 @@ export default function ({ Identifier, storeData }: any) {
 	useEffect(() => {
 		setPathname(window.location.pathname);
 	}, [window.location.pathname, window.location.href]);
+
+	const handleGetTypeData = () => {
+		var settings = {
+			"url": `https://api-${currentDocker?.domain}.${currentDocker?.server}/graphql`,
+			"method": "POST",
+			"timeout": 0,
+			"headers": {
+				"authority": "api-lcn-test.podorders.store",
+				"accept": "application/json, text/plain, */*",
+				"accept-language": "vi-VN,vi;q=0.9,fr-FR;q=0.8,fr;q=0.7,en-US;q=0.6,en;q=0.5",
+				"authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImxlY2hpbmd1eWVuMDlAZ21haWwuY29tIiwicGFzc3dvcmQiOiJhYmMxMjMiLCJ2YWxpZCI6bnVsbH0.H35smLgIHOOp0l21kIfSFU0HzVFCa-h9pbhKSTDou40",
+				"content-type": "application/json",
+				"sec-ch-ua": "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"",
+				"sec-ch-ua-mobile": "?0",
+				"sec-ch-ua-platform": "\"macOS\"",
+				"sec-fetch-dest": "empty",
+				"sec-fetch-mode": "cors",
+				"sec-fetch-site": "same-site",
+				"user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+				"x-page": "1",
+				"x-per-page": "-1",
+				"x-requested-with": "XMLHttpRequest",
+				"x-time": "09-12-2023 20:13:59.5180"
+			},
+			"data": JSON.stringify({
+				"query": "query { productPreset (_id:\"\",name:\"\",provider:\"\",category:\"\",favorite:false)  { _id,id,name,raw_name,image,description,provider, prety_attributes   { attribute_type,plf_attribute_name, options   { ffm_value,plf_value,plf_price,hex,default } }, attribute_specifics   { sale_price,base_price, name_value   { name,type,value },fix_profit,fixed_profit }, specifics   { key,value,required },fix_profit,fixed_profit,tax_fee_fix,tax_fee,min_price,max_price,category,size_chart,shipping_preset, platform_category   { type, category_selected   { id,level,name,parent } },shipping_cost,shipping_additional_cost,international_shipping_cost,international_shipping_additional_cost,provider_id,print_area_id, platform_specifics   { platform, specifics   { key,value,required } }, print_areas   { position,print },type,print_template,weight,package_width,package_height,package_length, extend_images   { src },price_addition,price,favorite,mockup_count,tags,collections, shipping_preset_info {\n    dispatch_time_max\n    shipping_time_max\n    location\n    location_detail\n    country\n    shipping_service\n    shipping_cost\n    shipping_additional_cost\n    return_accept\n    global_shipping\n    international_shipping_time_max\n    international_location\n    international_shipping_service\n    international_shipping_cost\n    international_shipping_additional_cost\n    international_return_accept\n    default_quantity} }}"
+			}),
+		};
+
+		$.ajax(settings).done((response) => {
+			setItemTypes(response?.data?.productPreset)
+		});
+
+	}
 
 	const handleClearData = async () => {
 		return new Promise(async (resolve, reject) => {
@@ -94,24 +138,69 @@ export default function ({ Identifier, storeData }: any) {
 		});
 	};
 
+	const isErrorVariation = (varSpec: any, pretAttr: any) =>
+		find(get(varSpec, 'name_value', []), (nvl) => {
+			const name = get(nvl, 'name', '');
+			const value = get(nvl, 'value', '');
+			const nameForCheck = find(pretAttr, (pattr) => pattr.plf_attribute_name === name);
+			const valueForCheck = find(get(nameForCheck, 'options', []), (op) => op.plf_value === value);
+			if (!valueForCheck) return true;
+			return !get(valueForCheck, 'default', false);
+		});
+
 	const handleFillData = async () => {
 		let index = 0;
 		setErrorMsg('');
 		setSuccessMsg('');
 		setWarningMsg([]);
-		console.log(itemInfo);
+		console.log("itemInfo", itemInfo);
+		console.log("currentType", currentType);
+		let itemInfoMap = itemInfo
+		let dataType = cloneDeep(currentType);
+		if (dataType && dataType?._id) {
+			itemInfoMap = {
+				...itemInfo,
+				description: get(dataType, 'description', ''),
+				shipping_preset_info: get(dataType, 'shipping_preset_info', {}),
+				price: get(dataType, 'price', ''),
+				attribute_specifics: get(dataType, 'attribute_specifics', ''),//
+				attribute_specifics_modify: filter(
+					dataType.attribute_specifics,
+					(aSpec) => !isErrorVariation(aSpec, dataType.prety_attributes)
+				),
+				include_size_chart: true,
+				size_chart: get(dataType, 'size_chart', ''),
+				include_extend_images: true,
+				extend_images: get(dataType, 'extend_images', ''),
+				platform_category: get(dataType, 'platform_category', []),
+				prety_attributes: map(get(dataType, 'prety_attributes', ''), pAttr => {
+					return {
+						...pAttr,
+						options: filter(get(pAttr, 'options', []), option => option?.default)
+					}
+				}),
+			}
+			console.log("itemInfoMap", itemInfoMap)
+		}
+
 		let errorMsg = [];
-		if (get(itemInfo, 'name', '').length > 120) {
+		if (
+			!Array.isArray(get(itemInfoMap, 'prety_attributes', [])) ||
+			get(itemInfoMap, 'prety_attributes', []).length > 3
+		) {
+			errorMsg.push('Too many variant');
+		}
+		if (get(itemInfoMap, 'name', '').length > 120) {
 			errorMsg.push('Item title is too long');
 		}
 
-		if (get(itemInfo, 'description', '').length > 3000) {
+		if (get(itemInfoMap, 'description', '').length > 3000) {
 			errorMsg.push('Item description is too long');
 		}
-		let shippingCost = get(itemInfo, ['shipping_preset_info', 'shipping_cost'], '') ? get(itemInfo, ['shipping_preset_info', 'shipping_cost'], '') : '5'
+		let shippingCost = get(itemInfoMap, ['shipping_preset_info', 'shipping_cost'], '') ? get(itemInfoMap, ['shipping_preset_info', 'shipping_cost'], '') : '5'
 		shippingCost = parseFloat(shippingCost)
-		let internationalShippingCost = get(itemInfo, ['shipping_preset_info', 'international_shipping_cost'], '') ? get(itemInfo, ['shipping_preset_info', 'international_shipping_cost'], '') : '9'
-		const isWorldWideShip = get(itemInfo, ['shipping_preset_info', 'global_shipping'], '') === 'Accepted' || !get(itemInfo, 'shipping_preset_info');
+		let internationalShippingCost = get(itemInfoMap, ['shipping_preset_info', 'international_shipping_cost'], '') ? get(itemInfoMap, ['shipping_preset_info', 'international_shipping_cost'], '') : '9'
+		const isWorldWideShip = get(itemInfoMap, ['shipping_preset_info', 'global_shipping'], '') === 'Accepted' || !get(itemInfoMap, 'shipping_preset_info');
 
 		if (isWorldWideShip) {
 			if (!head($x(`//option[text()="World Wide"]`))) {
@@ -127,9 +216,9 @@ export default function ({ Identifier, storeData }: any) {
 			return setErrorMsg(errorMsg);
 		}
 		setOnFillData(true);
-		let minPrice = parseFloat(itemInfo?.price);
-		let maxPrice = parseFloat(itemInfo?.price);
-		const prices = map(itemInfo?.attribute_specifics_modify, (attribute_specifics) =>
+		let minPrice = parseFloat(itemInfoMap?.price);
+		let maxPrice = parseFloat(itemInfoMap?.price);
+		const prices = map(itemInfoMap?.attribute_specifics_modify, (attribute_specifics) =>
 			parseFloat(attribute_specifics.sale_price)
 		);
 		if (prices.length) {
@@ -144,33 +233,32 @@ export default function ({ Identifier, storeData }: any) {
 		// 	minBasePrice = Math.min.apply(Math, basePrices);
 		// }
 
-		let titleReplace = get(itemInfo, 'name', '');
+		let titleReplace = get(itemInfoMap, 'name', '');
 		titleReplace = titleReplace.replace(/(\[Your Company Name\])/g, '');
-		titleReplace = titleReplace.replaceAll(/[\!\&\*\(\)\_\-\.\/\\\|\,\.]/gi, '')
-		titleReplace = filter(titleReplace.replaceAll(/[\@\#\$\%\^\+\=\[\]\{\}\;\<\>\?\`\~]/gi, '').split(" "), a => a).join(" ")
+		titleReplace = filter(titleReplace.replaceAll(/[\~\`\@\#\$\%\^\+\=\{\}\[\]\;\<\>\?]/gi, '').split(" "), a => a).join(" ")
 
-		let description = get(itemInfo, 'description', '');
+		let description = get(itemInfoMap, 'description', '');
 		description = description.replace(/PRODUCT_HEADER/g, '');
 		description = description.replace(/PRODUCT_FOOTER/g, '');
-		description = description.replace(/{{PRODUCT_TITLE}}/g, get(itemInfo, 'name', ''));
-		description = description.replace(/{{PRODUCT_NAME}}/g, get(itemInfo, 'name', ''));
-		description = description.replace(/PRODUCT_NAME/g, get(itemInfo, 'name', ''));
+		description = description.replace(/{{PRODUCT_TITLE}}/g, get(itemInfoMap, 'name', ''));
+		description = description.replace(/{{PRODUCT_NAME}}/g, get(itemInfoMap, 'name', ''));
+		description = description.replace(/PRODUCT_NAME/g, get(itemInfoMap, 'name', ''));
 
-		let pictures = flatMapDeep(get(itemInfo, 'images', []), (img) => get(img, 'src', ''));
+		let pictures = flatMapDeep(get(itemInfoMap, 'images', []), (img) => get(img, 'src', ''));
 		if (
-			itemInfo.include_size_chart &&
-			itemInfo.size_chart &&
-			itemInfo.size_chart !== '' &&
-			itemInfo.size_chart !== null &&
-			startsWith(itemInfo.size_chart, 'http')
+			itemInfoMap.include_size_chart &&
+			itemInfoMap.size_chart &&
+			itemInfoMap.size_chart !== '' &&
+			itemInfoMap.size_chart !== null &&
+			startsWith(itemInfoMap.size_chart, 'http')
 		) {
-			pictures = [...pictures, itemInfo.size_chart];
+			pictures = [...pictures, itemInfoMap.size_chart];
 		}
-		if (itemInfo.include_extend_images && itemInfo.extend_images && Array.isArray(itemInfo.extend_images)) {
+		if (itemInfoMap.include_extend_images && itemInfoMap.extend_images && Array.isArray(itemInfoMap.extend_images)) {
 			pictures = [
 				...pictures,
 				...map(
-					filter(itemInfo.extend_images, (image) => {
+					filter(itemInfoMap.extend_images, (image) => {
 						return image.src && image.src !== '' && image.src !== null && startsWith(image.src, 'http');
 					}),
 					(image) => {
@@ -180,10 +268,10 @@ export default function ({ Identifier, storeData }: any) {
 			];
 		}
 
-		const dispatchTime = get(itemInfo, ['shipping_preset_info', 'dispatch_time_max'], 5);
+		const dispatchTime = get(itemInfoMap, ['shipping_preset_info', 'dispatch_time_max'], 5);
 
 		const platform_category = get(
-			find(itemInfo?.platform_category, (pcate) => {
+			find(itemInfoMap?.platform_category, (pcate) => {
 				return pcate?.type === 'Inspireuplift';
 			}),
 			'category_selected',
@@ -211,13 +299,13 @@ export default function ({ Identifier, storeData }: any) {
 		}
 		await fillSelect(`select[name="processing_time"]`, dispatchTime + ' days');
 		await fillCheckbox(`input#sell-stock[name="continueSelling"][type="checkbox"]`, true);
-		if (Array.isArray(itemInfo?.prety_attributes) && itemInfo?.prety_attributes.length) {
+		if (Array.isArray(itemInfoMap?.prety_attributes) && itemInfoMap?.prety_attributes.length) {
 			await fillCheckbox(`input#shippment-detail[name="hasProductOptions"][type="checkbox"]`, true);
 		}
-		const determinedAttrs = filter(itemInfo?.prety_attributes, (prety_attribute, index) => {
+		const determinedAttrs = filter(itemInfoMap?.prety_attributes, (prety_attribute, index) => {
 			return prety_attribute?.attribute_type === 'Color' || prety_attribute?.attribute_type === 'Size';
 		});
-		const undefinedAttrs = filter(itemInfo?.prety_attributes, (prety_attribute, index) => {
+		const undefinedAttrs = filter(itemInfoMap?.prety_attributes, (prety_attribute, index) => {
 			return prety_attribute?.attribute_type !== 'Color' && prety_attribute?.attribute_type !== 'Size';
 		});
 		index = 0;
@@ -252,8 +340,8 @@ export default function ({ Identifier, storeData }: any) {
 			index++;
 		}
 
-		let quantity = Array.isArray(itemInfo?.attribute_specifics_modify)
-			? itemInfo?.attribute_specifics_modify.length * 20
+		let quantity = Array.isArray(itemInfoMap?.attribute_specifics_modify)
+			? itemInfoMap?.attribute_specifics_modify.length * 20
 			: 99;
 		await fillTextInput(`input#product-available-inventory`, quantity ? quantity : 1);
 
@@ -284,7 +372,7 @@ export default function ({ Identifier, storeData }: any) {
 		index = 0;
 		while (selector[index]) {
 			let valMerge = $(`input[name="variantCheck"]:eq(${index})`).first().val();
-			const valueAttr = find(itemInfo?.attribute_specifics_modify, (attribute_specifics_modify) => {
+			const valueAttr = find(itemInfoMap?.attribute_specifics_modify, (attribute_specifics_modify) => {
 				return (
 					toUpper(map(attribute_specifics_modify?.name_value, (name_value) => name_value?.value).join('-')) === valMerge
 				);
@@ -299,7 +387,7 @@ export default function ({ Identifier, storeData }: any) {
 		index = 0;
 		while (selector[index]) {
 			let valMerge = $(`input[name="variantCheck"]:eq(${index})`).first().val();
-			const valueAttr = find(itemInfo?.attribute_specifics_modify, (attribute_specifics_modify) => {
+			const valueAttr = find(itemInfoMap?.attribute_specifics_modify, (attribute_specifics_modify) => {
 				return (
 					toUpper(map(attribute_specifics_modify?.name_value, (name_value) => name_value?.value).join('-')) === valMerge
 				);
@@ -389,12 +477,6 @@ export default function ({ Identifier, storeData }: any) {
 				)
 				.then((response: any) => {
 					const itemInfoResponse = head(get(response, ['data', 'itemsInfo']));
-					if (
-						!Array.isArray(get(itemInfoResponse, 'prety_attributes', [])) ||
-						get(itemInfoResponse, 'prety_attributes', []).length > 3
-					) {
-						return setErrorMsg('Too many variant');
-					}
 					setItemInfo(head(get(response, ['data', 'itemsInfo'])));
 					setLoading(false);
 					resolve(true);
@@ -451,6 +533,36 @@ export default function ({ Identifier, storeData }: any) {
 						valid={false}
 						style={{ fontSize: 'initial' }}
 						id='ext-item-id-input'
+					/>
+				</div>
+				<div className='mb-3'>
+					<Label>Product Type overwrite(optional): </Label>
+					<Select
+						className="basic-single w-100"
+						classNamePrefix="ext-select"
+						placeholder="Select your hub"
+						isClearable={true}
+						isLoading={!Array.isArray(itemTypes) || !itemTypes.length}
+						isSearchable={true}
+						name="color"
+						options={map(itemTypes, type => {
+							return {
+								id: get(type, "_id", ""),
+								value: get(type, "name", ""),
+								label: <div className='d-flex flex-column'><strong>{get(type, "name", "")}</strong><i>{get(type, "provider", "")}</i></div>
+							}
+						})}
+						styles={colourStyles}
+						onChange={(data) => {
+							setCurrentType(find(itemTypes, type => type?._id === get(data, "id", "")))
+						}}
+						value={
+							{
+								id: currentType?._id,
+								value: get(currentType, "name", ""),
+								label: <div className='d-flex flex-column'><strong>{get(currentType, "name", "")}</strong><i>{get(currentType, "provider", "")}</i></div>
+							}
+						}
 					/>
 				</div>
 				{itemInfo ? (

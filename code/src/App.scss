@@ -262,6 +262,11 @@ html {
                             z-index: 2147483645;
                         }
                     }
+
+                    .btn-xs {
+                        padding: 0px 2px !important;
+                        font-size: 0.9rem !important;
+                    }
                 }
             }
 
@@ -324,7 +329,10 @@ html {
                     color: #000 !important;
                 }
             }
-            
+
+            .ext-select__menu {
+                min-height: 300px !important;
+            }
 
             .ext-imgs-list {
                 max-width: 34% !important;
