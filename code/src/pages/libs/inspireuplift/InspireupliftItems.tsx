@@ -50,7 +50,7 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
     const [WarningMsg, setWarningMsg] = useState<any>([]);
 
     const [itemIdTxt, setItemIdTxt] = useState<string>(
-        'IT-60173-76941'
+        ''
     );
     const [itemInfos, setItemInfos] = useState<any>([]);
     const [itemTypes, setItemTypes] = useState<any>([]);
@@ -112,12 +112,13 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
     }
 
     const handleClearData = async () => {
+        console.log('handleClearData');
         return new Promise(async (resolve, reject) => {
             let index = 0;
             if ($(`img[src="/images/icons/cancel-icon.svg"]`).length) {
-                const promisesAttrClear: any = [];
                 index = 0;
                 while ($(`img[src="/images/icons/cancel-icon.svg"]`)[index]) {
+                    console.log($(`img[src="/images/icons/cancel-icon.svg"]`)[index]);
                     await sleep(2000);
                     await clickButton(`img[src="/images/icons/cancel-icon.svg"]`);
                     await sleep(1000);
@@ -299,7 +300,7 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
 
         let titleReplace = get(itemInfoMap, 'name', '');
         titleReplace = titleReplace.replace(/(\[Your Company Name\])/g, '');
-		titleReplace = filter(titleReplace.replaceAll(/[\~\`\@\#\$\%\^\+\=\{\}\[\]\;\<\>\?]/gi, '').split(" "), a => a).join(" ")
+        titleReplace = filter(titleReplace.replaceAll(/[\~\`\@\#\$\%\^\+\=\{\}\[\]\;\<\>\?]/gi, '').split(" "), a => a).join(" ")
 
         let description = get(itemInfoMap, 'description', '');
         description = description.replace(/PRODUCT_HEADER/g, '');
@@ -368,6 +369,28 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
         if (Array.isArray(itemInfoMap?.prety_attributes) && itemInfoMap?.prety_attributes.length) {
             await fillCheckbox(`input#shippment-detail[name="hasProductOptions"][type="checkbox"]`, true);
         }
+        await sleep(1000);
+		if ($(`img[src="/images/icons/cancel-icon.svg"]:eq(3)`).length) {
+			await sleep(2000);
+			await clickButton(`img[src="/images/icons/cancel-icon.svg"]:eq(3)`);
+			await sleep(1000);
+			await clickButton(`button.rrt-ok-btn`);
+		}
+
+		if ($(`img[src="/images/icons/cancel-icon.svg"]:eq(2)`).length) {
+			await sleep(2000);
+			await clickButton(`img[src="/images/icons/cancel-icon.svg"]:eq(2)`);
+			await sleep(1000);
+			await clickButton(`button.rrt-ok-btn`);
+		}
+
+		if ($(`img[src="/images/icons/cancel-icon.svg"]:eq(1)`).length) {
+			await sleep(2000);
+			await clickButton(`img[src="/images/icons/cancel-icon.svg"]:eq(1)`);
+			await sleep(1000);
+			await clickButton(`button.rrt-ok-btn`);
+		}
+
         const determinedAttrs = filter(itemInfoMap?.prety_attributes, (prety_attribute, index) => {
             return prety_attribute?.attribute_type === 'Color' || prety_attribute?.attribute_type === 'Size';
         });
@@ -376,8 +399,9 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
         });
         index = 0;
         const allAttr = [...determinedAttrs, ...undefinedAttrs]
+        console.log('allAttr: ', allAttr);
         while (allAttr[index]) {
-            if (index) {
+            if (index > 0) {
                 const prety_attribute = allAttr[index];
                 let selector = `//button[text()="Add Option"]`;
                 if (prety_attribute?.attribute_type !== 'Color' && prety_attribute?.attribute_type !== 'Size') {
@@ -519,11 +543,11 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
         await clickXButton(`//button/span[text()="Save"]`);
 
         let count = 0
-        while (!head($x(`//span[text()="Duplicate"]`)) && count < 5) {
+        while (!head($x(`//span[text()="Duplicate"]`)) && count < 15) {
             await sleep(3000);
             count++
         }
-        if (count >= 5) {
+        if (count >= 15) {
             set(ItemInfos, [itemInfoIndex, 'current_status'], 'Error');
             setItemInfos(ItemInfos);
             return true

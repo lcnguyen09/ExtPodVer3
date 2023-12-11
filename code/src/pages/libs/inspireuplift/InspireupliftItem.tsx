@@ -302,6 +302,27 @@ export default function ({ Identifier, storeData }: any) {
 		if (Array.isArray(itemInfoMap?.prety_attributes) && itemInfoMap?.prety_attributes.length) {
 			await fillCheckbox(`input#shippment-detail[name="hasProductOptions"][type="checkbox"]`, true);
 		}
+		await sleep(1000);
+		if ($(`img[src="/images/icons/cancel-icon.svg"]:eq(3)`).length) {
+			await sleep(2000);
+			await clickButton(`img[src="/images/icons/cancel-icon.svg"]:eq(3)`);
+			await sleep(1000);
+			await clickButton(`button.rrt-ok-btn`);
+		}
+
+		if ($(`img[src="/images/icons/cancel-icon.svg"]:eq(2)`).length) {
+			await sleep(2000);
+			await clickButton(`img[src="/images/icons/cancel-icon.svg"]:eq(2)`);
+			await sleep(1000);
+			await clickButton(`button.rrt-ok-btn`);
+		}
+
+		if ($(`img[src="/images/icons/cancel-icon.svg"]:eq(1)`).length) {
+			await sleep(2000);
+			await clickButton(`img[src="/images/icons/cancel-icon.svg"]:eq(1)`);
+			await sleep(1000);
+			await clickButton(`button.rrt-ok-btn`);
+		}
 		const determinedAttrs = filter(itemInfoMap?.prety_attributes, (prety_attribute, index) => {
 			return prety_attribute?.attribute_type === 'Color' || prety_attribute?.attribute_type === 'Size';
 		});
