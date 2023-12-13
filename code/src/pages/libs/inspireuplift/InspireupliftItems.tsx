@@ -271,8 +271,8 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
                 errorMsg.push('Shipping Zone is no option to ship World Wide');
             }
         } else {
-            if (!head($x(`//option[text()="United States"]`)) && !head($x(`//option[text()="US"]`))) {
-                errorMsg.push('Shipping Zone is no option to ship to (US/United States)');
+            if (!head($x(`//option[text()="United States"]|//option[text()="United states"]|//option[text()="united states"]|//option[text()="US"]|//option[text()="us"]|//option[text()="Us"]|//option[text()="uS"]`))) {
+				errorMsg.push('Shipping Zone is no option to ship to (US/United States). Create Shipping with name: "US" or "United States"');
             }
         }
         if (errorMsg.length) {
@@ -359,6 +359,18 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
         } else {
             if (head($x(`//option[text()="United States"]`))) {
                 await fillSelect(`select[name="zone_id"]`, 'United States');
+            } else if (head($x(`//option[text()="United states"]`))) {
+                await fillSelect(`select[name="zone_id"]`, 'United states');
+            } else if (head($x(`//option[text()="united states"]`))) {
+                await fillSelect(`select[name="zone_id"]`, 'united states');
+            } else if (head($x(`//option[text()="US"]`))) {
+                await fillSelect(`select[name="zone_id"]`, 'US');
+            } else if (head($x(`//option[text()="us"]`))) {
+                await fillSelect(`select[name="zone_id"]`, 'us');
+            } else if (head($x(`//option[text()="Us"]`))) {
+                await fillSelect(`select[name="zone_id"]`, 'Us');
+            } else if (head($x(`//option[text()="uS"]`))) {
+                await fillSelect(`select[name="zone_id"]`, 'uS');
             } else {
                 await fillSelect(`select[name="zone_id"]`, 'US');
             }

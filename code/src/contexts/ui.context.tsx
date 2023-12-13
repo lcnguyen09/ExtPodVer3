@@ -174,9 +174,12 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		if (
 			token !== null &&
 			docker !== null &&
+			server !== null &&
 			windowViewStorage !== null &&
 			templateIdStorage !== null &&
-			server !== null
+			autoPageStorage !== null &&
+			extendShippingPriceStorage !== null &&
+			autoSaveStorage !== null
 		) {
 			setInit(true);
 		}
@@ -286,9 +289,11 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	};
 	const setGraphqlForAccount = async () => {
 		setUrlGraphql(isSaleHunter() ? URL_ACCOUNT_GRAPHQL_SALEHUNTER : URL_ACCOUNT_GRAPHQL_PODORDER);
+		return new Promise((resolve) => setTimeout(() => resolve(true), 500))
 	};
 	const setGraphqlForHub = async () => {
 		setUrlGraphql(URL_GRAPHQL(state.currentDocker));
+		return new Promise((resolve) => setTimeout(() => resolve(true), 500))
 	};
 	const setUrlRestApi = () => {
 		dispatch({ type: 'SET_URL_REST_API', urlRestApi: URL_REST_API(state.currentDocker) });

@@ -10,8 +10,12 @@ const inIframe = () => {
 	}
 };
 
+const checkValid = () => {
+	return !window?.location?.pathname?.match(/\.js$/gim) && !window?.location?.pathname?.match(/\.css/gim) && !inIframe() && !window.location.host.includes('podorders.store') && !window.location.host.includes('salehunter.io') && !window.location.host.includes('localhost:3000') && !window.location.host.includes('localhost:3200')
+}
+
 try {
-	if (!window?.location?.pathname?.match(/\.js$/gim) && !window?.location?.pathname?.match(/\.css/gim) && !inIframe()) {
+	if (checkValid()) {
 		const rootElement = Object.assign(document.createElement('div'), { id: 'podorder-ext-app' });
 		if (APP_MODE === 'dev' || process.env.REACT_APP_APP_MODE === 'dev') {
 			rootElement.classList.add('dev-mode');

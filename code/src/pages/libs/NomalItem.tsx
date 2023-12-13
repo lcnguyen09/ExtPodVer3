@@ -439,7 +439,6 @@ export default function NomalItem() {
 															}, 2000);
 														}
 														const sortUrl = item?.itemUrl.replace(window.location.origin, '');
-														console.log('sortUrl: ', sortUrl);
 														if ($(`a[href="${sortUrl}"]`)) {
 															movingOnElm(`a[href="${sortUrl}"]`);
 															const oldBorder = $(`a[href="${sortUrl}"]`).css('border');
@@ -537,15 +536,12 @@ function NomalItemSave({
 			console.log(Items);
 			while (find(Items, item => !item.done && item.checked && item.itemUrl)) {
 				let item = find(Items, item => !item.done && item.checked && item.itemUrl)
-				console.log('item: ', item);
-
 				if (item?.itemUrl) {
 					if ($(`a[href="${item?.itemUrl}"]`)) {
 						movingOnElm(`a[href="${item?.itemUrl}"]`);
 						$(`a[href="${item?.itemUrl}"]`).css('border', '1px solid blue');
 					}
 					const sortUrl = item?.itemUrl.replace(window.location.origin, '');
-					console.log('sortUrl: ', sortUrl);
 					if ($(`a[href="${sortUrl}"]`)) {
 						movingOnElm(`a[href="${sortUrl}"]`);
 						$(`a[href="${sortUrl}"]`).css('border', '1px solid blue');
@@ -554,124 +550,170 @@ function NomalItemSave({
 
 				let index = findIndex(Items, item => !item.done && item.checked && item.itemUrl)
 
-
 				await new Promise((resolve, reject) => {
-					$.ajax({
-						url: item.itemUrl,
+					var settings = {
+						url: `${urlRestApi}/item-clone-check`,
+						data: {
+							url: item?.itemUrl
+						},
 						method: 'GET',
-					})
-						.done((res) => {
-							const el = document.createElement('html');
-							el.innerHTML = res;
-							const detailDom = $(el);
-							const itemInfo = getItemInfo(detailDom);
-							resolve({
-								...item,
-								...itemInfo,
-							});
+						timeout: 0,
+						headers: {
+							Authorization: `Bearer ${currentToken.token}`,
+						},
+					};
+					$.ajax(settings)
+						.done((response) => {
+							if (response?.data === 'Item has exist!') {
+								set(Items, [index, 'done'], true);
+								set(Items, [index, 'status'], 'Exist');
+								setItems(Items);
+								console.log(
+									`%c=======>>> ${get(item, 'name', '')} ==> ${get(response, 'data', '')}`,
+									'background: #222; color: #c73c3c'
+								);
+								if (item?.itemUrl) {
+									if ($(`a[href="${item?.itemUrl}"]`)) {
+										movingOnElm(`a[href="${item?.itemUrl}"]`);
+										$(`a[href="${item?.itemUrl}"]`).css('border', '1px solid orange');
+									}
+									const sortUrl = item?.itemUrl.replace(window.location.origin, '');
+									if ($(`a[href="${sortUrl}"]`)) {
+										movingOnElm(`a[href="${sortUrl}"]`);
+										$(`a[href="${sortUrl}"]`).css('border', '1px solid orange');
+									}
+								}
+								resolve(true)
+							} else {
+								resolve(false)
+							}
 						})
 						.fail((error) => {
 							console.log('error: ', error);
-							resolve(item);
+							resolve('next');
 						});
-				}).then((itemInfo: any) => {
-					console.log('itemInfo: ', itemInfo);
-					if (!itemInfo) {
-						return Promise.resolve('99');
-					}
-					if (!itemInfo?.images || !itemInfo?.images?.length) {
-						itemInfo.images = [
-							itemInfo?.imageUrl
-						]
-					}
-
-					if (!itemInfo || !itemInfo?.name || !itemInfo?.images || !itemInfo?.images?.length) {
-						set(Items, [index, 'status'], 'Error');
-						set(Items, [index, 'done'], true);
-						setItems(Items);
-						return Promise.resolve(false);
-					}
-					return new Promise((resolve, reject) => {
-						var settings = {
-							url: `${urlRestApi}/item-clone`,
-							data: {
-								id: templateId,
-								name: itemInfo?.name,
-								url: itemInfo?.itemUrl,
-								images: itemInfo?.images,
-								origin_id: ForceCreateNew ? '' : itemInfo?.id || '',
-							},
-							method: 'GET',
-							timeout: 0,
-							headers: {
-								Authorization: `Bearer ${currentToken.token}`,
-							},
-						};
-						$.ajax(settings)
-							.done((response) => {
-								set(Items, [index, 'done'], true);
-								if (get(response, 'data', '').includes('OK, New Identity is')) {
-									set(Items, [index, 'status'], 'Done');
-									console.log(
-										`%c=======>>> ${get(itemInfo, 'name', '')} ==> ${get(response, 'data', '')}`,
-										'background: #222; color: #bada55'
-									);
-									resolve('0');
-								} else if (get(response, 'data', '') === 'Item not found!') {
-									setErrorMsg('Template item ID not setup!');
-									Items = Items.map(i => {
-										return { ...i, done: true }
-									})
-									setItems(Items);
-									resolve('1');
-								} else if (get(response, 'data', '') === 'Item has exist!') {
-									set(Items, [index, 'status'], 'Exist');
-									console.log(
-										`%c=======>>> ${get(itemInfo, 'name', '')} ==> ${get(response, 'data', '')}`,
-										'background: #222; color: #c73c3c'
-									);
-									resolve('2');
-								}
-								setItems(Items);
+				}).then((exist) => {
+					if (exist !== true) {
+						return new Promise((resolve, reject) => {
+							$.ajax({
+								url: item.itemUrl,
+								method: 'GET',
 							})
-							.fail(function () {
+								.done((res) => {
+									const el = document.createElement('html');
+									el.innerHTML = res;
+									const detailDom = $(el);
+									const itemInfo = getItemInfo(detailDom);
+									resolve({
+										...item,
+										...itemInfo,
+									});
+								})
+								.fail((error) => {
+									console.log('error: ', error);
+									resolve(item);
+								});
+						}).then(async (itemInfo: any) => {
+							console.log('itemInfo: ', itemInfo);
+							if (!itemInfo) {
+								return Promise.resolve('99');
+							}
+							if (!itemInfo?.images || !itemInfo?.images?.length) {
+								itemInfo.images = [
+									itemInfo?.imageUrl
+								]
+							}
+
+							if (!itemInfo || !itemInfo?.name || !itemInfo?.images || !itemInfo?.images?.length) {
+								set(Items, [index, 'status'], 'Error');
 								set(Items, [index, 'done'], true);
 								setItems(Items);
-								resolve('3');
-							});
-					}).then(res => {
-						let color = 'blue'
-						switch (res) {
-							case '0':
-								color = 'green'
-								break;
-							case '1':
-								color = 'red'
-								break;
-							case '2':
-								color = 'orange'
-								break;
-							case '3':
-								color = 'red'
-								break;
-							default:
-								break;
-						}
+								return Promise.resolve(false);
+							}
+							return new Promise((resolve, reject) => {
+								var settings = {
+									url: `${urlRestApi}/item-clone`,
+									data: {
+										id: templateId,
+										name: itemInfo?.name,
+										url: itemInfo?.itemUrl,
+										images: itemInfo?.images,
+										origin_id: ForceCreateNew ? '' : itemInfo?.id || '',
+									},
+									method: 'GET',
+									timeout: 0,
+									headers: {
+										Authorization: `Bearer ${currentToken.token}`,
+									},
+								};
+								$.ajax(settings)
+									.done((response) => {
+										set(Items, [index, 'done'], true);
+										if (get(response, 'data', '').includes('OK, New Identity is')) {
+											set(Items, [index, 'status'], 'Done');
+											console.log(
+												`%c=======>>> ${get(itemInfo, 'name', '')} ==> ${get(response, 'data', '')}`,
+												'background: #222; color: #bada55'
+											);
+											resolve('0');
+										} else if (get(response, 'data', '') === 'Item not found!') {
+											setErrorMsg('Template item ID not setup!');
+											Items = Items.map(i => {
+												return { ...i, done: true }
+											})
+											setItems(Items);
+											resolve('1');
+										} else if (get(response, 'data', '') === 'Item has exist!') {
+											set(Items, [index, 'status'], 'Exist');
+											console.log(
+												`%c=======>>> ${get(itemInfo, 'name', '')} ==> ${get(response, 'data', '')}`,
+												'background: #222; color: #c73c3c'
+											);
+											resolve('2');
+										}
+										setItems(Items);
+									})
+									.fail(function () {
+										set(Items, [index, 'done'], true);
+										setItems(Items);
+										resolve('3');
+									});
+							}).then(res => {
+								let color = 'blue'
+								switch (res) {
+									case '0':
+										color = 'green'
+										break;
+									case '1':
+										color = 'red'
+										break;
+									case '2':
+										color = 'orange'
+										break;
+									case '3':
+										color = 'red'
+										break;
+									default:
+										break;
+								}
 
-						if (itemInfo?.itemUrl) {
-							if ($(`a[href="${itemInfo?.itemUrl}"]`)) {
-								movingOnElm(`a[href="${itemInfo?.itemUrl}"]`);
-								$(`a[href="${itemInfo?.itemUrl}"]`).css('border', '1px solid ' + color);
-							}
-							const sortUrl = itemInfo?.itemUrl.replace(window.location.origin, '');
-							if ($(`a[href="${sortUrl}"]`)) {
-								movingOnElm(`a[href="${sortUrl}"]`);
-								$(`a[href="${sortUrl}"]`).css('border', '1px solid ' + color);
-							}
-						}
-						return res
-					})
-				});
+								if (itemInfo?.itemUrl) {
+									if ($(`a[href="${itemInfo?.itemUrl}"]`)) {
+										movingOnElm(`a[href="${itemInfo?.itemUrl}"]`);
+										$(`a[href="${itemInfo?.itemUrl}"]`).css('border', '1px solid ' + color);
+									}
+									const sortUrl = itemInfo?.itemUrl.replace(window.location.origin, '');
+									if ($(`a[href="${sortUrl}"]`)) {
+										movingOnElm(`a[href="${sortUrl}"]`);
+										$(`a[href="${sortUrl}"]`).css('border', '1px solid ' + color);
+									}
+								}
+								return res
+							})
+						});
+					}
+
+				})
 			}
 			setLoading(false);
 			handleNext()
