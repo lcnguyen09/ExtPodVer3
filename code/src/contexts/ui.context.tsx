@@ -381,6 +381,28 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		}
 	};
 
+	const fillReactTab = async (selector: any, value: string | number) => {
+		try {
+			await movingOnElm(selector);
+			let elm = typeof selector === 'string' ? (head($(selector)) as any) : selector;
+			if (elm) {
+				let lastValue = elm.value;
+				elm.value = value;
+				//tracker is a hack to force React to handle change event
+				let tracker = elm._valueTracker;
+				if (tracker) {
+					tracker.setValue(lastValue);
+				}
+				elm.dispatchEvent(new Event('change', { bubbles: true }));
+				elm.dispatchEvent(new Event('blur', { bubbles: true }));
+				elm.dispatchEvent(new Event('focusout', { bubbles: true }));
+			}
+		} catch (error) {
+			console.log(`%cCannot find element`, 'color: red');
+			console.log('error: ', error);
+		}
+	};
+
 	const fillTextArea = async (selector: any, value: string | number) => {
 		try {
 			await movingOnElm(selector);
@@ -547,6 +569,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 			sleep,
 			movingOnElm,
 			fillTextInput,
+			fillReactTab,
 			fillTextArea,
 			fillSelect,
 			fillCheckbox,

@@ -22,6 +22,7 @@ export default function ({ Identifier, storeData }: any) {
 		$x,
 		movingOnElm,
 		fillTextInput,
+		fillReactTab,
 		fillTextArea,
 		fillSelect,
 		fillCheckbox,
@@ -387,10 +388,10 @@ export default function ({ Identifier, storeData }: any) {
 			while (options[idx]) {
 				const op = options[idx];
 				await sleep(300);
-				await ($(`input.ReactTags__tagInputField:eq(${index})`).first() as any)?.focus();
-				await fillTextInput(`input.ReactTags__tagInputField:eq(${index})`, op?.plf_value);
+				// await ($(`input.ReactTags__tagInputField:eq(${index})`).first() as any)?.focus();
+				await fillReactTab(`input.ReactTags__tagInputField:eq(${index})`, op?.plf_value);
 				await sleep(100);
-				await ($('input#ext-item-id-input').first() as any)?.focus();
+				// await ($('input#ext-item-id-input').first() as any)?.focus();
 				idx++;
 			}
 			index++;
@@ -738,7 +739,7 @@ export default function ({ Identifier, storeData }: any) {
 				>
 					<PlusCircle size={14} /> <span style={{ marginLeft: '3px' }}>Add</span>
 				</Button>
-				<Button
+				{/* <Button
 					size='xs'
 					color='success'
 					className='py-1 d-flex justify-content-center align-items-center'
@@ -753,7 +754,7 @@ export default function ({ Identifier, storeData }: any) {
 					onClick={() => handleFillData()}
 				>
 					<PlusCircle size={14} /> <span style={{ marginLeft: '3px' }}>Fill</span>
-				</Button>
+				</Button> */}
 			</BottomBar>
 		</>
 	);

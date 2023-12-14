@@ -22,6 +22,7 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
         sleep,
         movingOnElm,
         fillTextInput,
+		fillReactTab,
         fillTextArea,
         fillSelect,
         fillCheckbox,
@@ -456,11 +457,11 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
             while (options[idx]) {
                 const op = options[idx];
                 await sleep(300);
-                await ($(`input.ReactTags__tagInputField:eq(${index})`).first() as any)?.focus();
-                await fillTextInput(`input.ReactTags__tagInputField:eq(${index})`, op?.plf_value);
-                await sleep(100);
-                await ($('input#ext-item-id-input').first() as any)?.focus();
-                idx++;
+				// await ($(`input.ReactTags__tagInputField:eq(${index})`).first() as any)?.focus();
+				await fillReactTab(`input.ReactTags__tagInputField:eq(${index})`, op?.plf_value);
+				await sleep(100);
+				// await ($('input#ext-item-id-input').first() as any)?.focus();
+				idx++;
             }
             index++;
         }
