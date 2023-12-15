@@ -6,7 +6,7 @@ import { useItemsInfoLazyQuery, usePutItemToStoreMutation } from '../../../graph
 import Notification from './../../../components/Notification';
 import BottomBar from './../../../components/BottomBar';
 import $ from 'jquery';
-import { cloneDeep, filter, find, flatMapDeep, get, head, map, startsWith, toLower, toUpper, trim } from 'lodash';
+import { cloneDeep, filter, find, flatMapDeep, get, head, last, map, startsWith, toLower, toUpper, trim } from 'lodash';
 import Select, { StylesConfig } from 'react-select';
 
 const colourStyles: StylesConfig = {
@@ -226,13 +226,6 @@ export default function ({ Identifier, storeData }: any) {
 			minPrice = Math.min.apply(Math, prices) + (extendShippingPrice ? shippingCost : 0);
 			maxPrice = Math.max.apply(Math, prices) + (extendShippingPrice ? shippingCost : 0);
 		}
-		// let minBasePrice = parseFloat(itemInfo?.price);
-		// const basePrices = map(itemInfo?.attribute_specifics_modify, (attribute_specifics) =>
-		// 	parseFloat(attribute_specifics.base_price)
-		// );
-		// if (basePrices.length) {
-		// 	minBasePrice = Math.min.apply(Math, basePrices);
-		// }
 
 		let titleReplace = get(itemInfoMap, 'name', '');
 		titleReplace = titleReplace.replace(/(\[Your Company Name\])/g, '');
@@ -287,6 +280,21 @@ export default function ({ Identifier, storeData }: any) {
 
 		await fillTextInput(`input#product-title[name="title"]`, titleReplace);
 		// !&*()_-./\|,.
+
+		const lastCateName = trim(get(last(platform_category), 'name'))
+		await fillTextInput(`input[name="product-category"]`, lastCateName);
+
+		while (!$(`div.suggested-categories-container`).length) {
+			await sleep(2000);
+		}
+
+		if ($x(`//div[contains(@class, 'suggested-categories-container')]//span[text()="${lastCateName}"]`).length) {
+			clickXButton(`//div[contains(@class, 'suggested-categories-container')]//span[text()="${lastCateName}"]`);
+		} else {
+			clickXButton(`//div[contains(@class, 'suggested-categories-container')]/div[1]`);
+		}
+
+
 		await fillTextInput(`input#product-price[name="price"]`, minPrice.toFixed(2));
 
 		if (isWorldWideShip) {
@@ -434,26 +442,26 @@ export default function ({ Identifier, storeData }: any) {
 			index++;
 		}
 
-		if (get(platform_category, [0, 'name'])) {
-			await fillSelect(`select[name="productMain"]:eq(0)`, trim(get(platform_category, [0, 'name'])));
-			await sleep(500);
-		}
-		if (get(platform_category, [1, 'name'])) {
-			await fillSelect(`select[name="productMain"]:eq(1)`, trim(get(platform_category, [1, 'name'])));
-			await sleep(500);
-		}
-		if (get(platform_category, [2, 'name'])) {
-			await fillSelect(`select[name="productMain"]:eq(2)`, trim(get(platform_category, [2, 'name'])));
-			await sleep(500);
-		}
-		if (get(platform_category, [3, 'name'])) {
-			await fillSelect(`select[name="productMain"]:eq(3)`, trim(get(platform_category, [3, 'name'])));
-			await sleep(500);
-		}
-		if (get(platform_category, [4, 'name'])) {
-			await fillSelect(`select[name="productMain"]:eq(4)`, trim(get(platform_category, [4, 'name'])));
-			await sleep(500);
-		}
+		// if (get(platform_category, [0, 'name'])) {
+		// 	await fillSelect(`select[name="productMain"]:eq(0)`, trim(get(platform_category, [0, 'name'])));
+		// 	await sleep(500);
+		// }
+		// if (get(platform_category, [1, 'name'])) {
+		// 	await fillSelect(`select[name="productMain"]:eq(1)`, trim(get(platform_category, [1, 'name'])));
+		// 	await sleep(500);
+		// }
+		// if (get(platform_category, [2, 'name'])) {
+		// 	await fillSelect(`select[name="productMain"]:eq(2)`, trim(get(platform_category, [2, 'name'])));
+		// 	await sleep(500);
+		// }
+		// if (get(platform_category, [3, 'name'])) {
+		// 	await fillSelect(`select[name="productMain"]:eq(3)`, trim(get(platform_category, [3, 'name'])));
+		// 	await sleep(500);
+		// }
+		// if (get(platform_category, [4, 'name'])) {
+		// 	await fillSelect(`select[name="productMain"]:eq(4)`, trim(get(platform_category, [4, 'name'])));
+		// 	await sleep(500);
+		// }
 
 		await fillTextArea(`textarea`, description);
 
@@ -461,13 +469,6 @@ export default function ({ Identifier, storeData }: any) {
 		const resImg = await fillInputFile(`input[type="file"]:not([id*="my-image-file"])`, pictures);
 
 		const warningMsg = [];
-		// if (filter(resImg, (res) => res === false)) {
-		// 	warningMsg.push('Image upload wrong, check again');
-		// }
-		// if (filter(resImg, (res) => res === 'webp')) {
-		// 	warningMsg.push('Webp image not support, check again');
-		// }
-		// setWarningMsg(warningMsg);
 
 		while ($x(`//div[text()="Uploading Images"]`).length) {
 			await sleep(2000);
@@ -553,6 +554,7 @@ export default function ({ Identifier, storeData }: any) {
 	return (
 		<>
 			<h4 className='text-center'>Add item</h4>
+            <p className='text-danger' style={{textAlign: 'justify'}}>*Please DO NOT MINIMIZE this tab, the OS will interfere with event simulation. Automatically adding products will not be possible.*</p>
 			<Notification ErrorMsg={ErrorMsg} SuccessMsg={SuccessMsg} WarningMsg={WarningMsg} Loading={Loading} />
 			<div className='mt-2'>
 				<div className='mb-3'>
@@ -701,34 +703,40 @@ export default function ({ Identifier, storeData }: any) {
 					false
 				)}
 			</div>
-			<BottomBar>
+			<BottomBar className='flex-column'>
 				<div className='d-flex justify-content-center align-items-center p-1'>
-					<Input
-						id='autoSave'
-						type='checkbox'
-						value='autoSave'
-						onChange={(e) => {
-							setAutoSave(e.target.checked);
-						}}
-						checked={autoSave}
-						disabled={onFillData}
-					/>
-					<Label for='autoSave' className='pl-1'>
-						Auto save
-					</Label>
-					<Input
-						id='extendShippingPrice'
-						type='checkbox'
-						value='extendShippingPrice'
-						onChange={(e) => {
-							setExtendShippingPrice(e.target.checked);
-						}}
-						checked={extendShippingPrice}
-						disabled={onFillData}
-					/>
-					<Label for='extendShippingPrice' className='pl-1'>
-						Extend shipping price
-					</Label>
+					<div className='d-flex align-items-center'>
+						<Input
+							id='autoSave'
+							type='checkbox'
+							value='autoSave'
+							className='mt-0'
+							onChange={(e) => {
+								setAutoSave(e.target.checked);
+							}}
+							checked={autoSave}
+							disabled={onFillData}
+						/>
+						<Label for='autoSave' className='pl-1'>
+							Auto save
+						</Label>
+					</div>
+					<div className='d-flex align-items-center'>
+						<Input
+							id='extendShippingPrice'
+							type='checkbox'
+							value='extendShippingPrice'
+							className='mt-0'
+							onChange={(e) => {
+								setExtendShippingPrice(e.target.checked);
+							}}
+							checked={extendShippingPrice}
+							disabled={onFillData}
+						/>
+						<Label for='extendShippingPrice' className='pl-1'>
+							Extend shipping price
+						</Label>
+					</div>
 				</div>
 				<Button
 					size='xs'

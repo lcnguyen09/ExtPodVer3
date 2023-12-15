@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Button, Col, Input, Label, Media, Row, Spinner, Table } from 'reactstrap';
-import { PlusCircle } from 'react-feather';
+import { PlayCircle, PlusCircle } from 'react-feather';
 import UiContext from './../../../contexts/ui.context';
 import { useItemsInfoLazyQuery, usePutItemToStoreMutation } from '../../../graphql/graphql';
 import Notification from './../../../components/Notification';
 import BottomBar from './../../../components/BottomBar';
 import $ from 'jquery';
-import { cloneDeep, filter, find, findIndex, flatMapDeep, get, head, map, set, startsWith, toLower, toUpper, trim } from 'lodash';
+import { cloneDeep, filter, find, findIndex, flatMapDeep, get, head, last, map, set, startsWith, toLower, toUpper, trim } from 'lodash';
 import Select, { StylesConfig } from 'react-select';
 
 const colourStyles: StylesConfig = {
@@ -22,7 +22,7 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
         sleep,
         movingOnElm,
         fillTextInput,
-		fillReactTab,
+        fillReactTab,
         fillTextArea,
         fillSelect,
         fillCheckbox,
@@ -273,7 +273,7 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
             }
         } else {
             if (!head($x(`//option[text()="United States"]|//option[text()="United states"]|//option[text()="united states"]|//option[text()="US"]|//option[text()="us"]|//option[text()="Us"]|//option[text()="uS"]`))) {
-				errorMsg.push('Shipping Zone is no option to ship to (US/United States). Create Shipping with name: "US" or "United States"');
+                errorMsg.push('Shipping Zone is no option to ship to (US/United States). Create Shipping with name: "US" or "United States"');
             }
         }
         if (errorMsg.length) {
@@ -291,13 +291,6 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
             minPrice = Math.min.apply(Math, prices) + (extendShippingPrice ? shippingCost : 0);
             maxPrice = Math.max.apply(Math, prices) + (extendShippingPrice ? shippingCost : 0);
         }
-        // let minBasePrice = parseFloat(itemInfoMap?.price);
-        // const basePrices = map(itemInfoMap?.attribute_specifics_modify, (attribute_specifics) =>
-        // 	parseFloat(attribute_specifics.base_price)
-        // );
-        // if (basePrices.length) {
-        // 	minBasePrice = Math.min.apply(Math, basePrices);
-        // }
 
         let titleReplace = get(itemInfoMap, 'name', '');
         titleReplace = titleReplace.replace(/(\[Your Company Name\])/g, '');
@@ -353,6 +346,21 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
         await handleClearData();
 
         await fillTextInput(`input#product-title[name="title"]`, titleReplace);
+
+        const lastCateName = trim(get(last(platform_category), 'name'))
+		await fillTextInput(`input[name="product-category"]`, lastCateName);
+
+		while (!$(`div.suggested-categories-container`).length) {
+			await sleep(2000);
+		}
+
+		if ($x(`//div[contains(@class, 'suggested-categories-container')]//span[text()="${lastCateName}"]`).length) {
+			clickXButton(`//div[contains(@class, 'suggested-categories-container')]//span[text()="${lastCateName}"]`);
+		} else {
+			clickXButton(`//div[contains(@class, 'suggested-categories-container')]/div[1]`);
+		}
+
+
         await fillTextInput(`input#product-price[name="price"]`, minPrice.toFixed(2));
 
         if (isWorldWideShip) {
@@ -383,26 +391,26 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
             await fillCheckbox(`input#shippment-detail[name="hasProductOptions"][type="checkbox"]`, true);
         }
         await sleep(1000);
-		if ($(`img[src="/images/icons/cancel-icon.svg"]:eq(3)`).length) {
-			await sleep(2000);
-			await clickButton(`img[src="/images/icons/cancel-icon.svg"]:eq(3)`);
-			await sleep(1000);
-			await clickButton(`button.rrt-ok-btn`);
-		}
+        if ($(`img[src="/images/icons/cancel-icon.svg"]:eq(3)`).length) {
+            await sleep(2000);
+            await clickButton(`img[src="/images/icons/cancel-icon.svg"]:eq(3)`);
+            await sleep(1000);
+            await clickButton(`button.rrt-ok-btn`);
+        }
 
-		if ($(`img[src="/images/icons/cancel-icon.svg"]:eq(2)`).length) {
-			await sleep(2000);
-			await clickButton(`img[src="/images/icons/cancel-icon.svg"]:eq(2)`);
-			await sleep(1000);
-			await clickButton(`button.rrt-ok-btn`);
-		}
+        if ($(`img[src="/images/icons/cancel-icon.svg"]:eq(2)`).length) {
+            await sleep(2000);
+            await clickButton(`img[src="/images/icons/cancel-icon.svg"]:eq(2)`);
+            await sleep(1000);
+            await clickButton(`button.rrt-ok-btn`);
+        }
 
-		if ($(`img[src="/images/icons/cancel-icon.svg"]:eq(1)`).length) {
-			await sleep(2000);
-			await clickButton(`img[src="/images/icons/cancel-icon.svg"]:eq(1)`);
-			await sleep(1000);
-			await clickButton(`button.rrt-ok-btn`);
-		}
+        if ($(`img[src="/images/icons/cancel-icon.svg"]:eq(1)`).length) {
+            await sleep(2000);
+            await clickButton(`img[src="/images/icons/cancel-icon.svg"]:eq(1)`);
+            await sleep(1000);
+            await clickButton(`button.rrt-ok-btn`);
+        }
 
         const determinedAttrs = filter(itemInfoMap?.prety_attributes, (prety_attribute, index) => {
             return prety_attribute?.attribute_type === 'Color' || prety_attribute?.attribute_type === 'Size';
@@ -457,11 +465,11 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
             while (options[idx]) {
                 const op = options[idx];
                 await sleep(300);
-				// await ($(`input.ReactTags__tagInputField:eq(${index})`).first() as any)?.focus();
-				await fillReactTab(`input.ReactTags__tagInputField:eq(${index})`, op?.plf_value);
-				await sleep(100);
-				// await ($('input#ext-item-id-input').first() as any)?.focus();
-				idx++;
+                // await ($(`input.ReactTags__tagInputField:eq(${index})`).first() as any)?.focus();
+                await fillReactTab(`input.ReactTags__tagInputField:eq(${index})`, op?.plf_value);
+                await sleep(100);
+                // await ($('input#ext-item-id-input').first() as any)?.focus();
+                idx++;
             }
             index++;
         }
@@ -502,26 +510,26 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
             index++;
         }
 
-        if (get(platform_category, [0, 'name'])) {
-            await fillSelect(`select[name="productMain"]:eq(0)`, trim(get(platform_category, [0, 'name'])));
-            await sleep(500);
-        }
-        if (get(platform_category, [1, 'name'])) {
-            await fillSelect(`select[name="productMain"]:eq(1)`, trim(get(platform_category, [1, 'name'])));
-            await sleep(500);
-        }
-        if (get(platform_category, [2, 'name'])) {
-            await fillSelect(`select[name="productMain"]:eq(2)`, trim(get(platform_category, [2, 'name'])));
-            await sleep(500);
-        }
-        if (get(platform_category, [3, 'name'])) {
-            await fillSelect(`select[name="productMain"]:eq(3)`, trim(get(platform_category, [3, 'name'])));
-            await sleep(500);
-        }
-        if (get(platform_category, [4, 'name'])) {
-            await fillSelect(`select[name="productMain"]:eq(4)`, trim(get(platform_category, [4, 'name'])));
-            await sleep(500);
-        }
+        // if (get(platform_category, [0, 'name'])) {
+        //     await fillSelect(`select[name="productMain"]:eq(0)`, trim(get(platform_category, [0, 'name'])));
+        //     await sleep(500);
+        // }
+        // if (get(platform_category, [1, 'name'])) {
+        //     await fillSelect(`select[name="productMain"]:eq(1)`, trim(get(platform_category, [1, 'name'])));
+        //     await sleep(500);
+        // }
+        // if (get(platform_category, [2, 'name'])) {
+        //     await fillSelect(`select[name="productMain"]:eq(2)`, trim(get(platform_category, [2, 'name'])));
+        //     await sleep(500);
+        // }
+        // if (get(platform_category, [3, 'name'])) {
+        //     await fillSelect(`select[name="productMain"]:eq(3)`, trim(get(platform_category, [3, 'name'])));
+        //     await sleep(500);
+        // }
+        // if (get(platform_category, [4, 'name'])) {
+        //     await fillSelect(`select[name="productMain"]:eq(4)`, trim(get(platform_category, [4, 'name'])));
+        //     await sleep(500);
+        // }
 
         await fillTextArea(`textarea`, description);
 
@@ -530,18 +538,6 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
         await sleep(2000);
 
         const warningMsg = [];
-        // if (filter(resImg, (res) => res === false)) {
-        //     warningMsg.push('Image upload wrong, check again');
-        // }
-        // if (filter(resImg, (res) => res === 'webp')) {
-        //     warningMsg.push('Webp image not support, check again');
-        // }
-
-        // if (warningMsg.length) {
-        //     set(ItemInfos, [itemInfoIndex, 'warningMsg'], warningMsg.join('; '));
-        // }
-
-        // setItemInfos(ItemInfos);
 
         while ($x(`//div[text()="Uploading Images"]`).length) {
             await sleep(3000);
@@ -643,6 +639,7 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
     return (
         <>
             <h4 className='text-center'>Add item</h4>
+            <p className='text-danger' style={{textAlign: 'justify'}}>*Please DO NOT MINIMIZE this tab, the OS will interfere with event simulation. Automatically adding products will not be possible.*</p>
             <Notification ErrorMsg={ErrorMsg} SuccessMsg={SuccessMsg} WarningMsg={WarningMsg} Loading={Loading} />
             <div className='mt-2'>
                 <div className='mb-3'>
@@ -771,31 +768,36 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
                     false
                 )}
             </div>
-            <BottomBar>
-                <div className='d-flex justify-content-center align-items-center p-1'>
-                    <Input
-                        id='autoSave'
-                        type='checkbox'
-                        value='autoSave'
-                        checked={itemInfos.length > 1}
-                        disabled={true}
-                    />
-                    <Label for='autoSave' className='pl-1'>
-                        Auto save
-                    </Label>
-                    <Input
-                        id='extendShippingPrice'
-                        type='checkbox'
-                        value='extendShippingPrice'
-                        onChange={(e) => {
-                            setExtendShippingPrice(e.target.checked);
-                        }}
-                        checked={extendShippingPrice}
-                        disabled={onFillData}
-                    />
-                    <Label for='extendShippingPrice' className='pl-1'>
-                        Extend shipping price
-                    </Label>
+            <BottomBar className='flex-column'>
+                <div className='d-flex justify-content-between align-items-center p-1'>
+                    <div className='d-flex align-items-center'>
+                        <Input
+                            id='autoSave'
+                            type='checkbox'
+                            value='autoSave'
+                            className='mt-0'
+                            checked={itemInfos.length > 1}
+                            disabled={true}
+                        />
+                        <Label for='autoSave' className='pl-1'>
+                            Auto save
+                        </Label>
+                    </div>
+                    <div className='d-flex align-items-center'>
+                        <Input
+                            id='extendShippingPrice'
+                            type='checkbox'
+                            value='extendShippingPrice'
+                            className='mt-0'
+                            onChange={(e) => {
+                                setExtendShippingPrice(e.target.checked);
+                            }}
+                            checked={extendShippingPrice}
+                            disabled={onFillData}
+                        />
+                        <Label for='extendShippingPrice' className='pl-1'>
+                            Extend shipping price
+                        </Label></div>
                 </div>
                 <Button
                     size='xs'
@@ -804,7 +806,7 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
                     onClick={() => handleFillDatas()}
                     disabled={!itemInfos.length}
                 >
-                    <PlusCircle size={14} /> <span style={{ marginLeft: '3px' }}>Add</span>
+                    <PlayCircle size={14} /> <span style={{ marginLeft: '3px' }}>Start</span>
                 </Button>
                 {/* <Button
 					size='xs'

@@ -538,12 +538,12 @@ function NomalItemSave({
 				let item = find(Items, item => !item.done && item.checked && item.itemUrl)
 				if (item?.itemUrl) {
 					if ($(`a[href="${item?.itemUrl}"]`)) {
-						movingOnElm(`a[href="${item?.itemUrl}"]`);
+						// movingOnElm(`a[href="${item?.itemUrl}"]`);
 						$(`a[href="${item?.itemUrl}"]`).css('border', '1px solid blue');
 					}
 					const sortUrl = item?.itemUrl.replace(window.location.origin, '');
 					if ($(`a[href="${sortUrl}"]`)) {
-						movingOnElm(`a[href="${sortUrl}"]`);
+						// movingOnElm(`a[href="${sortUrl}"]`);
 						$(`a[href="${sortUrl}"]`).css('border', '1px solid blue');
 					}
 				}
@@ -574,12 +574,12 @@ function NomalItemSave({
 								);
 								if (item?.itemUrl) {
 									if ($(`a[href="${item?.itemUrl}"]`)) {
-										movingOnElm(`a[href="${item?.itemUrl}"]`);
+										// movingOnElm(`a[href="${item?.itemUrl}"]`);
 										$(`a[href="${item?.itemUrl}"]`).css('border', '1px solid orange');
 									}
 									const sortUrl = item?.itemUrl.replace(window.location.origin, '');
 									if ($(`a[href="${sortUrl}"]`)) {
-										movingOnElm(`a[href="${sortUrl}"]`);
+										// movingOnElm(`a[href="${sortUrl}"]`);
 										$(`a[href="${sortUrl}"]`).css('border', '1px solid orange');
 									}
 								}
@@ -699,12 +699,12 @@ function NomalItemSave({
 
 								if (itemInfo?.itemUrl) {
 									if ($(`a[href="${itemInfo?.itemUrl}"]`)) {
-										movingOnElm(`a[href="${itemInfo?.itemUrl}"]`);
+										// movingOnElm(`a[href="${itemInfo?.itemUrl}"]`);
 										$(`a[href="${itemInfo?.itemUrl}"]`).css('border', '1px solid ' + color);
 									}
 									const sortUrl = itemInfo?.itemUrl.replace(window.location.origin, '');
 									if ($(`a[href="${sortUrl}"]`)) {
-										movingOnElm(`a[href="${sortUrl}"]`);
+										// movingOnElm(`a[href="${sortUrl}"]`);
 										$(`a[href="${sortUrl}"]`).css('border', '1px solid ' + color);
 									}
 								}
