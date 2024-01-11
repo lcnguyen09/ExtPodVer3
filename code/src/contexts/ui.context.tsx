@@ -338,7 +338,17 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		}
 		return results;
 	};
-	const sleep = (ms: any) => {
+	const getRandomInt = (min: number, max: number) => {
+		min = Math.ceil(min);
+		max = Math.floor(max);
+		return Math.floor(Math.random() * (max - min) + min); // The maximum is exclusive and the minimum is inclusive
+	}
+	const sleep = (ms: any, msRamdom?: any) => {
+		if (msRamdom && parseInt(msRamdom) > parseInt(ms)) {
+			ms = getRandomInt(ms, msRamdom)
+		} else {
+			ms = getRandomInt(ms, ms + 300)
+		}
 		return new Promise((resolve) => setTimeout(() => resolve(ms), ms));
 	};
 	const movingOnElm = async (selector: any, parrentSelector: any = null, offset: any = 50) => {

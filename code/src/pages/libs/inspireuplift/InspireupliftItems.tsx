@@ -348,17 +348,17 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
         await fillTextInput(`input#product-title[name="title"]`, titleReplace);
 
         const lastCateName = trim(get(last(platform_category), 'name'))
-		await fillTextInput(`input[name="product-category"]`, lastCateName);
+        await fillTextInput(`input[name="product-category"]`, lastCateName);
 
-		while (!$(`div.suggested-categories-container`).length) {
-			await sleep(2000);
-		}
+        while (!$(`div.suggested-categories-container`).length) {
+            await sleep(2000);
+        }
 
-		if ($x(`//div[contains(@class, 'suggested-categories-container')]//span[text()="${lastCateName}"]`).length) {
-			clickXButton(`//div[contains(@class, 'suggested-categories-container')]//span[text()="${lastCateName}"]`);
-		} else {
-			clickXButton(`//div[contains(@class, 'suggested-categories-container')]/div[1]`);
-		}
+        if ($x(`//div[contains(@class, 'suggested-categories-container')]//span[text()="${lastCateName}"]`).length) {
+            clickXButton(`//div[contains(@class, 'suggested-categories-container')]//span[text()="${lastCateName}"]`);
+        } else {
+            clickXButton(`//div[contains(@class, 'suggested-categories-container')]/div[1]`);
+        }
 
 
         await fillTextInput(`input#product-price[name="price"]`, minPrice.toFixed(2));
@@ -556,6 +556,7 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
             await sleep(3000);
             count++
         }
+        await sleep(60000, 300000);
         if (count >= 15) {
             set(ItemInfos, [itemInfoIndex, 'current_status'], 'Error');
             setItemInfos(ItemInfos);
@@ -639,7 +640,7 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
     return (
         <>
             <h4 className='text-center'>Add item</h4>
-            <p className='text-danger' style={{textAlign: 'justify'}}>*Please DO NOT MINIMIZE this tab, the OS will interfere with event simulation. Automatically adding products will not be possible.*</p>
+            <p className='text-danger' style={{ textAlign: 'justify' }}>*Please DO NOT MINIMIZE this tab, the OS will interfere with event simulation. Automatically adding products will not be possible.*</p>
             <Notification ErrorMsg={ErrorMsg} SuccessMsg={SuccessMsg} WarningMsg={WarningMsg} Loading={Loading} />
             <div className='mt-2'>
                 <div className='mb-3'>
