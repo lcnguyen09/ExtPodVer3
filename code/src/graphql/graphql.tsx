@@ -299,6 +299,16 @@ export type Collection = {
   type?: Maybe<Scalars['String']>;
 };
 
+export type CollectionTrend = {
+  __typename?: 'CollectionTrend';
+  _id?: Maybe<Scalars['String']>;
+  created_at?: Maybe<Scalars['Int']>;
+  keyword?: Maybe<Array<Maybe<Scalars['String']>>>;
+  name?: Maybe<Scalars['String']>;
+  status?: Maybe<Scalars['String']>;
+  total_items?: Maybe<Scalars['Int']>;
+};
+
 export type ComponentSetting = {
   __typename?: 'ComponentSetting';
   name?: Maybe<Scalars['String']>;
@@ -501,6 +511,7 @@ export type DashboardFulfillementProduction = {
 
 export type DashboardOrder = {
   __typename?: 'DashboardOrder';
+  actionrequired?: Maybe<Scalars['Int']>;
   all?: Maybe<Scalars['Int']>;
   cancelled?: Maybe<Scalars['Int']>;
   completed?: Maybe<Scalars['Int']>;
@@ -699,6 +710,7 @@ export type Docker = {
   sku?: Maybe<Scalars['String']>;
   sku_label?: Maybe<Scalars['String']>;
   status?: Maybe<Scalars['String']>;
+  trend?: Maybe<Scalars['String']>;
   type?: Maybe<Scalars['String']>;
   unlimit_lifetime?: Maybe<Scalars['Boolean']>;
 };
@@ -727,6 +739,14 @@ export type DockerUserInput = {
   user_invite_email?: InputMaybe<Scalars['String']>;
   user_name?: InputMaybe<Scalars['String']>;
   user_password?: InputMaybe<Scalars['String']>;
+};
+
+export type Domain = {
+  __typename?: 'Domain';
+  _id?: Maybe<Scalars['String']>;
+  created_at?: Maybe<Scalars['Int']>;
+  domain?: Maybe<Scalars['String']>;
+  total_items?: Maybe<Scalars['Int']>;
 };
 
 export type Dreamship = {
@@ -1524,6 +1544,25 @@ export type ItemInfo = {
   weight?: Maybe<Scalars['Float']>;
 };
 
+export type ItemInfoTrend = {
+  __typename?: 'ItemInfoTrend';
+  _id?: Maybe<Scalars['String']>;
+  collection?: Maybe<Array<Maybe<CollectionTrend>>>;
+  created_at?: Maybe<Scalars['Int']>;
+  domain?: Maybe<Scalars['String']>;
+  engine?: Maybe<Scalars['String']>;
+  external_url?: Maybe<Scalars['String']>;
+  ignore_publish?: Maybe<Scalars['Boolean']>;
+  image?: Maybe<Scalars['String']>;
+  images?: Maybe<Array<Maybe<Scalars['String']>>>;
+  name?: Maybe<Scalars['String']>;
+  orig_name?: Maybe<Scalars['String']>;
+  push_logs?: Maybe<Array<Maybe<PushLog>>>;
+  sku?: Maybe<Scalars['String']>;
+  status?: Maybe<Scalars['String']>;
+  tags?: Maybe<Array<Maybe<TagTrend>>>;
+};
+
 export type ItemInfoUpdate = {
   _id?: InputMaybe<Scalars['String']>;
   description_ai?: InputMaybe<Scalars['String']>;
@@ -2179,11 +2218,13 @@ export type PlatFormOrderTotal = {
 
 export type PlatformCategory = {
   __typename?: 'PlatformCategory';
+  alternate_name?: Maybe<Scalars['String']>;
   category_selected?: Maybe<Array<Maybe<PlatformCategorySelected>>>;
   type?: Maybe<Scalars['String']>;
 };
 
 export type PlatformCategoryInput = {
+  alternate_name?: InputMaybe<Scalars['String']>;
   category_selected?: InputMaybe<Array<InputMaybe<PlatformCategorySelectedInput>>>;
   type?: InputMaybe<Scalars['String']>;
 };
@@ -2506,6 +2547,7 @@ export type ProductPreset = {
   shipping_additional_cost?: Maybe<Scalars['Float']>;
   shipping_cost?: Maybe<Scalars['Float']>;
   shipping_preset?: Maybe<Scalars['String']>;
+  shipping_preset_info?: Maybe<ShippingPreset>;
   size_chart?: Maybe<Scalars['String']>;
   specifics?: Maybe<Array<Maybe<ItemSpecific>>>;
   tags?: Maybe<Array<Maybe<Scalars['String']>>>;
@@ -2551,6 +2593,14 @@ export type ProviderProductTypeProvider = {
   __typename?: 'ProviderProductTypeProvider';
   id?: Maybe<Scalars['String']>;
   title?: Maybe<Scalars['String']>;
+};
+
+export type PushLog = {
+  __typename?: 'PushLog';
+  created_at?: Maybe<Scalars['Int']>;
+  store_id?: Maybe<Scalars['String']>;
+  store_name?: Maybe<Scalars['String']>;
+  store_type?: Maybe<Scalars['String']>;
 };
 
 export type RandomId = {
@@ -2676,6 +2726,8 @@ export type RootMutation = {
   /** Fulfilment maker */
   makeFulfilment?: Maybe<Array<Maybe<Fulfilment>>>;
   makeItemInfo?: Maybe<Array<Maybe<Item>>>;
+  makeItemInfoTrend?: Maybe<ItemInfoTrend>;
+  makeItemInfosTrend?: Maybe<Array<Maybe<ItemInfoTrend>>>;
   makeItemPreset?: Maybe<Array<Maybe<ItemPreset>>>;
   /** ListingCustom maker */
   makeListCustom?: Maybe<Array<Maybe<ListCustom>>>;
@@ -2697,6 +2749,7 @@ export type RootMutation = {
   /** Store maker */
   makeStore?: Maybe<Array<Maybe<Store>>>;
   makeTransaction?: Maybe<Transaction>;
+  makeTrendQueue?: Maybe<TrendQueue>;
   makeUser?: Maybe<Array<Maybe<User>>>;
   makeUserGroup?: Maybe<Array<Maybe<UserGroup>>>;
   makeUserGroups?: Maybe<Array<Maybe<UserGroup>>>;
@@ -2713,7 +2766,9 @@ export type RootMutation = {
   queueRemoveItem?: Maybe<Array<Maybe<ItemInfo>>>;
   removeClipart?: Maybe<Clipart>;
   removeFile?: Maybe<File>;
+  removeItemImages?: Maybe<ItemInfo>;
   removeItemInfo?: Maybe<Array<Maybe<Item>>>;
+  removeItemInfoTrend?: Maybe<Array<Maybe<ItemInfoTrend>>>;
   removeItemPreset?: Maybe<ItemPreset>;
   removeProductMockupPreset?: Maybe<ProductMockupPreset>;
   replyMessenger?: Maybe<Messenger>;
@@ -2722,6 +2777,7 @@ export type RootMutation = {
   saveEbayTemplate?: Maybe<EbayTemplate>;
   saveFile?: Maybe<File>;
   saveNetworkCollection?: Maybe<NetworkCollection>;
+  saveTrendQueueRule?: Maybe<Array<Maybe<TrendQueueRule>>>;
   /** Send EMails */
   sendEmails?: Maybe<ResultSendEmail>;
   sendMessenger?: Maybe<Messenger>;
@@ -2743,6 +2799,7 @@ export type RootMutation = {
   testBigcommerceKey?: Maybe<BigCommerceConfiguration>;
   testEtsyKey?: Maybe<EtsyConfiguration>;
   topupAccount?: Maybe<Transaction>;
+  trackingOrder?: Maybe<Order>;
   trashCart?: Maybe<Array<Maybe<Cart>>>;
   trashCustomer?: Maybe<Array<Maybe<Customer>>>;
   trashEbayTemplate?: Maybe<EbayTemplate>;
@@ -2752,6 +2809,7 @@ export type RootMutation = {
   trashPrivate?: Maybe<Array<Maybe<PrivateFulfilment>>>;
   trashShippingPreset?: Maybe<Array<Maybe<ShippingPreset>>>;
   trashStore?: Maybe<Array<Maybe<Store>>>;
+  trashTrendQueue?: Maybe<Array<Maybe<TrendQueue>>>;
   trashUserGroup?: Maybe<Array<Maybe<UserGroup>>>;
   updateMockupDesign?: Maybe<MockupDesign>;
   updatePaypalItem?: Maybe<Array<Maybe<JobsList>>>;
@@ -3187,6 +3245,40 @@ export type RootMutationMakeItemInfoArgs = {
 };
 
 
+export type RootMutationMakeItemInfoTrendArgs = {
+  id?: InputMaybe<Scalars['String']>;
+  ignore_publish?: InputMaybe<Scalars['Boolean']>;
+  images?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  name?: InputMaybe<Scalars['String']>;
+};
+
+
+export type RootMutationMakeItemInfosTrendArgs = {
+  _id?: InputMaybe<Scalars['String']>;
+  collection?: InputMaybe<Scalars['String']>;
+  custom_collection?: InputMaybe<Scalars['String']>;
+  custom_tag?: InputMaybe<Scalars['String']>;
+  domain?: InputMaybe<Scalars['String']>;
+  engine?: InputMaybe<Scalars['String']>;
+  external_url?: InputMaybe<Scalars['String']>;
+  from_date?: InputMaybe<Scalars['String']>;
+  ids?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  isTM?: InputMaybe<Scalars['String']>;
+  missing_image?: InputMaybe<Scalars['String']>;
+  name?: InputMaybe<Scalars['String']>;
+  push_log?: InputMaybe<Scalars['Boolean']>;
+  q?: InputMaybe<Scalars['String']>;
+  restore?: InputMaybe<Scalars['Boolean']>;
+  rules?: InputMaybe<Array<InputMaybe<TrendQueueRuleInput>>>;
+  search_date?: InputMaybe<Scalars['String']>;
+  status?: InputMaybe<Scalars['String']>;
+  store?: InputMaybe<Scalars['String']>;
+  tags?: InputMaybe<Scalars['String']>;
+  to_date?: InputMaybe<Scalars['String']>;
+  trash?: InputMaybe<Scalars['Boolean']>;
+};
+
+
 export type RootMutationMakeItemPresetArgs = {
   _id?: InputMaybe<Scalars['String']>;
   attribute_specifics?: InputMaybe<Array<InputMaybe<SpecificAttributeInput>>>;
@@ -3440,6 +3532,24 @@ export type RootMutationMakeTransactionArgs = {
 };
 
 
+export type RootMutationMakeTrendQueueArgs = {
+  _id?: InputMaybe<Scalars['String']>;
+  convert_seo_image?: InputMaybe<Scalars['Boolean']>;
+  image_id?: InputMaybe<Scalars['String']>;
+  is_non_variation?: InputMaybe<Scalars['Boolean']>;
+  override_collection?: InputMaybe<Scalars['Boolean']>;
+  override_collection_text?: InputMaybe<Scalars['String']>;
+  override_tag?: InputMaybe<Scalars['Boolean']>;
+  override_tag_text?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  params?: InputMaybe<TrendQueueInput>;
+  product_id?: InputMaybe<Scalars['String']>;
+  render_description_ai?: InputMaybe<Scalars['Boolean']>;
+  render_description_ai_length?: InputMaybe<Scalars['String']>;
+  status?: InputMaybe<Scalars['String']>;
+  store_id?: InputMaybe<Scalars['String']>;
+};
+
+
 export type RootMutationMakeUserArgs = {
   containers?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   id?: InputMaybe<Scalars['String']>;
@@ -3562,8 +3672,19 @@ export type RootMutationRemoveFileArgs = {
 };
 
 
+export type RootMutationRemoveItemImagesArgs = {
+  _id: Scalars['String'];
+  images_remove?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+};
+
+
 export type RootMutationRemoveItemInfoArgs = {
   ids: Array<InputMaybe<Scalars['String']>>;
+};
+
+
+export type RootMutationRemoveItemInfoTrendArgs = {
+  delete_ids?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
 };
 
 
@@ -3614,6 +3735,11 @@ export type RootMutationSaveNetworkCollectionArgs = {
   accounts?: InputMaybe<Array<Scalars['String']>>;
   description?: InputMaybe<Scalars['String']>;
   name: Scalars['String'];
+};
+
+
+export type RootMutationSaveTrendQueueRuleArgs = {
+  rules?: InputMaybe<Array<InputMaybe<TrendQueueRuleInput>>>;
 };
 
 
@@ -3755,6 +3881,11 @@ export type RootMutationTopupAccountArgs = {
 };
 
 
+export type RootMutationTrackingOrderArgs = {
+  id?: InputMaybe<Scalars['String']>;
+};
+
+
 export type RootMutationTrashCartArgs = {
   ids: Array<InputMaybe<Scalars['String']>>;
 };
@@ -3797,6 +3928,11 @@ export type RootMutationTrashShippingPresetArgs = {
 
 
 export type RootMutationTrashStoreArgs = {
+  ids: Array<InputMaybe<Scalars['String']>>;
+};
+
+
+export type RootMutationTrashTrendQueueArgs = {
   ids: Array<InputMaybe<Scalars['String']>>;
 };
 
@@ -3930,6 +4066,7 @@ export type RootQuery = {
   carts?: Maybe<Array<Maybe<Cart>>>;
   checkUserAccess?: Maybe<ResponseCheckUserAccess>;
   cliparts?: Maybe<Array<Maybe<Clipart>>>;
+  collectionTrend?: Maybe<Array<Maybe<CollectionTrend>>>;
   collections?: Maybe<Array<Maybe<Collection>>>;
   configuration?: Maybe<Configuration>;
   countTasks?: Maybe<TaskCounter>;
@@ -3949,6 +4086,7 @@ export type RootQuery = {
   designs?: Maybe<Array<Maybe<Design>>>;
   /** Docker */
   dockers?: Maybe<Array<Maybe<Docker>>>;
+  domainTrend?: Maybe<Array<Maybe<Domain>>>;
   /** Ebay Template */
   ebayTemplate?: Maybe<EbayTemplate>;
   ebayTemplatePreview?: Maybe<EbayTemplatePreview>;
@@ -3984,6 +4122,7 @@ export type RootQuery = {
    */
   items?: Maybe<Array<Maybe<Item>>>;
   itemsInfo?: Maybe<Array<Maybe<ItemInfo>>>;
+  itemsInfoTrend?: Maybe<Array<Maybe<ItemInfoTrend>>>;
   itemsLive?: Maybe<Array<Maybe<Item>>>;
   itemsPreset?: Maybe<Array<Maybe<ItemPreset>>>;
   jobGroups?: Maybe<Array<Maybe<Jobs>>>;
@@ -4036,6 +4175,7 @@ export type RootQuery = {
   storeTransactionSummaryLive?: Maybe<Store>;
   /** Store */
   stores?: Maybe<Array<Maybe<Store>>>;
+  tagTrend?: Maybe<Array<Maybe<TagTrend>>>;
   tags?: Maybe<Array<Maybe<Tag>>>;
   taskOrderTarget?: Maybe<TaskTarget>;
   taskService?: Maybe<TaskService>;
@@ -4048,6 +4188,8 @@ export type RootQuery = {
   transactionCount?: Maybe<TransactionByStatus>;
   transactionSum?: Maybe<Array<Maybe<TransactionByStore>>>;
   transactions?: Maybe<Array<Maybe<Transaction>>>;
+  trendQueue?: Maybe<Array<Maybe<TrendQueue>>>;
+  trendQueueRule?: Maybe<Array<Maybe<TrendQueueRule>>>;
   userPermissions?: Maybe<Array<Maybe<Permission>>>;
   usergroups?: Maybe<Array<Maybe<UserGroup>>>;
   users?: Maybe<Array<Maybe<User>>>;
@@ -4130,6 +4272,13 @@ export type RootQueryClipartsArgs = {
   category?: InputMaybe<Scalars['String']>;
   name?: InputMaybe<Scalars['String']>;
   provider?: InputMaybe<Scalars['String']>;
+};
+
+
+export type RootQueryCollectionTrendArgs = {
+  include_non_collection?: InputMaybe<Scalars['String']>;
+  keyword?: InputMaybe<Scalars['String']>;
+  name?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -4244,6 +4393,11 @@ export type RootQueryDockersArgs = {
   start?: InputMaybe<Scalars['String']>;
   status?: InputMaybe<Scalars['String']>;
   type?: InputMaybe<Scalars['String']>;
+};
+
+
+export type RootQueryDomainTrendArgs = {
+  domain?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -4420,6 +4574,24 @@ export type RootQueryItemsInfoArgs = {
 };
 
 
+export type RootQueryItemsInfoTrendArgs = {
+  _id?: InputMaybe<Scalars['String']>;
+  collection?: InputMaybe<Scalars['String']>;
+  domain?: InputMaybe<Scalars['String']>;
+  engine?: InputMaybe<Scalars['String']>;
+  external_url?: InputMaybe<Scalars['String']>;
+  from_date?: InputMaybe<Scalars['String']>;
+  missing_image?: InputMaybe<Scalars['String']>;
+  name?: InputMaybe<Scalars['String']>;
+  q?: InputMaybe<Scalars['String']>;
+  search_date?: InputMaybe<Scalars['String']>;
+  status?: InputMaybe<Scalars['String']>;
+  store?: InputMaybe<Scalars['String']>;
+  tags?: InputMaybe<Scalars['String']>;
+  to_date?: InputMaybe<Scalars['String']>;
+};
+
+
 export type RootQueryItemsLiveArgs = {
   _id?: InputMaybe<Scalars['String']>;
   store?: InputMaybe<Scalars['String']>;
@@ -4435,6 +4607,7 @@ export type RootQueryItemsPresetArgs = {
 
 
 export type RootQueryJobGroupsArgs = {
+  order?: InputMaybe<Scalars['String']>;
   search?: InputMaybe<Scalars['String']>;
   type?: InputMaybe<Scalars['String']>;
 };
@@ -4740,6 +4913,13 @@ export type RootQueryStoresArgs = {
   sto_name?: InputMaybe<Scalars['String']>;
   sto_status?: InputMaybe<Scalars['String']>;
   sto_type?: InputMaybe<Scalars['String']>;
+};
+
+
+export type RootQueryTagTrendArgs = {
+  include_non_collection?: InputMaybe<Scalars['String']>;
+  keyword?: InputMaybe<Scalars['String']>;
+  name?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -5231,6 +5411,17 @@ export type Tag = {
   type?: Maybe<Scalars['String']>;
 };
 
+export type TagTrend = {
+  __typename?: 'TagTrend';
+  _id?: Maybe<Scalars['String']>;
+  created_at?: Maybe<Scalars['Int']>;
+  keyword?: Maybe<Array<Maybe<Scalars['String']>>>;
+  name?: Maybe<Scalars['String']>;
+  status?: Maybe<Scalars['String']>;
+  total_items?: Maybe<Scalars['Int']>;
+  type?: Maybe<Scalars['String']>;
+};
+
 export type Task = {
   __typename?: 'Task';
   _id?: Maybe<Scalars['String']>;
@@ -5519,6 +5710,60 @@ export type TransactionEvent = {
   message?: Maybe<Scalars['String']>;
 };
 
+export type TrendQueue = {
+  __typename?: 'TrendQueue';
+  _id?: Maybe<Scalars['String']>;
+  convert_seo_image?: Maybe<Scalars['Boolean']>;
+  image?: Maybe<Scalars['String']>;
+  image_id?: Maybe<Scalars['String']>;
+  is_non_variation?: Maybe<Scalars['Boolean']>;
+  override_collection?: Maybe<Scalars['Boolean']>;
+  override_collection_text?: Maybe<Scalars['String']>;
+  override_tag?: Maybe<Scalars['Boolean']>;
+  override_tag_text?: Maybe<Array<Maybe<Scalars['String']>>>;
+  params?: Maybe<Scalars['String']>;
+  product?: Maybe<ProductPreset>;
+  product_id?: Maybe<Scalars['String']>;
+  render_description_ai?: Maybe<Scalars['Boolean']>;
+  render_description_ai_length?: Maybe<Scalars['String']>;
+  status?: Maybe<Scalars['String']>;
+  store?: Maybe<Store>;
+  store_id?: Maybe<Scalars['String']>;
+};
+
+export type TrendQueueInput = {
+  collection?: InputMaybe<Scalars['String']>;
+  domain?: InputMaybe<Scalars['String']>;
+  engine?: InputMaybe<Scalars['String']>;
+  external_url?: InputMaybe<Scalars['String']>;
+  from_date?: InputMaybe<Scalars['String']>;
+  missing_image?: InputMaybe<Scalars['String']>;
+  name?: InputMaybe<Scalars['String']>;
+  q?: InputMaybe<Scalars['String']>;
+  search_date?: InputMaybe<Scalars['String']>;
+  status?: InputMaybe<Scalars['String']>;
+  store?: InputMaybe<Scalars['String']>;
+  tags?: InputMaybe<Scalars['String']>;
+  to_date?: InputMaybe<Scalars['String']>;
+};
+
+export type TrendQueueRule = {
+  __typename?: 'TrendQueueRule';
+  case?: Maybe<Scalars['Boolean']>;
+  regex?: Maybe<Scalars['Boolean']>;
+  replace_keyowrd?: Maybe<Scalars['String']>;
+  replace_type?: Maybe<Scalars['String']>;
+  search_keyword?: Maybe<Scalars['String']>;
+};
+
+export type TrendQueueRuleInput = {
+  case?: InputMaybe<Scalars['Boolean']>;
+  regex?: InputMaybe<Scalars['Boolean']>;
+  replace_keyowrd?: InputMaybe<Scalars['String']>;
+  replace_type?: InputMaybe<Scalars['String']>;
+  search_keyword?: InputMaybe<Scalars['String']>;
+};
+
 export type User = {
   __typename?: 'User';
   _id?: Maybe<Scalars['String']>;
@@ -5703,7 +5948,7 @@ export type ExtensionRuleIdFragment = { __typename?: 'ExtensionRuleId', block?: 
 
 export type ExtensionRuleItemsFragment = { __typename?: 'ExtensionRuleItems', block?: string | null, loop?: string | null, url?: string | null, url_attr?: string | null, name?: string | null, name_attr?: string | null, image?: string | null, image_attr?: string | null };
 
-export type ItemInfoFragment = { __typename?: 'ItemInfo', _id?: string | null, identity?: string | null, name?: string | null, description?: string | null, description_ai?: string | null, description_ai_pos?: string | null, front?: string | null, back?: string | null, sleeve?: string | null, hood?: string | null, type?: string | null, plf_price?: number | null, tags?: Array<string | null> | null, collections?: Array<string | null> | null, size_chart?: string | null, fix_profit?: number | null, fixed_profit?: number | null, tax_fee_fix?: number | null, tax_fee?: number | null, include_size_chart?: boolean | null, custom_name?: boolean | null, include_extend_images?: boolean | null, ebay_template_id?: string | null, sku?: string | null, barcode?: string | null, barcode_type?: string | null, price_addition?: number | null, price?: number | null, images?: Array<{ __typename?: 'Image', src?: string | null } | null> | null, prety_attributes?: Array<{ __typename?: 'PretyAttribute', attribute_type?: string | null, plf_attribute_name?: string | null, options?: Array<{ __typename?: 'PretyAttributeOption', ffm_value?: string | null, plf_value?: string | null, plf_price?: number | null, hex?: string | null, default?: boolean | null } | null> | null } | null> | null, specifics?: Array<{ __typename?: 'ItemSpecific', key?: string | null, value?: string | null, required?: string | null } | null> | null, attribute_specifics?: Array<{ __typename?: 'SpecificAttribute', sale_price?: number | null, base_price?: number | null, fix_profit?: number | null, fixed_profit?: number | null, sku?: string | null, barcode?: string | null, name_value?: Array<{ __typename?: 'NameValueType', name?: string | null, type?: string | null, value?: string | null } | null> | null } | null> | null, attribute_specifics_modify?: Array<{ __typename?: 'SpecificAttribute', sale_price?: number | null, base_price?: number | null, fix_profit?: number | null, fixed_profit?: number | null, sku?: string | null, barcode?: string | null, name_value?: Array<{ __typename?: 'NameValueType', name?: string | null, type?: string | null, value?: string | null } | null> | null } | null> | null, shipping_preset_info?: { __typename?: 'ShippingPreset', dispatch_time_max?: string | null, shipping_time_max?: string | null, location?: string | null, location_detail?: string | null, country?: string | null, shipping_service?: string | null, shipping_cost?: string | null, shipping_additional_cost?: string | null, return_accept?: string | null, global_shipping?: string | null, international_shipping_time_max?: string | null, international_location?: string | null, international_shipping_service?: string | null, international_shipping_cost?: string | null, international_shipping_additional_cost?: string | null, international_return_accept?: string | null, default_quantity?: string | null } | null, platform_category?: Array<{ __typename?: 'PlatformCategory', type?: string | null, category_selected?: Array<{ __typename?: 'PlatformCategorySelected', id?: string | null, level?: string | null, name?: string | null, parent?: string | null } | null> | null } | null> | null, platform_specifics?: Array<{ __typename?: 'PlatformItemSpecific', platform?: string | null, specifics?: Array<{ __typename?: 'ItemSpecific', key?: string | null, value?: string | null, required?: string | null } | null> | null } | null> | null, extend_images?: Array<{ __typename?: 'Image', src?: string | null } | null> | null };
+export type ItemInfoFragment = { __typename?: 'ItemInfo', _id?: string | null, identity?: string | null, name?: string | null, description?: string | null, description_ai?: string | null, description_ai_pos?: string | null, front?: string | null, back?: string | null, sleeve?: string | null, hood?: string | null, type?: string | null, plf_price?: number | null, tags?: Array<string | null> | null, collections?: Array<string | null> | null, size_chart?: string | null, fix_profit?: number | null, fixed_profit?: number | null, tax_fee_fix?: number | null, tax_fee?: number | null, include_size_chart?: boolean | null, custom_name?: boolean | null, include_extend_images?: boolean | null, ebay_template_id?: string | null, sku?: string | null, barcode?: string | null, barcode_type?: string | null, price_addition?: number | null, price?: number | null, images?: Array<{ __typename?: 'Image', src?: string | null } | null> | null, prety_attributes?: Array<{ __typename?: 'PretyAttribute', attribute_type?: string | null, plf_attribute_name?: string | null, options?: Array<{ __typename?: 'PretyAttributeOption', ffm_value?: string | null, plf_value?: string | null, plf_price?: number | null, hex?: string | null, default?: boolean | null } | null> | null } | null> | null, specifics?: Array<{ __typename?: 'ItemSpecific', key?: string | null, value?: string | null, required?: string | null } | null> | null, attribute_specifics?: Array<{ __typename?: 'SpecificAttribute', sale_price?: number | null, base_price?: number | null, fix_profit?: number | null, fixed_profit?: number | null, sku?: string | null, barcode?: string | null, name_value?: Array<{ __typename?: 'NameValueType', name?: string | null, type?: string | null, value?: string | null } | null> | null } | null> | null, attribute_specifics_modify?: Array<{ __typename?: 'SpecificAttribute', sale_price?: number | null, base_price?: number | null, fix_profit?: number | null, fixed_profit?: number | null, sku?: string | null, barcode?: string | null, name_value?: Array<{ __typename?: 'NameValueType', name?: string | null, type?: string | null, value?: string | null } | null> | null } | null> | null, shipping_preset_info?: { __typename?: 'ShippingPreset', dispatch_time_max?: string | null, shipping_time_max?: string | null, location?: string | null, location_detail?: string | null, country?: string | null, shipping_service?: string | null, shipping_cost?: string | null, shipping_additional_cost?: string | null, return_accept?: string | null, global_shipping?: string | null, international_shipping_time_max?: string | null, international_location?: string | null, international_shipping_service?: string | null, international_shipping_cost?: string | null, international_shipping_additional_cost?: string | null, international_return_accept?: string | null, default_quantity?: string | null } | null, platform_category?: Array<{ __typename?: 'PlatformCategory', type?: string | null, alternate_name?: string | null, category_selected?: Array<{ __typename?: 'PlatformCategorySelected', id?: string | null, level?: string | null, name?: string | null, parent?: string | null } | null> | null } | null> | null, platform_specifics?: Array<{ __typename?: 'PlatformItemSpecific', platform?: string | null, specifics?: Array<{ __typename?: 'ItemSpecific', key?: string | null, value?: string | null, required?: string | null } | null> | null } | null> | null, extend_images?: Array<{ __typename?: 'Image', src?: string | null } | null> | null };
 
 export type SpecificAttributeFragment = { __typename?: 'SpecificAttribute', sale_price?: number | null, base_price?: number | null, fix_profit?: number | null, fixed_profit?: number | null, sku?: string | null, barcode?: string | null, name_value?: Array<{ __typename?: 'NameValueType', name?: string | null, type?: string | null, value?: string | null } | null> | null };
 
@@ -5725,7 +5970,7 @@ export type PutItemToStoreMutationVariables = Exact<{
 }>;
 
 
-export type PutItemToStoreMutation = { __typename?: 'RootMutation', putItemToStore?: { __typename?: 'ItemInfo', _id?: string | null, identity?: string | null, name?: string | null, description?: string | null, description_ai?: string | null, description_ai_pos?: string | null, front?: string | null, back?: string | null, sleeve?: string | null, hood?: string | null, type?: string | null, plf_price?: number | null, tags?: Array<string | null> | null, collections?: Array<string | null> | null, size_chart?: string | null, fix_profit?: number | null, fixed_profit?: number | null, tax_fee_fix?: number | null, tax_fee?: number | null, include_size_chart?: boolean | null, custom_name?: boolean | null, include_extend_images?: boolean | null, ebay_template_id?: string | null, sku?: string | null, barcode?: string | null, barcode_type?: string | null, price_addition?: number | null, price?: number | null, images?: Array<{ __typename?: 'Image', src?: string | null } | null> | null, prety_attributes?: Array<{ __typename?: 'PretyAttribute', attribute_type?: string | null, plf_attribute_name?: string | null, options?: Array<{ __typename?: 'PretyAttributeOption', ffm_value?: string | null, plf_value?: string | null, plf_price?: number | null, hex?: string | null, default?: boolean | null } | null> | null } | null> | null, specifics?: Array<{ __typename?: 'ItemSpecific', key?: string | null, value?: string | null, required?: string | null } | null> | null, attribute_specifics?: Array<{ __typename?: 'SpecificAttribute', sale_price?: number | null, base_price?: number | null, fix_profit?: number | null, fixed_profit?: number | null, sku?: string | null, barcode?: string | null, name_value?: Array<{ __typename?: 'NameValueType', name?: string | null, type?: string | null, value?: string | null } | null> | null } | null> | null, attribute_specifics_modify?: Array<{ __typename?: 'SpecificAttribute', sale_price?: number | null, base_price?: number | null, fix_profit?: number | null, fixed_profit?: number | null, sku?: string | null, barcode?: string | null, name_value?: Array<{ __typename?: 'NameValueType', name?: string | null, type?: string | null, value?: string | null } | null> | null } | null> | null, shipping_preset_info?: { __typename?: 'ShippingPreset', dispatch_time_max?: string | null, shipping_time_max?: string | null, location?: string | null, location_detail?: string | null, country?: string | null, shipping_service?: string | null, shipping_cost?: string | null, shipping_additional_cost?: string | null, return_accept?: string | null, global_shipping?: string | null, international_shipping_time_max?: string | null, international_location?: string | null, international_shipping_service?: string | null, international_shipping_cost?: string | null, international_shipping_additional_cost?: string | null, international_return_accept?: string | null, default_quantity?: string | null } | null, platform_category?: Array<{ __typename?: 'PlatformCategory', type?: string | null, category_selected?: Array<{ __typename?: 'PlatformCategorySelected', id?: string | null, level?: string | null, name?: string | null, parent?: string | null } | null> | null } | null> | null, platform_specifics?: Array<{ __typename?: 'PlatformItemSpecific', platform?: string | null, specifics?: Array<{ __typename?: 'ItemSpecific', key?: string | null, value?: string | null, required?: string | null } | null> | null } | null> | null, extend_images?: Array<{ __typename?: 'Image', src?: string | null } | null> | null } | null };
+export type PutItemToStoreMutation = { __typename?: 'RootMutation', putItemToStore?: { __typename?: 'ItemInfo', _id?: string | null, identity?: string | null, name?: string | null, description?: string | null, description_ai?: string | null, description_ai_pos?: string | null, front?: string | null, back?: string | null, sleeve?: string | null, hood?: string | null, type?: string | null, plf_price?: number | null, tags?: Array<string | null> | null, collections?: Array<string | null> | null, size_chart?: string | null, fix_profit?: number | null, fixed_profit?: number | null, tax_fee_fix?: number | null, tax_fee?: number | null, include_size_chart?: boolean | null, custom_name?: boolean | null, include_extend_images?: boolean | null, ebay_template_id?: string | null, sku?: string | null, barcode?: string | null, barcode_type?: string | null, price_addition?: number | null, price?: number | null, images?: Array<{ __typename?: 'Image', src?: string | null } | null> | null, prety_attributes?: Array<{ __typename?: 'PretyAttribute', attribute_type?: string | null, plf_attribute_name?: string | null, options?: Array<{ __typename?: 'PretyAttributeOption', ffm_value?: string | null, plf_value?: string | null, plf_price?: number | null, hex?: string | null, default?: boolean | null } | null> | null } | null> | null, specifics?: Array<{ __typename?: 'ItemSpecific', key?: string | null, value?: string | null, required?: string | null } | null> | null, attribute_specifics?: Array<{ __typename?: 'SpecificAttribute', sale_price?: number | null, base_price?: number | null, fix_profit?: number | null, fixed_profit?: number | null, sku?: string | null, barcode?: string | null, name_value?: Array<{ __typename?: 'NameValueType', name?: string | null, type?: string | null, value?: string | null } | null> | null } | null> | null, attribute_specifics_modify?: Array<{ __typename?: 'SpecificAttribute', sale_price?: number | null, base_price?: number | null, fix_profit?: number | null, fixed_profit?: number | null, sku?: string | null, barcode?: string | null, name_value?: Array<{ __typename?: 'NameValueType', name?: string | null, type?: string | null, value?: string | null } | null> | null } | null> | null, shipping_preset_info?: { __typename?: 'ShippingPreset', dispatch_time_max?: string | null, shipping_time_max?: string | null, location?: string | null, location_detail?: string | null, country?: string | null, shipping_service?: string | null, shipping_cost?: string | null, shipping_additional_cost?: string | null, return_accept?: string | null, global_shipping?: string | null, international_shipping_time_max?: string | null, international_location?: string | null, international_shipping_service?: string | null, international_shipping_cost?: string | null, international_shipping_additional_cost?: string | null, international_return_accept?: string | null, default_quantity?: string | null } | null, platform_category?: Array<{ __typename?: 'PlatformCategory', type?: string | null, alternate_name?: string | null, category_selected?: Array<{ __typename?: 'PlatformCategorySelected', id?: string | null, level?: string | null, name?: string | null, parent?: string | null } | null> | null } | null> | null, platform_specifics?: Array<{ __typename?: 'PlatformItemSpecific', platform?: string | null, specifics?: Array<{ __typename?: 'ItemSpecific', key?: string | null, value?: string | null, required?: string | null } | null> | null } | null> | null, extend_images?: Array<{ __typename?: 'Image', src?: string | null } | null> | null } | null };
 
 export type InfoQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -5738,7 +5983,7 @@ export type ItemsInfoQueryVariables = Exact<{
 }>;
 
 
-export type ItemsInfoQuery = { __typename?: 'RootQuery', itemsInfo?: Array<{ __typename?: 'ItemInfo', _id?: string | null, identity?: string | null, name?: string | null, description?: string | null, description_ai?: string | null, description_ai_pos?: string | null, front?: string | null, back?: string | null, sleeve?: string | null, hood?: string | null, type?: string | null, plf_price?: number | null, tags?: Array<string | null> | null, collections?: Array<string | null> | null, size_chart?: string | null, fix_profit?: number | null, fixed_profit?: number | null, tax_fee_fix?: number | null, tax_fee?: number | null, include_size_chart?: boolean | null, custom_name?: boolean | null, include_extend_images?: boolean | null, ebay_template_id?: string | null, sku?: string | null, barcode?: string | null, barcode_type?: string | null, price_addition?: number | null, price?: number | null, images?: Array<{ __typename?: 'Image', src?: string | null } | null> | null, prety_attributes?: Array<{ __typename?: 'PretyAttribute', attribute_type?: string | null, plf_attribute_name?: string | null, options?: Array<{ __typename?: 'PretyAttributeOption', ffm_value?: string | null, plf_value?: string | null, plf_price?: number | null, hex?: string | null, default?: boolean | null } | null> | null } | null> | null, specifics?: Array<{ __typename?: 'ItemSpecific', key?: string | null, value?: string | null, required?: string | null } | null> | null, attribute_specifics?: Array<{ __typename?: 'SpecificAttribute', sale_price?: number | null, base_price?: number | null, fix_profit?: number | null, fixed_profit?: number | null, sku?: string | null, barcode?: string | null, name_value?: Array<{ __typename?: 'NameValueType', name?: string | null, type?: string | null, value?: string | null } | null> | null } | null> | null, attribute_specifics_modify?: Array<{ __typename?: 'SpecificAttribute', sale_price?: number | null, base_price?: number | null, fix_profit?: number | null, fixed_profit?: number | null, sku?: string | null, barcode?: string | null, name_value?: Array<{ __typename?: 'NameValueType', name?: string | null, type?: string | null, value?: string | null } | null> | null } | null> | null, shipping_preset_info?: { __typename?: 'ShippingPreset', dispatch_time_max?: string | null, shipping_time_max?: string | null, location?: string | null, location_detail?: string | null, country?: string | null, shipping_service?: string | null, shipping_cost?: string | null, shipping_additional_cost?: string | null, return_accept?: string | null, global_shipping?: string | null, international_shipping_time_max?: string | null, international_location?: string | null, international_shipping_service?: string | null, international_shipping_cost?: string | null, international_shipping_additional_cost?: string | null, international_return_accept?: string | null, default_quantity?: string | null } | null, platform_category?: Array<{ __typename?: 'PlatformCategory', type?: string | null, category_selected?: Array<{ __typename?: 'PlatformCategorySelected', id?: string | null, level?: string | null, name?: string | null, parent?: string | null } | null> | null } | null> | null, platform_specifics?: Array<{ __typename?: 'PlatformItemSpecific', platform?: string | null, specifics?: Array<{ __typename?: 'ItemSpecific', key?: string | null, value?: string | null, required?: string | null } | null> | null } | null> | null, extend_images?: Array<{ __typename?: 'Image', src?: string | null } | null> | null } | null> | null };
+export type ItemsInfoQuery = { __typename?: 'RootQuery', itemsInfo?: Array<{ __typename?: 'ItemInfo', _id?: string | null, identity?: string | null, name?: string | null, description?: string | null, description_ai?: string | null, description_ai_pos?: string | null, front?: string | null, back?: string | null, sleeve?: string | null, hood?: string | null, type?: string | null, plf_price?: number | null, tags?: Array<string | null> | null, collections?: Array<string | null> | null, size_chart?: string | null, fix_profit?: number | null, fixed_profit?: number | null, tax_fee_fix?: number | null, tax_fee?: number | null, include_size_chart?: boolean | null, custom_name?: boolean | null, include_extend_images?: boolean | null, ebay_template_id?: string | null, sku?: string | null, barcode?: string | null, barcode_type?: string | null, price_addition?: number | null, price?: number | null, images?: Array<{ __typename?: 'Image', src?: string | null } | null> | null, prety_attributes?: Array<{ __typename?: 'PretyAttribute', attribute_type?: string | null, plf_attribute_name?: string | null, options?: Array<{ __typename?: 'PretyAttributeOption', ffm_value?: string | null, plf_value?: string | null, plf_price?: number | null, hex?: string | null, default?: boolean | null } | null> | null } | null> | null, specifics?: Array<{ __typename?: 'ItemSpecific', key?: string | null, value?: string | null, required?: string | null } | null> | null, attribute_specifics?: Array<{ __typename?: 'SpecificAttribute', sale_price?: number | null, base_price?: number | null, fix_profit?: number | null, fixed_profit?: number | null, sku?: string | null, barcode?: string | null, name_value?: Array<{ __typename?: 'NameValueType', name?: string | null, type?: string | null, value?: string | null } | null> | null } | null> | null, attribute_specifics_modify?: Array<{ __typename?: 'SpecificAttribute', sale_price?: number | null, base_price?: number | null, fix_profit?: number | null, fixed_profit?: number | null, sku?: string | null, barcode?: string | null, name_value?: Array<{ __typename?: 'NameValueType', name?: string | null, type?: string | null, value?: string | null } | null> | null } | null> | null, shipping_preset_info?: { __typename?: 'ShippingPreset', dispatch_time_max?: string | null, shipping_time_max?: string | null, location?: string | null, location_detail?: string | null, country?: string | null, shipping_service?: string | null, shipping_cost?: string | null, shipping_additional_cost?: string | null, return_accept?: string | null, global_shipping?: string | null, international_shipping_time_max?: string | null, international_location?: string | null, international_shipping_service?: string | null, international_shipping_cost?: string | null, international_shipping_additional_cost?: string | null, international_return_accept?: string | null, default_quantity?: string | null } | null, platform_category?: Array<{ __typename?: 'PlatformCategory', type?: string | null, alternate_name?: string | null, category_selected?: Array<{ __typename?: 'PlatformCategorySelected', id?: string | null, level?: string | null, name?: string | null, parent?: string | null } | null> | null } | null> | null, platform_specifics?: Array<{ __typename?: 'PlatformItemSpecific', platform?: string | null, specifics?: Array<{ __typename?: 'ItemSpecific', key?: string | null, value?: string | null, required?: string | null } | null> | null } | null> | null, extend_images?: Array<{ __typename?: 'Image', src?: string | null } | null> | null } | null> | null };
 
 export type ProductPresetQueryVariables = Exact<{
   _id?: InputMaybe<Scalars['String']>;
@@ -5933,6 +6178,7 @@ export const ItemInfoFragmentDoc = gql`
       name
       parent
     }
+    alternate_name
   }
   include_size_chart
   custom_name

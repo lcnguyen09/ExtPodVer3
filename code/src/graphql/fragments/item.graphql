@@ -68,6 +68,7 @@ fragment ItemInfo on ItemInfo {
             name
             parent
         }
+        alternate_name
     }
     include_size_chart
     custom_name

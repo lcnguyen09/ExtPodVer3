@@ -6,8 +6,11 @@ import { useItemsInfoLazyQuery, usePutItemToStoreMutation } from '../../../graph
 import Notification from './../../../components/Notification';
 import BottomBar from './../../../components/BottomBar';
 import $ from 'jquery';
-import { cloneDeep, filter, find, flatMapDeep, get, head, last, map, startsWith, toLower, toUpper, trim } from 'lodash';
+import { cloneDeep, filter, find, flatMapDeep, get, head, last, map, set, startsWith, toLower, toUpper, trim } from 'lodash';
 import Select, { StylesConfig } from 'react-select';
+import {
+	URL_GRAPHQL,
+} from './../../../contexts/contants';
 
 const colourStyles: StylesConfig = {
 	control: (styles) => ({ ...styles, backgroundColor: 'white' }),
@@ -77,7 +80,7 @@ export default function ({ Identifier, storeData }: any) {
 
 	const handleGetTypeData = () => {
 		var settings = {
-			"url": `https://api-${currentDocker?.domain}.${currentDocker?.server}/graphql`,
+			"url": URL_GRAPHQL(currentDocker),
 			"method": "POST",
 			"timeout": 0,
 			"headers": {
@@ -173,7 +176,15 @@ export default function ({ Identifier, storeData }: any) {
 				size_chart: get(dataType, 'size_chart', ''),
 				include_extend_images: true,
 				extend_images: get(dataType, 'extend_images', ''),
-				platform_category: get(dataType, 'platform_category', []),
+				platform_category: map(get(dataType, 'platform_category', []), pcate => {
+					const itemPcate = find(get(itemInfo, 'platform_category', []), iPcate => {
+						return iPcate.type === pcate.type
+					})
+					return {
+						...pcate,
+						alternate_name: get(itemPcate, 'alternate_name', '')
+					}
+				}),
 				prety_attributes: map(get(dataType, 'prety_attributes', ''), pAttr => {
 					return {
 						...pAttr,
@@ -182,6 +193,14 @@ export default function ({ Identifier, storeData }: any) {
 				}),
 			}
 			console.log("itemInfoMap", itemInfoMap)
+		}
+		const alternate_name = get(
+			find(get(itemInfoMap, 'platform_category', []), (pCate) => pCate.type === 'Inspireuplift'),
+			'alternate_name',
+			undefined
+		);
+		if (alternate_name) {
+			set(itemInfoMap, 'name', alternate_name);
 		}
 
 		let errorMsg = [];
@@ -554,7 +573,7 @@ export default function ({ Identifier, storeData }: any) {
 	return (
 		<>
 			<h4 className='text-center'>Add item</h4>
-            <p className='text-danger' style={{textAlign: 'justify'}}>*Please DO NOT MINIMIZE this tab, the OS will interfere with event simulation. Automatically adding products will not be possible.*</p>
+			<p className='text-danger' style={{ textAlign: 'justify' }}>*Please DO NOT MINIMIZE this tab, the OS will interfere with event simulation. Automatically adding products will not be possible.*</p>
 			<Notification ErrorMsg={ErrorMsg} SuccessMsg={SuccessMsg} WarningMsg={WarningMsg} Loading={Loading} />
 			<div className='mt-2'>
 				<div className='mb-3'>

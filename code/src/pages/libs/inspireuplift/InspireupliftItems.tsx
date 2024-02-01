@@ -8,6 +8,9 @@ import BottomBar from './../../../components/BottomBar';
 import $ from 'jquery';
 import { cloneDeep, filter, find, findIndex, flatMapDeep, get, head, last, map, set, startsWith, toLower, toUpper, trim } from 'lodash';
 import Select, { StylesConfig } from 'react-select';
+import {
+    URL_GRAPHQL,
+} from './../../../contexts/contants';
 
 const colourStyles: StylesConfig = {
     control: (styles) => ({ ...styles, backgroundColor: 'white' }),
@@ -80,7 +83,7 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
 
     const handleGetTypeData = () => {
         var settings = {
-            "url": `https://api-${currentDocker?.domain}.${currentDocker?.server}/graphql`,
+            "url": URL_GRAPHQL(currentDocker),
             "method": "POST",
             "timeout": 0,
             "headers": {
@@ -210,7 +213,15 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
                 size_chart: get(dataType, 'size_chart', ''),
                 include_extend_images: true,
                 extend_images: get(dataType, 'extend_images', ''),
-                platform_category: get(dataType, 'platform_category', []),
+                platform_category: map(get(dataType, 'platform_category', []), pcate => {
+                    const itemPcate = find(get(itemInfo, 'platform_category', []), iPcate => {
+                        return iPcate.type === pcate.type
+                    })
+                    return {
+                        ...pcate,
+                        alternate_name: get(itemPcate, 'alternate_name', '')
+                    }
+                }),
                 prety_attributes: map(get(dataType, 'prety_attributes', ''), pAttr => {
                     return {
                         ...pAttr,
@@ -220,7 +231,14 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
             }
             console.log("itemInfoMap", itemInfoMap)
         }
-
+        const alternate_name = get(
+            find(get(itemInfoMap, 'platform_category', []), (pCate) => pCate.type === 'Inspireuplift'),
+            'alternate_name',
+            undefined
+        );
+        if (alternate_name) {
+            set(itemInfoMap, 'name', alternate_name);
+        }
 
         await sleep(1000);
 
