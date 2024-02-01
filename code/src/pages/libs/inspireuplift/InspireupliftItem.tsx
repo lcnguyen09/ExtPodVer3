@@ -53,7 +53,7 @@ export default function ({ Identifier, storeData }: any) {
 	const [SuccessMsg, setSuccessMsg] = useState<any>('');
 	const [WarningMsg, setWarningMsg] = useState<any>([]);
 
-	const [itemId, setItemId] = useState<string>('');
+	const [itemId, setItemId] = useState<string>(appMode === 'dev' ? 'IT-01234-56689' : '');
 	const [itemInfo, setItemInfo] = useState<any>();
 	const [itemTypes, setItemTypes] = useState<any>([]);
 	const [currentType, setCurrentType] = useState<any>({});
@@ -432,12 +432,13 @@ export default function ({ Identifier, storeData }: any) {
 
 		index = 0;
 		while (selector[index]) {
-			let valMerge = $(`input[name="variantCheck"]:eq(${index})`).first().val();
+			let valMerge = toUpper(map($(`table.variants-table-container tr:eq(${index + 1}) input[name='price']:hidden`), elm => $(elm).val()).join('-'))
 			const valueAttr = find(itemInfoMap?.attribute_specifics_modify, (attribute_specifics_modify) => {
 				return (
 					toUpper(map(attribute_specifics_modify?.name_value, (name_value) => name_value?.value).join('-')) === valMerge
 				);
 			});
+			console.log('valueAttr: ', valueAttr);
 			const price = valueAttr?.sale_price + (extendShippingPrice ? shippingCost : 0);
 			await sleep(200);
 			await fillTextInput(`${selectorQuery}:eq(${index})`, parseFloat(price ? price : maxPrice).toFixed(2));
@@ -447,7 +448,7 @@ export default function ({ Identifier, storeData }: any) {
 		await sleep(1000);
 		index = 0;
 		while (selector[index]) {
-			let valMerge = $(`input[name="variantCheck"]:eq(${index})`).first().val();
+			let valMerge = toUpper(map($(`table.variants-table-container tr:eq(${index + 1}) input[name='price']:hidden`), elm => $(elm).val()).join('-'))
 			const valueAttr = find(itemInfoMap?.attribute_specifics_modify, (attribute_specifics_modify) => {
 				return (
 					toUpper(map(attribute_specifics_modify?.name_value, (name_value) => name_value?.value).join('-')) === valMerge
@@ -455,6 +456,7 @@ export default function ({ Identifier, storeData }: any) {
 			});
 			const price = valueAttr?.sale_price + (extendShippingPrice ? shippingCost : 0);
 			if (!price && $(`${button}:eq(${index})`).first().attr('aria-checked') === 'true') {
+				console.log('price: ', price);
 				await sleep(100);
 				await clickButton(`${button}:eq(${index})`);
 			}

@@ -499,7 +499,7 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
         const button = `table.variants-table-container button[type='button']`;
         index = 0
         while (selector[index]) {
-            let valMerge = $(`input[name="variantCheck"]:eq(${index})`).first().val();
+            let valMerge = toUpper(map($(`table.variants-table-container tr:eq(${index + 1}) input[name='price']:hidden`), elm => $(elm).val()).join('-'))
             const valueAttr = find(itemInfoMap?.attribute_specifics_modify, (attribute_specifics_modify) => {
                 return (
                     toUpper(map(attribute_specifics_modify?.name_value, (name_value) => name_value?.value).join('-')) === valMerge
@@ -514,7 +514,7 @@ export default function ({ Identifier, storeData, setOnMulti }: any) {
 
         index = 0
         while (selector[index]) {
-            let valMerge = $(`input[name="variantCheck"]:eq(${index})`).first().val();
+            let valMerge = toUpper(map($(`table.variants-table-container tr:eq(${index + 1}) input[name='price']:hidden`), elm => $(elm).val()).join('-'))
             const valueAttr = find(itemInfoMap?.attribute_specifics_modify, (attribute_specifics_modify) => {
                 return (
                     toUpper(map(attribute_specifics_modify?.name_value, (name_value) => name_value?.value).join('-')) === valMerge
