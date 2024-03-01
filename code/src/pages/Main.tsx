@@ -27,7 +27,7 @@ export default function Main() {
 		return <Inspireuplift />
 	}
 	if (site === 'www.etsy.com') {
-		if (pathname.startsWith('/your') || true) {
+		if (pathname.startsWith('/your')) {
 			return <Etsy />
 		}
 	}

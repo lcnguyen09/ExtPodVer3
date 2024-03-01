@@ -51,21 +51,19 @@ export default function ({ Identifier, storeData }: any) {
   }, [window.location.pathname, window.location.href, window.location.search]);
 
   useEffect(() => {
-    console.log("#0");
     if ((window as any).myInterval) {
       clearInterval((window as any).myInterval);
     }
   }, []);
 
   useEffect(() => {
-    console.log("handleGetOrderData");
     if (
-      window.location.pathname.startsWith("/your/orders/sold/") ||
+      window.location.pathname.startsWith("/your/orders/") ||
       !orders.length
     ) {
       handleGetOrderData();
     }
-    // loopGetOrderData();
+    loopGetOrderData();
   }, [currentQueryString]);
 
   useEffect(() => {
@@ -75,7 +73,7 @@ export default function ({ Identifier, storeData }: any) {
   }, [currentDocker?.domain, orders]);
 
   function isListting() {
-    return pathname.startsWith("/your/orders/sold/");
+    return pathname.startsWith("/your/orders/");
   }
 
   function isDetail() {
@@ -138,15 +136,12 @@ export default function ({ Identifier, storeData }: any) {
       }
       const NewStatusID = 1122457242231;
       const CompletedStatusID = 1100033259692;
-      const StatusID = pathname.endsWith("/completed")
-        ? CompletedStatusID
-        : NewStatusID;
       fetch(
         `https://www.etsy.com/api/v3/ajax/bespoke/shop/${get(
           storeData,
           "account_id",
           ""
-        )}/mission-control/orders?filters[buyer_id]=all&filters[channel]=all&filters[completed_status]=all&filters[destination]=all&filters[ship_date]=all&filters[shipping_label_eligibility]=false&filters[shipping_label_status]=all&filters[has_buyer_notes]=false&filters[is_marked_as_gift]=false&filters[is_personalized]=false&filters[has_shipping_upgrade]=false&filters[order_state_id]=all&limit=50&offset=0&search_terms=&sort_by=expected_ship_date&sort_order=asc&objects_enabled_for_normalization[order_state]=true`,
+        )}/mission-control/orders?filters[buyer_id]=all&filters[channel]=all&filters[completed_status]=all&filters[destination]=all&filters[ship_date]=all&filters[shipping_label_eligibility]=false&filters[shipping_label_status]=all&filters[has_buyer_notes]=false&filters[is_marked_as_gift]=false&filters[is_personalized]=false&filters[has_shipping_upgrade]=false&filters[order_state_id]=all&limit=50&offset=0&search_terms=&sort_by=order_date&sort_order=desc&objects_enabled_for_normalization[order_state]=true`,
         {
           referrer: pathname.endsWith("/completed")
             ? "https://www.etsy.com/your/orders/sold/completed?ref=seller-platform-mcnav"
@@ -173,12 +168,12 @@ export default function ({ Identifier, storeData }: any) {
       method: "GET",
       url: `${urlRestApi}/order/orders?${map(
         orders,
-        (o) => `external_numbers[]=${get(o, "order_number", "")}`
+        (o) => `external_numbers[]=${get(o, "order_id", "")}`
       ).join("&")}&identifier=${Identifier}&store=${get(
         storeData,
         "account_id",
         ""
-      )}&store_type=Inspireuplift`,
+      )}&store_type=Etsy`,
       headers: {
         Authorization: `Bearer ${currentToken.token}`,
       },
@@ -234,16 +229,13 @@ export default function ({ Identifier, storeData }: any) {
       .then((response) => response.json())
       .then(async (data) => {
         const orderData = get(data, "data", {});
-        if (
-          !get(orderData, "order_number") ||
-          !get(orderData, "seller_order_number")
-        ) {
+        if (!get(orderData, "order_id") || !get(orderData, "seller_order_id")) {
           throw "Cannot find order data. Try again.";
         }
         return {
           orderData: orderData,
           dataRequest: {
-            order_id: get(orderData, "order_number", ""),
+            order_id: get(orderData, "order_id", ""),
             identifier: Identifier,
             fulfillment_note: get(orderData, "note", ""),
             shipping_total: get(orderData, ["payment_info", "shipping"], ""),
@@ -522,7 +514,7 @@ export default function ({ Identifier, storeData }: any) {
                   console.log(
                     `Seller_Order # ${get(
                       data,
-                      ["orderData", "seller_order_number"],
+                      ["orderData", "seller_order_id"],
                       ""
                     )}`
                   );
@@ -530,7 +522,7 @@ export default function ({ Identifier, storeData }: any) {
                     get(trans, "type", "") ===
                     `Seller_Order # ${get(
                       dataTotal,
-                      ["orderData", "seller_order_number"],
+                      ["orderData", "seller_order_id"],
                       ""
                     )}`
                   );
@@ -654,8 +646,7 @@ export default function ({ Identifier, storeData }: any) {
     const orderSyns = find(
       ordersSync,
       (oS) =>
-        String(oS.external_number) ===
-        String(get(orderSignle, "order_number", ""))
+        String(oS.external_number) === String(get(orderSignle, "order_id", ""))
     );
     return new Promise(async (resolve, reject) => {
       setOnFillData(true);
@@ -768,7 +759,7 @@ export default function ({ Identifier, storeData }: any) {
                 ordersSync,
                 (oS) =>
                   String(oS.external_number) ===
-                  String(get(order, "order_number", ""))
+                  String(get(order, "order_id", ""))
               );
               let color = "info";
               switch (orderSyns?.status) {
@@ -809,16 +800,16 @@ export default function ({ Identifier, storeData }: any) {
                 rowSpan++;
               }
               return [
-                <tr key={get(order, "order_number", "") + index}>
+                <tr key={get(order, "order_id", "") + index}>
                   <td rowSpan={rowSpan}>
                     <input
                       type="checkbox"
                       checked={!!order.checked}
-                      value={get(order, "order_number", "")}
+                      value={get(order, "order_id", "")}
                       onChange={(e) =>
                         setOrders(
                           map(orders, (o) =>
-                            order.order_number === o.order_number
+                            order.order_id === o.order_id
                               ? { ...o, checked: !order.checked }
                               : o
                           )
@@ -832,15 +823,14 @@ export default function ({ Identifier, storeData }: any) {
                       onClick={() =>
                         setOrders(
                           map(orders, (o) =>
-                            order.order_number === o.order_number
+                            order.order_id === o.order_id
                               ? { ...o, checked: !order.checked }
                               : o
                           )
                         )
                       }
                     >
-                      {get(order, "order_number", "")}-
-                      {get(order, "seller_order_number", "")}
+                      {get(order, "order_id", "")}
                     </strong>
                   </td>
                   <td
@@ -915,7 +905,7 @@ export default function ({ Identifier, storeData }: any) {
                 })(),
                 (() => {
                   return order?.ErrorMsg ? (
-                    <tr key={get(order, "order_number", "") + index + "noti"}>
+                    <tr key={get(order, "order_id", "") + index + "noti"}>
                       <td colSpan={3}>
                         <p className="text-danger text-right mb-1">
                           {order?.ErrorMsg}
