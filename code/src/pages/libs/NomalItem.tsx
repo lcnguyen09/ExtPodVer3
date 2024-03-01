@@ -113,6 +113,7 @@ export default function NomalItem() {
 		const item = {
 			id: getOriginID(htmlDOM),
 			name: getItemName(htmlDOM),
+			origin_name: getItemName(htmlDOM),
 			images: getItemImages(htmlDOM),
 		};
 		if (htmlDOM) {
@@ -335,7 +336,10 @@ export default function NomalItem() {
 						<Col sm={12}>
 							<strong>Name:</strong>
 						</Col>
-						<Col sm={12}>{item?.name}</Col>
+						<Col sm={12}>
+							<Input style={{fontSize: 13}} value={item?.name} onChange={(e) => setItem({...item, name: e.target.value})}></Input>
+							<p style={{fontSize: 10}}><strong>Origin name:</strong> {item?.origin_name}</p>
+						</Col>
 					</Row>
 					<Row>
 						<Col sm={12} className='mt-2'>
