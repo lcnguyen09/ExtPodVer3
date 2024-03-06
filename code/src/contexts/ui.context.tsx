@@ -160,15 +160,14 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	const [token, setToken]: [string | null, (val: string) => void] = useStorage('_pod_ext_token');
 	const [docker, setDocker]: [string | null, (val: string) => void] = useStorage('_pod_ext_docker');
 	const [server, setServer]: [string | null, (val: string) => void] = useStorage('_pod_ext_server');
-	const [windowViewStorage, setWindowViewStorage]: [string | null, (val: string) => void] = useStorage('_pod_ext_view');
+	const [windowViewStorage, setWindowViewStorage]: [string | null, (val: string) => void] =
+		useStorage('_pod_ext_view');
 	const [templateIdStorage, setTemplateIdStorage]: [string | null, (val: string) => void] =
 		useStorage('_pod_template_id');
-	const [autoPageStorage, setAutoPageStorage]: [string | null, (val: string) => void] =
-		useStorage('_pod_auto_page');
+	const [autoPageStorage, setAutoPageStorage]: [string | null, (val: string) => void] = useStorage('_pod_auto_page');
 	const [extendShippingPriceStorage, setExtendShippingPriceStorage]: [string | null, (val: string) => void] =
 		useStorage('_pod_extend_shipping_price');
-	const [autoSaveStorage, setAutoSaveStorage]: [string | null, (val: string) => void] =
-		useStorage('_pod_auto_save');
+	const [autoSaveStorage, setAutoSaveStorage]: [string | null, (val: string) => void] = useStorage('_pod_auto_save');
 
 	useEffect(() => {
 		if (
@@ -289,11 +288,11 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	};
 	const setGraphqlForAccount = async () => {
 		setUrlGraphql(isSaleHunter() ? URL_ACCOUNT_GRAPHQL_SALEHUNTER : URL_ACCOUNT_GRAPHQL_PODORDER);
-		return new Promise((resolve) => setTimeout(() => resolve(true), 500))
+		return new Promise((resolve) => setTimeout(() => resolve(true), 500));
 	};
 	const setGraphqlForHub = async () => {
 		setUrlGraphql(URL_GRAPHQL(state.currentDocker));
-		return new Promise((resolve) => setTimeout(() => resolve(true), 500))
+		return new Promise((resolve) => setTimeout(() => resolve(true), 500));
 	};
 	const setUrlRestApi = () => {
 		dispatch({ type: 'SET_URL_REST_API', urlRestApi: URL_REST_API(state.currentDocker) });
@@ -326,8 +325,6 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		dispatch({ type: 'SET_AUTO_SAVE', autoSave });
 	};
 
-
-
 	const isSaleHunter = () => state.currentServer === 'salehunter.io';
 
 	const $x = (xpath: any) => {
@@ -342,12 +339,12 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		min = Math.ceil(min);
 		max = Math.floor(max);
 		return Math.floor(Math.random() * (max - min) + min); // The maximum is exclusive and the minimum is inclusive
-	}
+	};
 	const sleep = (ms: any, msRamdom?: any) => {
 		if (msRamdom && parseInt(msRamdom) > parseInt(ms)) {
-			ms = getRandomInt(ms, msRamdom)
+			ms = getRandomInt(ms, msRamdom);
 		} else {
-			ms = getRandomInt(ms, ms + 300)
+			ms = getRandomInt(ms, ms + 300);
 		}
 		return new Promise((resolve) => setTimeout(() => resolve(ms), ms));
 	};
@@ -444,8 +441,8 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 			if (elm) {
 				const valueForSet = text
 					? find($(elm)?.find('option'), (elm) => {
-						return $(elm)?.text() === text;
-					})?.getAttribute('value')
+							return $(elm)?.text() === text;
+					  })?.getAttribute('value')
 					: value;
 				if (valueForSet) {
 					elm.value = String(valueForSet);
@@ -475,11 +472,20 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 			console.log('error: ', error);
 		}
 	};
-	const clickButton = async (selector: string) => {
+	const clickButton = async (selector: string, parrentSelector: any = null) => {
 		try {
-			const elm = head($(selector)) as any;
+			if (parrentSelector) {
+				const parrentElm =
+					typeof parrentSelector === 'string' ? (head($(parrentSelector)) as any) : parrentSelector;
+			const elm = head($(parrentElm).find(selector)) as any;
 			if (elm) {
-				elm.click();
+					elm.click();
+				}
+			} else {
+				const elm = head($(selector)) as any;
+				if (elm) {
+					elm.click();
+				}
 			}
 		} catch (error) {
 			console.log(`%cCannot find element`, 'color: red');
@@ -594,7 +600,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		<UIContext.Provider value={value} {...props} />
 	) : (
 		<div style={{ position: 'fixed', bottom: '3px', right: '6px' }}>
-			<Spinner color='info' size='sm' />
+			<Spinner color="info" size="sm" />
 		</div>
 	);
 };
