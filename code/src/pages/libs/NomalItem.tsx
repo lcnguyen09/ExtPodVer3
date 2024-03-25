@@ -88,10 +88,11 @@ export default function NomalItem() {
 	useEffect(() => {
 		if (HasCheck) {
 			if (!item?.name && !items.length) {
-				setAppHide(appMode !== 'dev');
+				setAppHide(true);
 			}
 		}
-	}, [HasCheck, appMode, item?.name, items.length, setAppHide]);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [HasCheck, appMode, item?.name, items.length]);
 
 	// useEffect(() => {
 	// 	setItemTitle(getItemName());

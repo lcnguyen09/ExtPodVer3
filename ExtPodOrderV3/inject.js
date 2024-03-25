@@ -20,7 +20,9 @@ try {
 					});
 					break;
 				case 'storageSetRequest':
-					chrome.storage.local.set({ [storageKey]: event?.data?.request?.value ? event?.data?.request?.value : '' });
+					chrome.storage.local.set({
+						[storageKey]: event?.data?.request?.value ? event?.data?.request?.value : '',
+					});
 					break;
 
 				default:
