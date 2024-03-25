@@ -1,12 +1,12 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { Alert, Button, Col, Input, Label, Row, Spinner, Table } from 'reactstrap';
-import { ArrowDownRight, ArrowRight, Save } from 'react-feather';
+import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
+import { Button, Col, Input, Label, Row, Table } from 'reactstrap';
+import { ArrowRight, Save } from 'react-feather';
 import UiContext from './../../contexts/ui.context';
-import { useInfoLazyQuery } from '../../graphql/graphql';
+// import { useInfoLazyQuery } from '../../graphql/graphql';
 import Notification from './../../components/Notification';
 import BottomBar from './../../components/BottomBar';
 import $ from 'jquery';
-import { ExtRule } from './ExtRule';
+import { ExtRule as ExtensionRule } from './ExtRule';
 import {
 	clone,
 	filter,
@@ -22,7 +22,6 @@ import {
 	split,
 	startsWith,
 	trim,
-	trimStart,
 	union,
 } from 'lodash';
 
@@ -33,16 +32,16 @@ var getLocation = function (href: any) {
 };
 
 export default function NomalItem() {
-	const { appMode, setAppHide, setGraphqlForAccount, movingOnElm, $x, autoPage } = UiContext.UseUIContext();
+	const { appMode, setAppHide, movingOnElm, autoPage } = UiContext.UseUIContext();
 
-	const [infoQuery] = useInfoLazyQuery({ fetchPolicy: 'network-only' });
+	// const [infoQuery] = useInfoLazyQuery({ fetchPolicy: 'network-only' });
 
 	const [Loading, setLoading] = useState<boolean>(true);
 	const [ErrorMsg, setErrorMsg] = useState('');
 	const [SuccessMsg, setSuccessMsg] = useState('');
 	const [HasCheck, setHasCheck] = useState<boolean>(false);
 
-	const [ExtensionRule, setExtensionRule] = useState<any>(ExtRule);
+	// const [ExtensionRule, setExtensionRule] = useState<any>(ExtRule);
 	const [__NEXT_DATA__, setNextData] = useState<any>({});
 	// Printbase/Shopbase
 	const [__INITIAL_STATE__, setInitialState] = useState<any>({});
@@ -50,12 +49,13 @@ export default function NomalItem() {
 	const [item, setItem] = useState<any>({});
 	const [items, setItems] = useState<Array<any>>([]);
 
-	const [ItemTitle, setItemTitle] = useState('');
-	const [ItemImages, setItemImages] = useState<Array<string>>([]);
+	// const [ItemTitle, setItemTitle] = useState('');
+	// const [ItemImages, setItemImages] = useState<Array<string>>([]);
 	const [ItemImagesSelected, setItemImagesSelected] = useState<Array<string>>([]);
 	useEffect(() => {
+		console.log('OKOKOK');
 		// getRule();
-		setLoading(false)
+		setLoading(false);
 		try {
 			const nextData = $('body').attr('tmp___NEXT_DATA__');
 			if (nextData) setNextData(JSON.parse(nextData));
@@ -64,6 +64,8 @@ export default function NomalItem() {
 			const initialStateTag = $('#__INITIAL_STATE__')[0].textContent;
 			if (initialStateTag) setInitialState(JSON.parse(initialStateTag));
 		} catch (error) {}
+		getItemInfo();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	// function getRule() {
@@ -77,14 +79,11 @@ export default function NomalItem() {
 	// }
 
 	useEffect(() => {
-		if (
-			ExtensionRule?.name ||
-			__INITIAL_STATE__?.product?.product?.title ||
-			__NEXT_DATA__?.props?.pageProps?.product?.title
-		) {
+		if (__INITIAL_STATE__?.product?.product?.title || __NEXT_DATA__?.props?.pageProps?.product?.title) {
 			getItemInfo();
 		}
-	}, [ExtensionRule, __INITIAL_STATE__, __NEXT_DATA__]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [__INITIAL_STATE__, __NEXT_DATA__]);
 
 	useEffect(() => {
 		if (HasCheck) {
@@ -92,23 +91,17 @@ export default function NomalItem() {
 				setAppHide(appMode !== 'dev');
 			}
 		}
-	}, [HasCheck]);
+	}, [HasCheck, appMode, item?.name, items.length, setAppHide]);
 
-	useEffect(() => {
-		setItemTitle(getItemName());
-	}, [
-		ExtensionRule?.name,
-		__INITIAL_STATE__?.product?.product?.title,
-		__NEXT_DATA__?.props?.pageProps?.product?.title,
-	]);
+	// useEffect(() => {
+	// 	setItemTitle(getItemName());
+	// // eslint-disable-next-line react-hooks/exhaustive-deps
+	// }, [__INITIAL_STATE__.product.product.title, __NEXT_DATA__.props.pageProps.product.title]);
 
-	useEffect(() => {
-		setItemImages(getItemImages());
-	}, [
-		ExtensionRule?.images,
-		__INITIAL_STATE__?.product?.product?.images,
-		__NEXT_DATA__?.props?.pageProps?.product?.gallery,
-	]);
+	// useEffect(() => {
+	// 	setItemImages(getItemImages());
+	// // eslint-disable-next-line react-hooks/exhaustive-deps
+	// }, [__INITIAL_STATE__.product.product.images, __NEXT_DATA__.props.pageProps.product.gallery]);
 
 	function getItemInfo(htmlDOM: any = null) {
 		console.log('Start getItemInfo');
@@ -477,7 +470,11 @@ export default function NomalItem() {
 													}
 												}}
 											>
-												<img style={{ minWidth: '60px', width: '60px' }} src={item?.imageUrl} />
+												<img
+													style={{ minWidth: '60px', width: '60px' }}
+													src={item?.imageUrl}
+													alt="Poduct img"
+												/>
 												<span
 													className={`p-1 ${item?.status === 'Done' ? 'text-success' : ''} ${
 														item?.status === 'Exist' ? 'text-warning' : ''
@@ -538,14 +535,14 @@ function NomalItemSave({
 	setErrorMsg: Dispatch<SetStateAction<string>>;
 	setItems: Dispatch<SetStateAction<Array<any>>>;
 }) {
-	const { currentUser, currentDocker, movingOnElm, currentToken, templateId, urlRestApi, sleep, autoPage } =
-		UiContext.UseUIContext();
+	const { currentUser, currentToken, templateId, urlRestApi, autoPage } = UiContext.UseUIContext();
 	const [ForceCreateNew, setForceCreateNew] = useState<boolean>(false);
 
 	useEffect(() => {
 		if (autoPage && Items.length && !Loading) {
 			handleSave();
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [autoPage, Items]);
 
 	const handleNext = async () => {
@@ -562,7 +559,7 @@ function NomalItemSave({
 				return { ...i, done: false };
 			});
 			setItems(Items);
-			let itemDone = [];
+			// let itemDone = [];
 			console.log(Items);
 			while (find(Items, (item) => !item.done && item.checked && item.itemUrl)) {
 				let item = find(Items, (item) => !item.done && item.checked && item.itemUrl);
@@ -579,8 +576,8 @@ function NomalItemSave({
 				}
 
 				let index = findIndex(Items, (item) => !item.done && item.checked && item.itemUrl);
-
-				await new Promise((resolve, reject) => {
+				// eslint-disable-next-line no-loop-func
+				await new Promise((resolve) => {
 					var settings = {
 						url: `${urlRestApi}/item-clone-check`,
 						data: {
@@ -622,9 +619,10 @@ function NomalItemSave({
 							console.log('error: ', error);
 							resolve('next');
 						});
+					// eslint-disable-next-line no-loop-func
 				}).then((exist) => {
 					if (exist !== true) {
-						return new Promise((resolve, reject) => {
+						return new Promise((resolve) => {
 							$.ajax({
 								url: item.itemUrl,
 								method: 'GET',
@@ -658,7 +656,7 @@ function NomalItemSave({
 								setItems(Items);
 								return Promise.resolve(false);
 							}
-							return new Promise((resolve, reject) => {
+							return new Promise((resolve) => {
 								var settings = {
 									url: `${urlRestApi}/item-clone`,
 									data: {

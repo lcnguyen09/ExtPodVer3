@@ -16,13 +16,10 @@ export default function Router({ apolloClient }: { apolloClient?: any }) {
 	const [fetchCUserLazyQuery] = useCUserLazyQuery({ fetchPolicy: 'network-only' });
 	useEffect(() => {
 		fetchCurrentUser();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [apolloClient]);
 
 	function fetchCurrentUser() {
-		fetchCurrent();
-	}
-
-	function fetchCurrent() {
 		if (!currentToken?.token) {
 			return setCurrentUser();
 		}
@@ -67,8 +64,8 @@ export default function Router({ apolloClient }: { apolloClient?: any }) {
 			{get(
 				routers,
 				pageRoute,
-				<div className='d-flex justify-content-center align-items-center mt-5'>
-					<div className='brand-logo' />
+				<div className="d-flex justify-content-center align-items-center mt-5">
+					<div className="brand-logo" />
 				</div>
 			)}
 		</>

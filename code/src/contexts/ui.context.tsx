@@ -9,7 +9,6 @@ import {
 	URL_GRAPHQL,
 	URL_REST_API,
 } from './contants';
-import convertBlob from './function';
 import { Spinner } from 'reactstrap';
 import reactTriggerChange from './reacttrigger';
 
@@ -108,9 +107,10 @@ function uiReducer(state: State, action: ACTION) {
 	}
 }
 
-export const useStorage = (key: string): [string | null, (val: string) => void] => {
-	const [value, setValue] = useState<string | null>(null);
+export const useStorage = (key: string): [string | null | undefined, (val: string) => void] => {
+	const [value, setValue] = useState<string | null | undefined>(undefined);
 	useEffect(() => {
+		console.log("storageGetRequest Send");
 		window.postMessage(
 			{
 				action: 'storageGetRequest',
@@ -121,9 +121,11 @@ export const useStorage = (key: string): [string | null, (val: string) => void] 
 
 		window.addEventListener('message', (event) => {
 			if (event?.data?.action === 'storageGetResponse' && event?.data.response?.key === key) {
+				console.log(event?.data.response);
 				setValue(event?.data.response?.value);
 			}
 		});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	useEffect(() => {
@@ -139,6 +141,7 @@ export const useStorage = (key: string): [string | null, (val: string) => void] 
 				'*'
 			);
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [value]);
 	function toggleValue(val: string): void {
 		setValue(val);
@@ -157,48 +160,56 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	const [state, dispatch]: any = useReducer<any>(uiReducer, initialState);
 
 	const [init, setInit]: [boolean, (val: boolean) => void] = useState(false);
-	const [token, setToken]: [string | null, (val: string) => void] = useStorage('_pod_ext_token');
-	const [docker, setDocker]: [string | null, (val: string) => void] = useStorage('_pod_ext_docker');
-	const [server, setServer]: [string | null, (val: string) => void] = useStorage('_pod_ext_server');
-	const [windowViewStorage, setWindowViewStorage]: [string | null, (val: string) => void] =
+
+	const [token, setToken]: [string | null | undefined, (val: string) => void] = useStorage('_pod_ext_token');
+	const [docker, setDocker]: [string | null | undefined, (val: string) => void] = useStorage('_pod_ext_docker');
+	const [server, setServer]: [string | null | undefined, (val: string) => void] = useStorage('_pod_ext_server');
+	const [windowViewStorage, setWindowViewStorage]: [string | null | undefined, (val: string) => void] =
 		useStorage('_pod_ext_view');
-	const [templateIdStorage, setTemplateIdStorage]: [string | null, (val: string) => void] =
+	const [templateIdStorage, setTemplateIdStorage]: [string | null | undefined, (val: string) => void] =
 		useStorage('_pod_template_id');
-	const [autoPageStorage, setAutoPageStorage]: [string | null, (val: string) => void] = useStorage('_pod_auto_page');
-	const [extendShippingPriceStorage, setExtendShippingPriceStorage]: [string | null, (val: string) => void] =
-		useStorage('_pod_extend_shipping_price');
-	const [autoSaveStorage, setAutoSaveStorage]: [string | null, (val: string) => void] = useStorage('_pod_auto_save');
+	const [autoPageStorage, setAutoPageStorage]: [string | null | undefined, (val: string) => void] =
+		useStorage('_pod_auto_page');
+	const [extendShippingPriceStorage, setExtendShippingPriceStorage]: [
+		string | null | undefined,
+		(val: string) => void
+	] = useStorage('_pod_extend_shipping_price');
+	const [autoSaveStorage, setAutoSaveStorage]: [string | null | undefined, (val: string) => void] =
+		useStorage('_pod_auto_save');
 
 	useEffect(() => {
 		if (
-			token !== null &&
-			docker !== null &&
-			server !== null &&
-			windowViewStorage !== null &&
-			templateIdStorage !== null &&
-			autoPageStorage !== null &&
-			extendShippingPriceStorage !== null &&
-			autoSaveStorage !== null
+			token !== undefined &&
+			docker !== undefined &&
+			server !== undefined &&
+			windowViewStorage !== undefined &&
+			templateIdStorage !== undefined &&
+			autoPageStorage !== undefined &&
+			extendShippingPriceStorage !== undefined &&
+			autoSaveStorage !== undefined
 		) {
 			setInit(true);
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [token, docker, server, windowViewStorage, templateIdStorage]);
 
 	useEffect(() => {
+		console.log(init);
 		if (init) {
-			if (token !== null)
+			if (token !== undefined)
 				setCurrentToken({
 					token: token,
 				});
-			if (windowViewStorage !== null) setWindowView(windowViewStorage);
-			if (docker !== null) setCurrentDocker(docker ? { _id: docker } : undefined);
-			if (server !== null) setCurrentServer(server ? server : 'podorders.store');
+			if (windowViewStorage !== undefined) setWindowView(windowViewStorage);
+			if (docker !== undefined) setCurrentDocker(docker ? { _id: docker } : undefined);
+			if (server !== undefined) setCurrentServer(server ? server : 'podorders.store');
 
-			if (templateIdStorage !== null) setTemplateId(templateIdStorage);
-			if (autoPageStorage !== null) setAutoPage(autoPageStorage === 'true');
-			if (extendShippingPriceStorage !== null) setExtendShippingPrice(extendShippingPriceStorage === 'true');
-			if (autoSaveStorage !== null) setAutoSave(autoSaveStorage === 'true');
+			if (templateIdStorage !== undefined) setTemplateId(templateIdStorage);
+			if (autoPageStorage !== undefined) setAutoPage(autoPageStorage === 'true');
+			if (extendShippingPriceStorage !== undefined) setExtendShippingPrice(extendShippingPriceStorage === 'true');
+			if (autoSaveStorage !== undefined) setAutoSave(autoSaveStorage === 'true');
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [init]);
 
 	useEffect(() => {
@@ -218,6 +229,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 			$('body').removeClass('podorder-ext-app-min');
 		}
 		setWindowViewStorage(state.windowView);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [state.windowView]);
 
 	useEffect(() => {
@@ -242,6 +254,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		if (state.currentToken?.token !== undefined && !!!state.currentToken?.token) {
 			setPageRoute('LOGIN');
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [state.currentToken?.token, state.currentUser, state.currentDocker?._id, state.currentServer]);
 
 	useEffect(() => {
@@ -256,22 +269,27 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		if (state.currentDocker?.domain) {
 			setUrlRestApi();
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [state.currentDocker]);
 
 	useEffect(() => {
 		setTemplateIdStorage(state.templateId);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [state.templateId]);
 
 	useEffect(() => {
 		setAutoPageStorage(state.autoPage ? 'true' : 'false');
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [state.autoPage]);
 
 	useEffect(() => {
 		setExtendShippingPriceStorage(state.extendShippingPrice ? 'true' : 'false');
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [state.extendShippingPrice]);
 
 	useEffect(() => {
 		setAutoSaveStorage(state.autoSave ? 'true' : 'false');
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [state.autoSave]);
 
 	const setAppLoading = (appLoading: boolean) => {
@@ -309,10 +327,10 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	const setCurrentDocker = (currentDocker?: DOCKER) => {
 		dispatch({ type: 'SET_CURRENT_DOCKER', currentDocker });
 	};
-	const setCurrentServer = (currentServer?: String) => {
+	const setCurrentServer = (currentServer?: String | null) => {
 		dispatch({ type: 'SET_CURRENT_SERVER', currentServer });
 	};
-	const setTemplateId = (templateId?: string) => {
+	const setTemplateId = (templateId?: string | null) => {
 		dispatch({ type: 'SET_TEMPLATE_ID', templateId });
 	};
 	const setAutoPage = (autoPage?: boolean) => {
@@ -363,9 +381,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 				);
 				await sleep(50);
 			}
-		} catch (error) {
-			console.log('movingOnElm fail: ', error);
-		}
+		} catch (error) {}
 	};
 	const fillTextInput = async (selector: any, value: string | number) => {
 		try {
@@ -382,10 +398,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 				elm.dispatchEvent(new Event('change', { bubbles: true }));
 				elm.dispatchEvent(new Event('blur', { bubbles: true }));
 			}
-		} catch (error) {
-			console.log(`%cCannot find element`, 'color: red');
-			console.log('error: ', error);
-		}
+		} catch (error) {}
 	};
 
 	const fillReactTab = async (selector: any, value: string | number) => {
@@ -404,10 +417,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 				elm.dispatchEvent(new Event('blur', { bubbles: true }));
 				elm.dispatchEvent(new Event('focusout', { bubbles: true }));
 			}
-		} catch (error) {
-			console.log(`%cCannot find element`, 'color: red');
-			console.log('error: ', error);
-		}
+		} catch (error) {}
 	};
 
 	const fillTextArea = async (selector: any, value: string | number) => {
@@ -424,10 +434,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 				// 	'*'
 				// );
 			}
-		} catch (error) {
-			console.log(`%cCannot find element`, 'color: red');
-			console.log('error: ', error);
-		}
+		} catch (error) {}
 	};
 
 	const fillSelect = async (
@@ -448,13 +455,9 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 					elm.value = String(valueForSet);
 					elm.dispatchEvent(new Event('change', { bubbles: true }));
 				} else {
-					console.log(`%cCannot find value`, 'color: red');
 				}
 			}
-		} catch (error) {
-			console.log(`%cCannot find element`, 'color: red');
-			console.log('error: ', error);
-		}
+		} catch (error) {}
 	};
 
 	const fillCheckbox = async (selector: string, checked: boolean) => {
@@ -467,18 +470,15 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 				}
 				elm.click();
 			}
-		} catch (error) {
-			console.log(`%cCannot find element`, 'color: red');
-			console.log('error: ', error);
-		}
+		} catch (error) {}
 	};
 	const clickButton = async (selector: string, parrentSelector: any = null) => {
 		try {
 			if (parrentSelector) {
 				const parrentElm =
 					typeof parrentSelector === 'string' ? (head($(parrentSelector)) as any) : parrentSelector;
-			const elm = head($(parrentElm).find(selector)) as any;
-			if (elm) {
+				const elm = head($(parrentElm).find(selector)) as any;
+				if (elm) {
 					elm.click();
 				}
 			} else {
@@ -487,10 +487,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 					elm.click();
 				}
 			}
-		} catch (error) {
-			console.log(`%cCannot find element`, 'color: red');
-			console.log('error: ', error);
-		}
+		} catch (error) {}
 	};
 	const clickXButton = async (selector: string) => {
 		try {
@@ -498,10 +495,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 			if (elm) {
 				elm.click();
 			}
-		} catch (error) {
-			console.log(`%cCannot find element`, 'color: red');
-			console.log('error: ', error);
-		}
+		} catch (error) {}
 	};
 
 	const fillInputFile = async (selector: string, image: string[]) => {
@@ -536,14 +530,11 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 										return getImagesBlob(index + 1);
 									},
 									error: function (error) {
-										console.log('error: ', error);
 										res.push(false);
 										return getImagesBlob(index + 1);
 									},
 								});
-							} catch (error) {
-								console.log('error2: ', error);
-							}
+							} catch (error) {}
 						} else {
 							resolve(res);
 						}
@@ -555,10 +546,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 					return imgs;
 				});
 			}
-		} catch (error) {
-			console.log(`%cCannot find element`, 'color: red');
-			console.log('error: ', error);
-		}
+		} catch (error) {}
 	};
 
 	const value = useMemo(

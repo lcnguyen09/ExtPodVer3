@@ -126,9 +126,7 @@ export default function ({ Identifier, storeData }: any) {
 					storeData,
 					'account_id',
 					''
-				)}/mission-control/orders?filters[buyer_id]=all&filters[channel]=all&filters[completed_status]=all&filters[destination]=all&filters[ship_date]=all&filters[shipping_label_eligibility]=false&filters[shipping_label_status]=all&filters[has_buyer_notes]=false&filters[is_marked_as_gift]=false&filters[is_personalized]=false&filters[has_shipping_upgrade]=false&filters[order_state_id]=${
-					pathname.endsWith('/completed') ? CompletedStatusID : NewStatusID
-				}&limit=50&offset=0&search_terms=&sort_by=order_date&sort_order=desc&objects_enabled_for_normalization[order_state]=true`,
+				)}/mission-control/orders?filters[buyer_id]=all&filters[channel]=all&filters[completed_status]=all&filters[destination]=all&filters[ship_date]=all&filters[shipping_label_eligibility]=false&filters[shipping_label_status]=all&filters[has_buyer_notes]=false&filters[is_marked_as_gift]=false&filters[is_personalized]=false&filters[has_shipping_upgrade]=false&filters[order_state_id]=all&limit=50&offset=0&search_terms=&sort_by=order_date&sort_order=desc&objects_enabled_for_normalization[order_state]=true`,
 				{
 					referrer: pathname.endsWith('/completed')
 						? 'https://www.etsy.com/your/orders/sold/completed?ref=seller-platform-mcnav'
@@ -507,10 +505,8 @@ export default function ({ Identifier, storeData }: any) {
 										)}
 									</td>
 									<td className={`text-center ${rowSpan > 1 ? 'border-bottom-none' : ''}`}>
-										{orderSyns &&
-										get(orderSyns, 'status', 'New') !== 'Trash' &&
-										orderSyns?.tracking_number ? (
-											get(order, 'order_state_id') === '1122457242231' ? (
+										{orderSyns && get(orderSyns, 'status', 'New') !== 'Trash' ? (
+											orderSyns?.tracking_number && !get(order, ['fulfillment', 'is_complete']) ? (
 												<Button
 													size="sm"
 													color="primary"

@@ -1,5 +1,5 @@
 export type TOKEN = {
-    token?: string
+    token?: string | null | undefined
 }
 
 export type CURRENT_USER = {
@@ -47,35 +47,35 @@ export type ACTION =
     }
     | {
         type: "SET_CURRENT_USER"
-        user: CURRENT_USER | null
+        user: CURRENT_USER | null | undefined
     }
     | {
         type: "SET_CURRENT_TOKEN"
-        currentToken: TOKEN | null
+        currentToken: TOKEN | null | undefined
     }
     | {
         type: "SET_CURRENT_DOCKER"
-        currentDocker: DOCKER | null
+        currentDocker: DOCKER | null | undefined
     }
     | {
         type: "SET_CURRENT_SERVER"
-        currentServer: String | null
+        currentServer: String | null | undefined
     }
     | {
         type: "SET_TEMPLATE_ID"
-        templateId: string | null
+        templateId: string | null | undefined
     }
     | {
         type: "SET_AUTO_PAGE"
-        autoPage: boolean | null
+        autoPage: boolean | null | undefined
     }
     | {
         type: "SET_EXTEND_SHIPPING_PRICE"
-        extendShippingPrice: boolean | null
+        extendShippingPrice: boolean | null | undefined
     }
     | {
         type: "SET_AUTO_SAVE"
-        autoSave: boolean | null
+        autoSave: boolean | null | undefined
     }
     | {
         type: "SET_URL_GRAPHQL"

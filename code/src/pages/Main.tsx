@@ -1,6 +1,4 @@
-import { get } from 'lodash';
 import { useEffect, useState } from 'react';
-import UiContext from './../contexts/ui.context';
 import NomalItem from './libs/NomalItem';
 import Inspireuplift from './libs/inspireuplift/Inspireuplift';
 import Amazon from './libs/amazon/Amazon';
@@ -13,12 +11,8 @@ export default function Main() {
 
 	useEffect(() => {
 		setSite(window.location.host);
-	}, [window.location.host]);
-
-	useEffect(() => {
 		setPathname(window.location.pathname);
-	}, [window.location.pathname]);
-
+	}, []);
 	if (site === 'sellercentral.amazon.com') {
 		return <Amazon />;
 	}

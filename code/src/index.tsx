@@ -11,8 +11,16 @@ const inIframe = () => {
 };
 
 const checkValid = () => {
-	return !window?.location?.pathname?.match(/\.js$/gim) && !window?.location?.pathname?.match(/\.css/gim) && !inIframe() && !window.location.host.includes('podorders.store') && !window.location.host.includes('salehunter.io') && !window.location.host.includes('localhost:3000') && !window.location.host.includes('localhost:3200')
-}
+	return (
+		!window?.location?.pathname?.match(/\.js$/gim) &&
+		!window?.location?.pathname?.match(/\.css/gim) &&
+		!inIframe() &&
+		!window.location.host.includes('podorders.store') &&
+		!window.location.host.includes('salehunter.io') &&
+		!window.location.host.includes('localhost:3000') &&
+		!window.location.host.includes('localhost:3200')
+	);
+};
 
 try {
 	if (checkValid()) {
