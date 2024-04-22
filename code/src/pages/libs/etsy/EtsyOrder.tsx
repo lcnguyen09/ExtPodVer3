@@ -84,12 +84,20 @@ export default function ({ Identifier, storeData }: any) {
 			}
 
 			const s = new URLSearchParams(window.location.search);
-			const page = s.get('page') || '1';
+			const limitElm = $("select[aria-label='Orders displayed']").first().val()
+			let limit = (Array.isArray(limitElm) ? head(limitElm) : limitElm)
+			limit = String(limit ? limit : '20')
+			const page = parseInt(s.get('page') || '1');
+			const offset = (page - 1) * parseInt(limit);
+			const search_query = s.get('search_query') || '';
+			const ship_date = s.get('ship_date') || 'all';
+			const destination = s.get('destination') || 'all';
 			let search = s.get('search') || '';
 			if (search) {
 				search = `&search=${search}`;
 			}
 			let status = s.get('type') || '';
+			
 			switch (status) {
 				case 'unfulfilled':
 					status = `&status=0`;
@@ -126,7 +134,7 @@ export default function ({ Identifier, storeData }: any) {
 					storeData,
 					'account_id',
 					''
-				)}/mission-control/orders?filters[buyer_id]=all&filters[channel]=all&filters[completed_status]=all&filters[destination]=all&filters[ship_date]=all&filters[shipping_label_eligibility]=false&filters[shipping_label_status]=all&filters[has_buyer_notes]=false&filters[is_marked_as_gift]=false&filters[is_personalized]=false&filters[has_shipping_upgrade]=false&filters[order_state_id]=all&limit=50&offset=0&search_terms=&sort_by=order_date&sort_order=desc&objects_enabled_for_normalization[order_state]=true`,
+				)}/mission-control/orders?filters[buyer_id]=all&filters[channel]=all&filters[completed_status]=all&filters[destination]=${destination}&filters[ship_date]=${ship_date}&filters[shipping_label_eligibility]=false&filters[shipping_label_status]=all&filters[has_buyer_notes]=false&filters[is_marked_as_gift]=false&filters[is_personalized]=false&filters[has_shipping_upgrade]=false&filters[order_state_id]=all&limit=${limit}&offset=${offset}&search_terms=${search_query}&sort_by=order_date&sort_order=desc&objects_enabled_for_normalization[order_state]=true`,
 				{
 					referrer: pathname.endsWith('/completed')
 						? 'https://www.etsy.com/your/orders/sold/completed?ref=seller-platform-mcnav'
@@ -603,26 +611,23 @@ export default function ({ Identifier, storeData }: any) {
 				>
 					<RefreshCw size={14} /> <span style={{ marginLeft: '3px' }}>Reload data</span>
 				</Button>
-				{isTracking() ? (
-					<Button
-						size="xs"
-						color="primary"
-						className="py-1 d-flex justify-content-center align-items-center flex-column"
-						onClick={() => handleFillTracking()}
-					>
-						<Save size={14} /> <span style={{ marginLeft: '3px' }}>Fill tracking</span>
-					</Button>
-				) : (
-					<Button
-						size="xs"
-						color="success"
-						className="py-1 d-flex justify-content-center align-items-center flex-column"
-						onClick={() => handleSaveOrder()}
-						disabled={!currentDocker?.domain || !find(orders, (order) => order.checked)}
-					>
-						<Save size={14} /> <span style={{ marginLeft: '3px' }}>Save orders</span>
-					</Button>
-				)}
+				<Button
+					size="xs"
+					color="primary"
+					className="py-1 d-flex justify-content-center align-items-center flex-column"
+					onClick={() => handleFillTracking()}
+				>
+					<Save size={14} /> <span style={{ marginLeft: '3px' }}>Fill tracking</span>
+				</Button>
+				<Button
+					size="xs"
+					color="success"
+					className="py-1 d-flex justify-content-center align-items-center flex-column"
+					onClick={() => handleSaveOrder()}
+					disabled={!currentDocker?.domain || !find(orders, (order) => order.checked)}
+				>
+					<Save size={14} /> <span style={{ marginLeft: '3px' }}>Save orders</span>
+				</Button>
 			</BottomBar>
 		</>
 	);
