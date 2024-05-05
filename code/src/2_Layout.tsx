@@ -45,7 +45,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 					<CardTitle className="mb-0 d-flex align-items-center" id="podorder-ext-app-title">
 						<div className="brand-logo" id="podorder-ext-app-logo" />
 						<span className="ml-1 p-2" id="podorder-ext-app-version">
-							v3.5.0
+							v3.6.1
 						</span>
 					</CardTitle>
 					<div className="actions d-flex justify-content-end align-items-center">

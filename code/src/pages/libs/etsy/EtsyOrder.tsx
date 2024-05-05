@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { useEffect, useRef, useState } from 'react';
 import { Button, Spinner, Table } from 'reactstrap';
 import { DownloadCloud, RefreshCw, Save, UploadCloud } from 'react-feather';
@@ -5,7 +6,7 @@ import UiContext from './../../../contexts/ui.context';
 import Notification from './../../../components/Notification';
 import BottomBar from './../../../components/BottomBar';
 import $ from 'jquery';
-import { filter, find, findIndex, get, head, last, map, set, trim, unionBy } from 'lodash';
+import { filter, find, findIndex, get, head, last, map, set, toLower, trim, unionBy } from 'lodash';
 
 export default function ({ Identifier, storeData }: any) {
 	const {
@@ -22,6 +23,7 @@ export default function ({ Identifier, storeData }: any) {
 	} = UiContext.UseUIContext();
 
 	const [pathname, setPathname] = useState(window.location.pathname);
+	const [searchStr, setSearchStr] = useState(window.location.search);
 
 	const [Loading, setLoading] = useState<boolean>(false);
 	const [LoadingStatus, setLoadingStatus] = useState<boolean>(true);
@@ -36,6 +38,7 @@ export default function ({ Identifier, storeData }: any) {
 
 	useEffect(() => {
 		setPathname(window.location.pathname);
+		setSearchStr(window.location.search);
 	}, [window.location.pathname, window.location.href, window.location.search]);
 
 	useEffect(() => {
@@ -49,7 +52,7 @@ export default function ({ Identifier, storeData }: any) {
 			handleGetOrderData();
 		}
 		loopGetOrderData();
-	}, [pathname]);
+	}, [pathname, searchStr]);
 
 	useEffect(() => {
 		if (currentDocker?.domain && orders && orders.length) {
@@ -73,31 +76,79 @@ export default function ({ Identifier, storeData }: any) {
 		(window as any).myInterval = setInterval(() => {
 			if (pathname !== window.location.pathname) {
 				setPathname(window.location.pathname);
+			} else if (window.location.pathname.includes('/your/orders/')) {
+				if (searchStr !== window.location.search) {
+					setSearchStr(window.location.search);
+				}
 			}
 		}, 1000);
 	}
 
 	function handleGetOrderData() {
+		let stateDatas = null;
+		try {
+			stateDatas = get(window, ['Etsy', 'Context', 'data', 'order_states'], []);
+		} catch (error) {}
+
+		let patch = '';
+		try {
+			patch = window.location.pathname.replace('/your/orders/', '');
+		} catch (error) {}
+
+		const statusData = find(stateDatas, (stateData) => {
+			if ($(".wt-tab__item.wt-tab__item--selected span[data-test-id='unsanitize']").text()) {
+				return (
+					get(stateData, 'name', '') ===
+					$(".wt-tab__item.wt-tab__item--selected span[data-test-id='unsanitize']").text()
+				);
+			}
+			if (patch === 'sold') {
+				return true;
+			}
+			return patch === toLower(get(stateData, 'name', ''));
+		});
+
+		let statusID = get(statusData, 'order_state_id', 'all');
+
+		let sortBy: string | null = null;
+		let sortOrder: string | null = null;
+
+		try {
+			const sortByData = get(
+				JSON.parse(get(window, ['localStorage', 'mission_control/orders_search_preferences'], '')),
+				get(statusData, 'state_type') === 'Completed'
+					? 'default_sort_option_completed'
+					: 'default_sort_option_open'
+			);
+			sortBy = get(sortByData, 'sort_by', 'expected_ship_dat');
+			sortOrder = get(sortByData, 'sort_order', 'asc');
+		} catch (error) {}
+
 		setLoading(true);
 		new Promise((resolve, reject) => {
 			if (isDetail() || isTracking()) {
 			}
 
 			const s = new URLSearchParams(window.location.search);
-			const limitElm = $("select[aria-label='Orders displayed']").first().val()
-			let limit = (Array.isArray(limitElm) ? head(limitElm) : limitElm)
-			limit = String(limit ? limit : '20')
+
+			if (s.get('sort_by')) {
+				sortBy = s.get('sort_by');
+			}
+			if (s.get('sort_order')) {
+				sortOrder = s.get('sort_order');
+			}
+
+			const limitElm = $("select[aria-label='Orders displayed']").first().val();
+			let limit = Array.isArray(limitElm) ? head(limitElm) : limitElm;
+			limit = String(limit ? limit : '20');
 			const page = parseInt(s.get('page') || '1');
 			const offset = (page - 1) * parseInt(limit);
-			const search_query = s.get('search_query') || '';
-			const ship_date = s.get('ship_date') || 'all';
-			const destination = s.get('destination') || 'all';
 			let search = s.get('search') || '';
 			if (search) {
 				search = `&search=${search}`;
 			}
 			let status = s.get('type') || '';
-			
+
 			switch (status) {
 				case 'unfulfilled':
 					status = `&status=0`;
@@ -127,14 +178,35 @@ export default function ({ Identifier, storeData }: any) {
 					status = '';
 					break;
 			}
-			const NewStatusID = 1122457242231;
-			const CompletedStatusID = 1100033259692;
+
+			if (s.get('search_query')) {
+				statusID = 'all';
+				sortBy = 'order_date';
+				sortOrder = 'desc';
+			}
+			// ${s.get('ship_date') || 'all'}
 			fetch(
 				`https://www.etsy.com/api/v3/ajax/bespoke/shop/${get(
 					storeData,
 					'account_id',
 					''
-				)}/mission-control/orders?filters[buyer_id]=all&filters[channel]=all&filters[completed_status]=all&filters[destination]=${destination}&filters[ship_date]=${ship_date}&filters[shipping_label_eligibility]=false&filters[shipping_label_status]=all&filters[has_buyer_notes]=false&filters[is_marked_as_gift]=false&filters[is_personalized]=false&filters[has_shipping_upgrade]=false&filters[order_state_id]=all&limit=${limit}&offset=${offset}&search_terms=${search_query}&sort_by=order_date&sort_order=desc&objects_enabled_for_normalization[order_state]=true`,
+				)}/mission-control/orders?filters[buyer_id]=${s.get('buyer_id') || 'all'}&filters[channel]=${
+					s.get('channel') || 'all'
+				}&filters[completed_status]=${s.get('completed_status') || 'all'}&filters[destination]=${
+					s.get('destination') || 'all'
+				}&filters[ship_date]=${s.get('ship_date') || 'all'}&filters[shipping_label_eligibility]=${
+					s.get('shipping_label_eligibility') || 'false'
+				}&filters[shipping_label_status]=${s.get('shipping_label_status') || 'all'}&filters[has_buyer_notes]=${
+					s.get('has_buyer_notes') || 'false'
+				}&filters[is_marked_as_gift]=${s.get('is_marked_as_gift') || 'false'}&filters[is_personalized]=${
+					s.get('is_personalized') || 'false'
+				}&filters[has_shipping_upgrade]=${
+					s.get('has_shipping_upgrade') || 'false'
+				}&filters[order_state_id]=${statusID}&limit=${limit}&offset=${offset}&search_terms=${
+					s.get('search_query') || ''
+				}&sort_by=${sortBy}&sort_order=${sortOrder}&objects_enabled_for_normalization[order_state]=${
+					s.get('order_state') || 'true'
+				}`,
 				{
 					referrer: pathname.endsWith('/completed')
 						? 'https://www.etsy.com/your/orders/sold/completed?ref=seller-platform-mcnav'
@@ -277,6 +349,112 @@ export default function ({ Identifier, storeData }: any) {
 				setOrders(orderState);
 				handleSaveOrder(orderSignle, index + 1, orderState);
 			});
+	}
+
+
+	async function handleMapOldOrder(thisOrder: any) {
+		const dataRequest = {
+			order_id: get(thisOrder, 'order_id', ''),
+			identifier: Identifier,
+			fulfillment_note: get(thisOrder, ['notes', 'note_from_buyer'], ''),
+			shipping_total: parseInt(get(thisOrder, ['payment', 'cost_breakdown', 'shipping_cost', 'value'], '')) / 100,
+			discount_total: parseInt(get(thisOrder, ['payment', 'cost_breakdown', 'discount', 'value'], '')) / 100,
+			total_tax: parseInt(get(thisOrder, ['payment', 'cost_breakdown', 'tax_cost', 'value'], '')) / 100,
+			total_fee: 0,
+			account_id: get(storeData, 'account_id', ''),
+			account_name: get(storeData, 'account_name', ''),
+			account_type: 'Etsy',
+			shipping_info: {
+				full_name: get(thisOrder, ['fulfillment', 'to_address', 'name'], ''),
+				address_1: get(thisOrder, ['fulfillment', 'to_address', 'first_line'], ''),
+				address_2: get(thisOrder, ['fulfillment', 'to_address', 'second_line'], ''),
+				company: '',
+				city: get(thisOrder, ['fulfillment', 'to_address', 'city'], ''),
+				state: get(thisOrder, ['fulfillment', 'to_address', 'state'], ''),
+				postcode: get(thisOrder, ['fulfillment', 'to_address', 'zip'], ''),
+				country: get(thisOrder, ['fulfillment', 'to_address', 'country'], ''),
+				email: get(thisOrder, ['fulfillment', 'to_address', 'email'], ''),
+				phone: get(thisOrder, ['fulfillment', 'to_address', 'phone'], ''),
+			},
+			items: map(get(thisOrder, 'transactions', []), (transaction) => {
+				return {
+					name: get(transaction, ['product', 'title'], ''),
+					product_id: get(transaction, ['listing_id'], ''),
+					order_line_item_id: get(transaction, 'transaction_id', ''),
+					variation_id: map(get(transaction, 'variations'), (variation) =>
+						get(variation, 'variation_id')
+					).join(';'),
+					sku: get(transaction, ['listing_id'], ''),
+					quantity: get(transaction, 'quantity', ''),
+					price: parseInt(get(transaction, 'usd_price', '')) / 100,
+					currency: 'USD',
+					image: get(transaction, ['product', 'image_url_75x75'], '').replace('_75x75', '_1000x1000'),
+					attributes: map(get(transaction, 'variations'), (variation) => {
+						return {
+							name: get(variation, 'property', ''),
+							option: get(variation, 'value', ''),
+						};
+					}),
+				};
+			}),
+			tracking: null,
+		};
+
+		return new Promise((resolve, reject) => {
+			fetch(
+				`https://www.etsy.com/api/v3/ajax/shop/${get(
+					storeData,
+					'account_id',
+					''
+				)}/shipments/by-order?order_ids%5B%5D=${get(thisOrder, 'order_id', '')}`,
+				{
+					referrer: 'https://www.etsy.com/your/orders/sold?ref=seller-platform-mcnav',
+				}
+			)
+				.then((response) => response.json())
+				.then((response) => {
+					const ordersToShipments = get(response, 'ordersToShipments');
+					const shipments = get(response, 'shipments');
+					const ordersToShipment = head(
+						find(ordersToShipments, (ordersToShipment, orderID) => {
+							return orderID === get(thisOrder, 'order_id', '');
+						})
+					);
+					const shipment = find(shipments, (shipment) => {
+						return get(shipment, 'shipmentId') === ordersToShipment;
+					});
+					resolve(get(shipment, ['tracking', 'code']));
+				})
+				.catch((e) => {
+					console.log('e: ', e);
+					setLoading(false);
+					reject([]);
+				});
+		}).then((tracking: any) => {
+			dataRequest.tracking = tracking;
+			return new Promise((resolve, reject) => {
+				const settings = {
+					method: 'POST',
+					url: `${
+						currentDocker?.domain ? `${urlRestApi}/order/map-by-address` : '/api/order/map-by-address'
+					}`,
+					data: dataRequest,
+					timeout: 0,
+					headers: {
+						Authorization: `Bearer ${currentToken.token}`,
+					},
+				};
+				$.ajax(settings)
+					.done(function (response) {
+						setSuccessMsg(JSON.stringify(response.data));
+						resolve(true);
+					})
+					.fail((response) => {
+						setErrorMsg(get(response, ['responseJSON', 'error'], JSON.stringify(response)));
+						reject(false);
+					});
+			});
+		});
 	}
 
 	function handleFillTracking(orderSignle = null) {
@@ -514,7 +692,8 @@ export default function ({ Identifier, storeData }: any) {
 									</td>
 									<td className={`text-center ${rowSpan > 1 ? 'border-bottom-none' : ''}`}>
 										{orderSyns && get(orderSyns, 'status', 'New') !== 'Trash' ? (
-											orderSyns?.tracking_number && !get(order, ['fulfillment', 'is_complete']) ? (
+											orderSyns?.tracking_number &&
+											!get(order, ['fulfillment', 'is_complete']) ? (
 												<Button
 													size="sm"
 													color="primary"
@@ -530,17 +709,30 @@ export default function ({ Identifier, storeData }: any) {
 												false
 											)
 										) : (
-											<Button
-												size="sm"
-												color="success"
-												className=""
-												onClick={() => {
-													handleSaveOrder(order);
-												}}
-												disabled={!currentDocker?.domain}
-											>
-												<Save size={14} />
-											</Button>
+											<div>
+												<Button
+													size="sm"
+													color="success"
+													className=""
+													onClick={() => {
+														handleSaveOrder(order);
+													}}
+													disabled={!currentDocker?.domain}
+												>
+													<Save size={14} />
+												</Button>
+												<Button
+													size="sm"
+													color="warning"
+													className=""
+													onClick={() => {
+														handleMapOldOrder(order);
+													}}
+													disabled={!currentDocker?.domain}
+												>
+													<RefreshCw size={14} />
+												</Button>
+											</div>
 										)}
 									</td>
 								</tr>,
@@ -601,15 +793,12 @@ export default function ({ Identifier, storeData }: any) {
 			<BottomBar>
 				<Button
 					size="xs"
-					color="primary"
+					color="success"
 					className="py-1 d-flex justify-content-center align-items-center flex-column"
-					onClick={() => {
-						handleGetOrderData();
-						setSuccessMsg('');
-						setErrorMsg('');
-					}}
+					onClick={() => handleSaveOrder()}
+					disabled={!currentDocker?.domain || !find(orders, (order) => order.checked)}
 				>
-					<RefreshCw size={14} /> <span style={{ marginLeft: '3px' }}>Reload data</span>
+					<Save size={14} /> <span style={{ marginLeft: '3px' }}>Save orders</span>
 				</Button>
 				<Button
 					size="xs"
@@ -617,16 +806,19 @@ export default function ({ Identifier, storeData }: any) {
 					className="py-1 d-flex justify-content-center align-items-center flex-column"
 					onClick={() => handleFillTracking()}
 				>
-					<Save size={14} /> <span style={{ marginLeft: '3px' }}>Fill tracking</span>
+					<DownloadCloud size={14} /> <span style={{ marginLeft: '3px' }}>Fill tracking</span>
 				</Button>
 				<Button
 					size="xs"
-					color="success"
+					color="warning"
 					className="py-1 d-flex justify-content-center align-items-center flex-column"
-					onClick={() => handleSaveOrder()}
-					disabled={!currentDocker?.domain || !find(orders, (order) => order.checked)}
+					onClick={() => {
+						handleGetOrderData();
+						setSuccessMsg('');
+						setErrorMsg('');
+					}}
 				>
-					<Save size={14} /> <span style={{ marginLeft: '3px' }}>Save orders</span>
+					<RefreshCw size={14} /> <span style={{ marginLeft: '3px' }}>Reload order(s)</span>
 				</Button>
 			</BottomBar>
 		</>

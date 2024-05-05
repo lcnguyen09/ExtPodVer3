@@ -1,5 +1,7 @@
+/* eslint-disable */
 import { useEffect, useState } from 'react';
 import EtsyOrder from './EtsyOrder';
+import EtsyOrderMap from './EtsyOrderMap';
 // import InspireupliftItem from './InspireupliftItem';
 // import InspireupliftItems from './InspireupliftItems';
 import { Spinner } from 'reactstrap';
@@ -16,6 +18,7 @@ const Identifier = 'Etsy.com';
 export default function Etsy() {
 	const [path, setPath] = useState(window.location.pathname);
 
+	const [onRemap, setOnRemap] = useState<boolean>(false);
 	const [onMulti, setOnMulti] = useState<boolean>(false);
 	const [reloadStore, setReloadStore] = useState<boolean>(false);
 	const [storeData, setStoreData] = useState<any>();
@@ -47,7 +50,7 @@ export default function Etsy() {
 
 	return (
 		<div>
-			<div className="text-right mb-1">
+			<div className="text-right mb-2">
 				Etsy store:{' '}
 				{reloadStore ? (
 					<Spinner size="sm" />
@@ -59,8 +62,22 @@ export default function Etsy() {
 					</span>
 				)}
 			</div>
+			<div className="text-right mb-3">
+				<button
+					className="btn-link"
+					onClick={(e) => {
+						setOnRemap(!onRemap);
+					}}
+				>
+					{
+						onRemap ? 'Back to order(s) list' : 'Remap Old Order(s)'
+					}
+				</button>
+			</div>
 			{storeData?.account_id ? (
-				path === '/your/shops/me/listing-editor/create' && !onMulti ? (
+				onRemap ? (
+					<EtsyOrderMap Identifier={Identifier} storeData={storeData} />
+				) : path === '/your/shops/me/listing-editor/create' && !onMulti ? (
 					false // <InspireupliftItem Identifier={Identifier} storeData={storeData} />
 				) : path.endsWith('/tools/listings') || onMulti ? (
 					false //<InspireupliftItems Identifier={Identifier} storeData={storeData} setOnMulti={setOnMulti} />

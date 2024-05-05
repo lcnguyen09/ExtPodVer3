@@ -1,7 +1,6 @@
 console.log('Extension Ver30 loaded');
 try {
 	window.addEventListener('message', (event) => {
-		console.log(event?.data);
 		const storageKey = event?.data?.request?.key;
 		if (typeof storageKey !== 'undefined') {
 			switch (event?.data?.action) {
@@ -24,7 +23,9 @@ try {
 						[storageKey]: event?.data?.request?.value ? event?.data?.request?.value : '',
 					});
 					break;
-
+				case 'extLog':
+					console.log(event?.data?.request);
+					break;
 				default:
 					break;
 			}

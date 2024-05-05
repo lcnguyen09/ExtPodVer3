@@ -1,4 +1,4 @@
-export const APP_MODE = process.env.REACT_APP_APP_MODE ? 'production' : 'dev'
+export const APP_MODE = process.env.REACT_APP_APP_MODE// ? 'production' : 'dev'
 console.log(`%cAPP_MODE ===> %c${APP_MODE}`, 'color: cyan', 'color: red');
 
 export const URL_AUTH_PODORDER = APP_MODE === 'dev' ? "http://localhost:3201/api/v1/auth" : "https://api-account.podorders.store/api/v1/auth"
