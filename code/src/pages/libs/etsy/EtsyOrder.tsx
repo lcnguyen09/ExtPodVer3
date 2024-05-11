@@ -184,7 +184,10 @@ export default function ({ Identifier, storeData }: any) {
 				sortBy = 'order_date';
 				sortOrder = 'desc';
 			}
-			// ${s.get('ship_date') || 'all'}
+			if (sortBy === 'null') {
+				sortBy = 'order_date';
+				sortOrder = 'desc';
+			}
 			fetch(
 				`https://www.etsy.com/api/v3/ajax/bespoke/shop/${get(
 					storeData,
@@ -398,6 +401,9 @@ export default function ({ Identifier, storeData }: any) {
 				};
 			}),
 			tracking: null,
+			tracking_carrier: null,
+			order_date: get(thisOrder, 'order_date', ''),
+			is_canceled: get(thisOrder, 'is_canceled', '')
 		};
 
 		return new Promise((resolve, reject) => {
@@ -423,15 +429,18 @@ export default function ({ Identifier, storeData }: any) {
 					const shipment = find(shipments, (shipment) => {
 						return get(shipment, 'shipmentId') === ordersToShipment;
 					});
-					resolve(get(shipment, ['tracking', 'code']));
+					resolve(shipment);
 				})
 				.catch((e) => {
 					console.log('e: ', e);
 					setLoading(false);
 					reject([]);
 				});
-		}).then((tracking: any) => {
+		}).then((shipment: any) => {
+			const tracking = get(shipment, ['tracking', 'code'])
+			const carrier = get(shipment, ['carrier_name'])
 			dataRequest.tracking = tracking;
+			dataRequest.tracking_carrier = carrier;
 			return new Promise((resolve, reject) => {
 				const settings = {
 					method: 'POST',
@@ -713,7 +722,7 @@ export default function ({ Identifier, storeData }: any) {
 												<Button
 													size="sm"
 													color="success"
-													className=""
+													className="mx-1"
 													onClick={() => {
 														handleSaveOrder(order);
 													}}
@@ -724,7 +733,7 @@ export default function ({ Identifier, storeData }: any) {
 												<Button
 													size="sm"
 													color="warning"
-													className=""
+													className="mx-1"
 													onClick={() => {
 														handleMapOldOrder(order);
 													}}

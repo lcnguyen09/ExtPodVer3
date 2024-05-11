@@ -45,11 +45,18 @@ export default function ({ Identifier, storeData }: any) {
 	function pushMsg(msg: String, type: String = 'black') {
 		$('#ext-msg-box').prepend(`<p class="text-${type} d-flex align-items-center">${msg}</p>`);
 	}
-	function handleMapOrderData() {
+	function handleMapOrderData(only_this = false) {
 		pushMsg('Start scan all orders', 'info');
-		handleGetOrderByPage().then((orderTmp: any) => {
-			setOrders(orderTmp);
-		});
+		if (only_this) {
+			handleGetOrderData().then((orderTmp: any) => {
+				setOrders(orderTmp);
+			});
+		} else {
+			handleGetOrderByPage().then((orderTmp: any) => {
+				setOrders(orderTmp);
+			});
+		}
+		
 	}
 
 	async function handleStartCheckOrders() {
@@ -133,6 +140,9 @@ export default function ({ Identifier, storeData }: any) {
 				};
 			}),
 			tracking: null,
+			tracking_carrier: null,
+			order_date: get(thisOrder, 'order_date', ''),
+			is_canceled: get(thisOrder, 'is_canceled', '')
 		};
 
 		return new Promise((resolve, reject) => {
@@ -158,15 +168,18 @@ export default function ({ Identifier, storeData }: any) {
 					const shipment = find(shipments, (shipment) => {
 						return get(shipment, 'shipmentId') === ordersToShipment;
 					});
-					resolve(get(shipment, ['tracking', 'code']));
+					resolve(shipment);
+					// resolve(get(shipment, ['tracking', 'code']));
 				})
 				.catch((e) => {
 					console.log('e: ', e);
-					setLoading(false);
 					reject([]);
 				});
-		}).then((tracking: any) => {
+		}).then((shipment: any) => {
+			const tracking = get(shipment, ['tracking', 'code'])
+			const carrier = get(shipment, ['carrier_name'])
 			dataRequest.tracking = tracking;
+			dataRequest.tracking_carrier = carrier;
 			return new Promise((resolve, reject) => {
 				const settings = {
 					method: 'POST',
@@ -193,7 +206,6 @@ export default function ({ Identifier, storeData }: any) {
 	}
 
 	function handleGetOrderByPage() {
-		setLoading(true);
 		return new Promise((resolve, reject) => {
 			let ordersTmp: any = [];
 			const handleGetOrderByPageFn = (page = 1) => {
@@ -220,7 +232,6 @@ export default function ({ Identifier, storeData }: any) {
 						ordersTmp = [...ordersTmp, ...get(response, 'orders', [])];
 
 						if (total < offset + limit) {
-							setLoading(false);
 							return resolve(ordersTmp);
 						}
 
@@ -230,12 +241,148 @@ export default function ({ Identifier, storeData }: any) {
 					})
 					.catch((e) => {
 						console.log('e: ', e);
-						setLoading(false);
 						reject([]);
 					});
 			};
 
 			handleGetOrderByPageFn(1);
+		});
+	}
+
+	async function handleGetOrderData() {
+		let stateDatas = null;
+		try {
+			stateDatas = get(window, ['Etsy', 'Context', 'data', 'order_states'], []);
+		} catch (error) {}
+
+		let patch = '';
+		try {
+			patch = window.location.pathname.replace('/your/orders/', '');
+		} catch (error) {}
+
+		const statusData = find(stateDatas, (stateData) => {
+			if ($(".wt-tab__item.wt-tab__item--selected span[data-test-id='unsanitize']").text()) {
+				return (
+					get(stateData, 'name', '') ===
+					$(".wt-tab__item.wt-tab__item--selected span[data-test-id='unsanitize']").text()
+				);
+			}
+			if (patch === 'sold') {
+				return true;
+			}
+			return patch === toLower(get(stateData, 'name', ''));
+		});
+
+		let statusID = get(statusData, 'order_state_id', 'all');
+
+		let sortBy: string | null = null;
+		let sortOrder: string | null = null;
+
+		try {
+			const sortByData = get(
+				JSON.parse(get(window, ['localStorage', 'mission_control/orders_search_preferences'], '')),
+				get(statusData, 'state_type') === 'Completed'
+					? 'default_sort_option_completed'
+					: 'default_sort_option_open'
+			);
+			sortBy = get(sortByData, 'sort_by', 'expected_ship_dat');
+			sortOrder = get(sortByData, 'sort_order', 'asc');
+		} catch (error) {}
+
+		return new Promise((resolve, reject) => {
+
+			const s = new URLSearchParams(window.location.search);
+
+			if (s.get('sort_by')) {
+				sortBy = s.get('sort_by');
+			}
+			if (s.get('sort_order')) {
+				sortOrder = s.get('sort_order');
+			}
+
+			const limitElm = $("select[aria-label='Orders displayed']").first().val();
+			let limit = Array.isArray(limitElm) ? head(limitElm) : limitElm;
+			limit = String(limit ? limit : '20');
+			const page = parseInt(s.get('page') || '1');
+			const offset = (page - 1) * parseInt(limit);
+			let search = s.get('search') || '';
+			if (search) {
+				search = `&search=${search}`;
+			}
+			let status = s.get('type') || '';
+
+			switch (status) {
+				case 'unfulfilled':
+					status = `&status=0`;
+					break;
+				case 'fulfilled':
+					status = `&status=1`;
+					break;
+				case 'partially-refunded':
+					status = `&status=4`;
+					break;
+				case 'refunded':
+					status = `&status=3`;
+					break;
+				case 'hold':
+					status = `&status=9`;
+					break;
+				case 'dispute':
+					status = `&status=10`;
+					break;
+				case 'approved':
+					status = `&balance_status=approved`;
+					break;
+				case 'pending':
+					status = `&balance_status=pending`;
+					break;
+				default:
+					status = '';
+					break;
+			}
+
+			if (s.get('search_query')) {
+				statusID = 'all';
+				sortBy = 'order_date';
+				sortOrder = 'desc';
+			}
+			// ${s.get('ship_date') || 'all'}
+			fetch(
+				`https://www.etsy.com/api/v3/ajax/bespoke/shop/${get(
+					storeData,
+					'account_id',
+					''
+				)}/mission-control/orders?filters[buyer_id]=${s.get('buyer_id') || 'all'}&filters[channel]=${
+					s.get('channel') || 'all'
+				}&filters[completed_status]=${s.get('completed_status') || 'all'}&filters[destination]=${
+					s.get('destination') || 'all'
+				}&filters[ship_date]=${s.get('ship_date') || 'all'}&filters[shipping_label_eligibility]=${
+					s.get('shipping_label_eligibility') || 'false'
+				}&filters[shipping_label_status]=${s.get('shipping_label_status') || 'all'}&filters[has_buyer_notes]=${
+					s.get('has_buyer_notes') || 'false'
+				}&filters[is_marked_as_gift]=${s.get('is_marked_as_gift') || 'false'}&filters[is_personalized]=${
+					s.get('is_personalized') || 'false'
+				}&filters[has_shipping_upgrade]=${
+					s.get('has_shipping_upgrade') || 'false'
+				}&filters[order_state_id]=${statusID}&limit=${limit}&offset=${offset}&search_terms=${
+					s.get('search_query') || ''
+				}&sort_by=${sortBy}&sort_order=${sortOrder}&objects_enabled_for_normalization[order_state]=${
+					s.get('order_state') || 'true'
+				}`,
+				{
+					referrer: pathname.endsWith('/completed')
+						? 'https://www.etsy.com/your/orders/sold/completed?ref=seller-platform-mcnav'
+						: 'https://www.etsy.com/your/orders/sold?ref=seller-platform-mcnav',
+				}
+			)
+				.then((response) => response.json())
+				.then((response) => {
+					resolve(get(response, 'orders', []));
+				})
+				.catch((e) => {
+					console.log('e: ', e);
+					reject([]);
+				});
 		});
 	}
 
@@ -278,6 +425,19 @@ export default function ({ Identifier, storeData }: any) {
 					}}
 				>
 					<RefreshCw size={14} /> <span style={{ marginLeft: '3px' }}>Start remap old order(s)</span>
+				</Button>
+
+				<Button
+					size="xs"
+					color="danger"
+					className="py-1 d-flex justify-content-center align-items-center flex-column"
+					onClick={() => {
+						handleMapOrderData(true);
+						setSuccessMsg('');
+						setErrorMsg('');
+					}}
+				>
+					<RefreshCw size={14} /> <span style={{ marginLeft: '3px' }}>Start remap current page</span>
 				</Button>
 			</BottomBar>
 		</>

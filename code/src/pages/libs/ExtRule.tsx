@@ -75,7 +75,7 @@ export const ExtRule = {
 		{
 			block: '.ux-image-carousel-container .ux-image-carousel',
 			loop: 'img',
-			attr: ['data-src', 'src'],
+			attr: ['data-zoom-src', 'src'],
 		},
 		// Other
 		{
