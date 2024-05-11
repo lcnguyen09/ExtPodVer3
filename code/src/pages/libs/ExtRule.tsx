@@ -14,6 +14,7 @@ export const ExtRule = {
 		'h1.x-item-title__mainTitle span', //Ebay
 		'#alert h1',
 		'.t4s-product__title', //Shopify
+		'span[value="product.title"]', //ShopBase
 		'._2rn4tqXP', //Other
 	].join(', '),
 	images: [
@@ -74,6 +75,12 @@ export const ExtRule = {
 		// Ebay
 		{
 			block: '.ux-image-carousel-container .ux-image-carousel',
+			loop: 'img',
+			attr: ['data-src', 'src'],
+		},
+		// ShopBase
+		{
+			block: '.VueCarousel-inner',
 			loop: 'img',
 			attr: ['data-src', 'src'],
 		},
