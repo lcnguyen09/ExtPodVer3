@@ -6,7 +6,7 @@
 @import '~bootstrap/scss/root';
 
 :root {
-	--ext-width: 300px;
+	--ext-width: 350px;
 	--ext-height: 350px;
 }
 
@@ -345,7 +345,7 @@ html {
 		}
 
 		&.podorder-ext-app-max {
-			margin-right: var(--ext-width);
+			padding-right: var(--ext-width) !important;
 
 			#podorder-ext-app {
 				height: 100vh;
