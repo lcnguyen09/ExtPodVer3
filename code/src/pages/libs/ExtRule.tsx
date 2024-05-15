@@ -199,6 +199,17 @@ export const ExtRule = {
 			image: 'img.product--image.image',
 			image_attr: 'src',
 		},
+		{
+			
+			block: '.product-grid',
+			loop: '.grid__item',
+			url: '.card__heading  a.full-unstyled-link',
+			url_attr: 'href',
+			name: '.card__heading  a.full-unstyled-link',
+			name_attr: 'text',
+			image: '.card__media .media img',
+			image_attr: 'src',
+		},
 		// ShopBase
 		{
 			block: '.product-grid',
