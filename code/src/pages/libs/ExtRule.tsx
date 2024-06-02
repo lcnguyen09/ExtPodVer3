@@ -16,6 +16,7 @@ export const ExtRule = {
 		'.t4s-product__title', //Shopify
 		'span[value="product.title"]', //ShopBase
 		'._2rn4tqXP', //Other
+		'h1.p-n.mt15.mb0'
 	].join(', '),
 	images: [
 		// Printerval
@@ -88,6 +89,11 @@ export const ExtRule = {
 		{
 			block: '.ALsph7jA',
 			loop: 'img',
+			attr: ['data-src', 'src'],
+		},
+		{
+			block: '.s-view',
+			loop: 'img.lazyload',
 			attr: ['data-src', 'src'],
 		},
 	],
