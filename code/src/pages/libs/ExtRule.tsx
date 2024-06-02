@@ -14,6 +14,8 @@ export const ExtRule = {
 		'h1.x-item-title__mainTitle span', //Ebay
 		'#alert h1',
 		'.t4s-product__title', //Shopify
+		'.prod__title h1', //Shopify
+		'.main-product__block-title', //Shopify
 		'span[value="product.title"]', //ShopBase
 		'._2rn4tqXP', //Other
 		'h1.p-n.mt15.mb0'
@@ -73,6 +75,12 @@ export const ExtRule = {
 			loop: 'img',
 			attr: ['srcset', 'data-src', 'src'],
 		},
+		{
+			block: '.main-slider',
+			loop: 'img',
+			attr: ['srcset', 'data-src', 'src'],
+		},
+		
 		// Ebay
 		{
 			block: '.ux-image-carousel-container .ux-image-carousel',
@@ -238,5 +246,16 @@ export const ExtRule = {
 			image: '.t4s-product-img img',
 			image_attr: 'srcset',
 		},
+		{
+			block: '.sf__product-listing',
+			loop: '.sf__pcard',
+			url: 'a.sf__pcard-name',
+			url_attr: 'href',
+			name: 'a.sf__pcard-name',
+			name_attr: 'text',
+			image: 'img.f-img-loaded',
+			image_attr: 'srcset',
+		},
+		
 	],
 }
