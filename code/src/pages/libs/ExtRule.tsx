@@ -257,7 +257,7 @@ export const ExtRule = {
 			image_attr: 'srcset',
 		},
 		{
-			block: '.container',
+			block: '.min-h-500 .container',
 			loop: '.hover-main_border',
 			url: 'a',
 			url_attr: 'href',
