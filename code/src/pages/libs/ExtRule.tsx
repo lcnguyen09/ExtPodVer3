@@ -256,6 +256,15 @@ export const ExtRule = {
 			image: 'img.f-img-loaded',
 			image_attr: 'srcset',
 		},
-		
+		{
+			block: '.container',
+			loop: '.hover-main_border',
+			url: 'a',
+			url_attr: 'href',
+			name: 'h4',
+			name_attr: 'text',
+			image: 'img',
+			image_attr: 'srcset',
+		},
 	],
 }
