@@ -5,26 +5,22 @@ import { APP_MODE } from './contexts/contants';
 const inIframe = () => {
 	try {
 		return window.self !== window.top;
-	} catch (e) {
+	} catch {
 		return true;
 	}
 };
 
-const checkValid = () => {
-	return (
-		!window?.location?.pathname?.match(/\.js$/gim) &&
-		!window?.location?.pathname?.match(/\.css/gim) &&
-		!inIframe() &&
-		!window.location.host.includes('podorders.store') &&
-		!window.location.host.includes('salehunter.io') &&
-		!window.location.host.includes('localhost:3000') &&
-		!window.location.host.includes('localhost:3200')
+const checkValid = () =>
+	!/\.js$|\.css$/i.test(window?.location?.pathname) &&
+	!inIframe() &&
+	!['podorders.store', 'salehunter.io', 'localhost:3000', 'localhost:3200'].some((host) =>
+		window.location.host.includes(host)
 	);
-};
 
 try {
 	if (checkValid()) {
-		const rootElement = Object.assign(document.createElement('div'), { id: 'podorder-ext-app' });
+		const rootElement = document.createElement('div');
+		rootElement.id = 'podorder-ext-app';
 		if (APP_MODE === 'dev' || process.env.REACT_APP_APP_MODE === 'dev') {
 			rootElement.classList.add('dev-mode');
 		}

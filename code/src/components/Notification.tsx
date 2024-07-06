@@ -15,7 +15,7 @@ export default function Notification({
     return (
         <>
             {WarningMsg && typeof WarningMsg === 'string' ? (
-                <Alert color='warning' className='text-center mt-1 p-2'>
+                <Alert color='warning' className='text-center mt-1 p-2 mb-2'>
                     <i>{WarningMsg}.</i>
                 </Alert>
             ) : (
@@ -23,14 +23,14 @@ export default function Notification({
             )}
             {WarningMsg && Array.isArray(WarningMsg)
                 ? map(WarningMsg, (msg, index) => {
-                    return <Alert key={`warning-${index}`} color='warning' className='text-center mt-1 p-2'>
+                    return <Alert key={`warning-${index}`} color='warning' className='text-center mt-1 p-2 mb-2'>
                         <i>{msg}.</i>
                     </Alert>;
                 })
                 : false}
 
             {ErrorMsg && typeof ErrorMsg === 'string' ? (
-                <Alert color='danger' className='text-center mt-1 p-2'>
+                <Alert color='danger' className='text-center mt-1 p-2 mb-2'>
                     <strong>*Error:</strong> <i>{ErrorMsg}.</i>
                 </Alert>
             ) : (
@@ -38,7 +38,7 @@ export default function Notification({
             )}
             {ErrorMsg && Array.isArray(ErrorMsg)
                 ? map(ErrorMsg, (msg, index) => {
-                    return <Alert key={`danger-${index}`} color='danger' className='text-center mt-1 p-2'>
+                    return <Alert key={`danger-${index}`} color='danger' className='text-center mt-1 p-2 mb-2'>
                         <strong>*Error:</strong> <i>{msg}.</i>
                     </Alert>;
                 })
@@ -46,7 +46,7 @@ export default function Notification({
 
 
             {SuccessMsg && typeof SuccessMsg === 'string' ? (
-                <Alert color='success' className='text-center mt-1 p-2'>
+                <Alert color='success' className='text-center mt-1 p-2 mb-2'>
                     <i>{SuccessMsg}.</i>
                 </Alert>
             ) : (
@@ -54,7 +54,7 @@ export default function Notification({
             )}
             {SuccessMsg && Array.isArray(SuccessMsg)
                 ? map(SuccessMsg, (msg, index) => {
-                    return <Alert key={`success-${index}`} color='success' className='text-center mt-1 p-2'>
+                    return <Alert key={`success-${index}`} color='success' className='text-center mt-1 p-2 mb-2'>
                         <i>{msg}.</i>
                     </Alert>;
                 })

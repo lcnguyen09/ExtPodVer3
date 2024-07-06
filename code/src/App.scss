@@ -104,6 +104,26 @@ html {
 			//     }
 			// }
 
+
+			.spinner-border-sm {
+				width: 15px !important;
+				height: 15px !important;
+			}
+
+			h6 {
+				font-size: 13px !important;
+			}
+
+			input {
+				font-size: 13px !important;
+			}
+			button {
+				font-size: 13px !important;
+			}
+			.input-group-text {
+				padding: 5px 10px;
+			}
+
 			#podorder-ext-app-main {
 				min-width: var(--ext-width) !important;
 				border-bottom-left-radius: 0px;
@@ -254,11 +274,11 @@ html {
 
 						.footer-action {
 							button {
-								font-size: 12px;
+								font-size: 12px !important;
 							}
 						}
 
-						.overlay-div {
+						.overlay-div {	
 							z-index: 2147483645;
 						}
 					}

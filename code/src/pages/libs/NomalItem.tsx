@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { Button, Col, Input, Label, Row, Table } from 'reactstrap';
 import { ArrowRight, Save } from 'react-feather';
 import UiContext from './../../contexts/ui.context';
@@ -31,8 +31,18 @@ var getLocation = function (href: any) {
 	return l;
 };
 
+const convertToJpeg = function (img: any) {
+	var canvas = document.createElement('canvas');
+	var context = canvas.getContext('2d') as any;
+
+	canvas.width = img.width;
+	canvas.height = img.height;
+	context.drawImage(img, 0, 0);
+	return canvas.toDataURL('image/jpeg');
+};
+
 export default function NomalItem() {
-	const { appMode, setAppHide, movingOnElm, autoPage } = UiContext.UseUIContext();
+	const { appMode, setAppHide, movingOnElm, autoPage, setAppLoading } = UiContext.UseUIContext();
 
 	// const [infoQuery] = useInfoLazyQuery({ fetchPolicy: 'network-only' });
 
@@ -42,48 +52,17 @@ export default function NomalItem() {
 	const [HasCheck, setHasCheck] = useState<boolean>(false);
 
 	// const [ExtensionRule, setExtensionRule] = useState<any>(ExtRule);
-	const [__NEXT_DATA__, setNextData] = useState<any>({});
 	// Printbase/Shopbase
-	const [__INITIAL_STATE__, setInitialState] = useState<any>({});
 
 	const [item, setItem] = useState<any>({});
 	const [items, setItems] = useState<Array<any>>([]);
 
-	// const [ItemTitle, setItemTitle] = useState('');
-	// const [ItemImages, setItemImages] = useState<Array<string>>([]);
 	const [ItemImagesSelected, setItemImagesSelected] = useState<Array<string>>([]);
 	useEffect(() => {
-		console.log('OKOKOK');
-		// getRule();
 		setLoading(false);
-		try {
-			const nextData = $('body').attr('tmp___NEXT_DATA__');
-			if (nextData) setNextData(JSON.parse(nextData));
-		} catch (error) {}
-		try {
-			const initialStateTag = $('#__INITIAL_STATE__')[0].textContent;
-			if (initialStateTag) setInitialState(JSON.parse(initialStateTag));
-		} catch (error) {}
 		getItemInfo();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
-
-	// function getRule() {
-	// 	setGraphqlForAccount()
-	// 		.then(() => infoQuery({ fetchPolicy: 'network-only' }))
-	// 		.then((response: any) => {
-	// 			setExtensionRule(response?.data?.info?.extension_rule);
-	// 			setLoading(false);
-	// 			console.log(response?.data?.info?.extension_rule);
-	// 		});
-	// }
-
-	useEffect(() => {
-		if (__INITIAL_STATE__?.product?.product?.title || __NEXT_DATA__?.props?.pageProps?.product?.title) {
-			getItemInfo();
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [__INITIAL_STATE__, __NEXT_DATA__]);
 
 	useEffect(() => {
 		if (HasCheck) {
@@ -91,31 +70,45 @@ export default function NomalItem() {
 				setAppHide(true);
 			}
 		}
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [HasCheck, appMode, item?.name, items.length]);
 
-	// useEffect(() => {
-	// 	setItemTitle(getItemName());
-	// // eslint-disable-next-line react-hooks/exhaustive-deps
-	// }, [__INITIAL_STATE__.product.product.title, __NEXT_DATA__.props.pageProps.product.title]);
-
-	// useEffect(() => {
-	// 	setItemImages(getItemImages());
-	// // eslint-disable-next-line react-hooks/exhaustive-deps
-	// }, [__INITIAL_STATE__.product.product.images, __NEXT_DATA__.props.pageProps.product.gallery]);
-
 	function getItemInfo(htmlDOM: any = null) {
-		console.log('Start getItemInfo');
 		const item = {
 			id: getOriginID(htmlDOM),
 			name: getItemName(htmlDOM),
 			origin_name: getItemName(htmlDOM),
 			images: getItemImages(htmlDOM),
 		};
+
+		item.images = map(item.images, (imgSrc: any) => {
+			console.log('imgSrc: ', imgSrc);
+			if (window.location.host === 'www.temu.com' || window.location.host === 'temu.com') {
+				imgSrc = head(imgSrc.split('?imageView'));
+			}
+			// var imageRaw = new Image();
+			// imageRaw.src = imgSrc;
+			// var imageConverted = new Image();
+
+			// var canvas = document.createElement('canvas');
+			// var context = canvas.getContext('2d') as any;
+
+			// canvas.width = imageRaw.width;
+			// canvas.height = imageRaw.height;
+			// context.drawImage(imageRaw, 0, 0);
+			// console.log(canvas.toDataURL('image/jpeg'));
+			// imageConverted.src = canvas.toDataURL('image/jpeg');
+			// document.body.appendChild(imageConverted);
+
+			return imgSrc;
+		});
+
+		console.log(item);
+
 		if (htmlDOM) {
 			return item;
 		}
-		if (item?.name && item?.images?.length) {
+		if (item?.name) {
 			setItem(item);
 			setHasCheck(true);
 		} else {
@@ -124,7 +117,6 @@ export default function NomalItem() {
 	}
 
 	function getItemsInfo(htmlDOM: any = null) {
-		console.log('Start getItem(s)Info');
 		if (!htmlDOM) htmlDOM = $('html');
 		const getItemsFromSite = (configRules: any, index: number = 0): any => {
 			const configRule = get(configRules, index, null);
@@ -132,61 +124,63 @@ export default function NomalItem() {
 				return [];
 			}
 			const items: Array<any> = [];
-			console.log(htmlDOM.find(get(configRule, 'block', '')).first());
 			$.each(
 				htmlDOM.find(get(configRule, 'block', '')).first().find(get(configRule, 'loop', '')),
 				(index: number, element: any) => {
-					console.log('element: ', element);
-					const name = trim($(element).find(get(configRule, 'name', '')).first().text());
-					let itemUrl = $(element)
-						.find(get(configRule, 'url', ''))
-						.first()
-						.attr(get(configRule, 'url_attr', 'href')) as any;
-					if (itemUrl && itemUrl.startsWith('/')) {
-						itemUrl = window.location.origin + itemUrl;
-					}
-					let imageUrl = $(element)
-						.find(get(configRule, 'image', ''))
-						.first()
-						.attr(get(configRule, 'image_attr', 'src')) as any;
-					if (imageUrl && imageUrl.startsWith('//')) {
-						imageUrl = window.location.protocol + imageUrl;
-						imageUrl = head(imageUrl.split(' ')) || '';
-					} else if (imageUrl && imageUrl.startsWith('/')) {
-						imageUrl = window.location.origin + imageUrl;
-						imageUrl = head(imageUrl.split(' ')) || '';
-					}
-					if (itemUrl) {
-						items.push({
-							name: name,
-							itemUrl: itemUrl,
-							imageUrl: imageUrl,
-						});
+					try {
+						let name = '';
+						if (get(configRule, 'name_attr', '') === 'text_only') {
+							name = $(element)
+								.find(get(configRule, 'name', ''))
+								.first()
+								.clone()
+								.children()
+								.remove()
+								.end()
+								.text();
+						} else {
+							name = $(element).find(get(configRule, 'name', '')).first().text();
+						}
+						name = trim(name);
+
+						let itemUrl = $(element)
+							.find(get(configRule, 'url', ''))
+							.first()
+							.attr(get(configRule, 'url_attr', 'href')) as any;
+						if (itemUrl && itemUrl.startsWith('/')) {
+							itemUrl = window.location.origin + itemUrl;
+						}
+						let imageUrl = $(element)
+							.find(get(configRule, 'image', ''))
+							.first()
+							.attr(get(configRule, 'image_attr', 'src')) as any;
+						if (imageUrl && imageUrl.startsWith('//')) {
+							imageUrl = window.location.protocol + imageUrl;
+							imageUrl = head(imageUrl.split(' ')) || '';
+						} else if (imageUrl && imageUrl.startsWith('/')) {
+							imageUrl = window.location.origin + imageUrl;
+							imageUrl = head(imageUrl.split(' ')) || '';
+						}
+						if (imageUrl) {
+							imageUrl = imageUrl.replace('&width=30', '&width=300');
+						}
+						if (itemUrl) {
+							items.push({
+								name: name,
+								itemUrl: itemUrl,
+								imageUrl: imageUrl,
+							});
+						}
+					} catch (error) {
+						console.log('error: ', error);
 					}
 				}
 			);
 			if (!items.length) {
 				return getItemsFromSite(configRules, index + 1);
 			}
-			console.log(`%c=======>>> Get Items, Use configRules ==> ${index}`, 'background: #222; color: #bada55');
 			return items;
 		};
-		try {
-			// Shopbase/Printbase
-			const items = __INITIAL_STATE__.product.products.collection.items.map((item: any) => {
-				return {
-					name: item.title,
-					itemUrl: window.location.origin + '/products/' + item.handle,
-					imageUrl: head(map(item.images, (image) => image.src)),
-					images: map(item.images, (image) => image.src),
-					id: item.id,
-					done: true,
-				};
-			});
-			setItems(items);
-			setHasCheck(true);
-			return;
-		} catch (error) {}
 		const items = getItemsFromSite(get(ExtensionRule, 'items', []));
 		setItems(
 			map(items, (item) => {
@@ -215,52 +209,31 @@ export default function NomalItem() {
 		if (!useVar) {
 			return getIdFromSite(get(ExtensionRule, 'id', []));
 		}
-		return __INITIAL_STATE__?.product?.product?.id
-			? __INITIAL_STATE__?.product?.product?.id
-			: getIdFromSite(get(ExtensionRule, 'id', []));
+		return getIdFromSite(get(ExtensionRule, 'id', []));
 	}
 
 	function getItemName(htmlDOM: any = null) {
 		const useVar = htmlDOM ? false : true;
 		if (!htmlDOM) htmlDOM = $('html');
-		// let __INITIAL_STATE__ = null;
-		// let __NEXT_DATA__ = null;
-		// try {
-		// 	const nextData = $('body').attr('tmp___NEXT_DATA__');
-		// 	if (nextData) __NEXT_DATA__ = JSON.parse(nextData);
-		// } catch (error) {}
-		// try {
-		// 	const initialStateTag = $('#__INITIAL_STATE__')[0].textContent;
-		// 	if (initialStateTag) __INITIAL_STATE__ = JSON.parse(initialStateTag);
-		// } catch (error) {}
 		if (!useVar) {
 			return trim(htmlDOM.find(get(ExtensionRule, 'name', '')).first().text());
 		}
-		console.log(htmlDOM.find(get(ExtensionRule, 'name', '')).first());
-		return __INITIAL_STATE__?.product?.product?.title
-			? __INITIAL_STATE__?.product?.product?.title
-			: __NEXT_DATA__?.props?.pageProps?.product?.title
-			? __NEXT_DATA__?.props?.pageProps?.product?.title
-			: trim(htmlDOM.find(get(ExtensionRule, 'name', '')).first().text());
+		return trim(htmlDOM.find(get(ExtensionRule, 'name', '')).first().text());
 	}
 
 	function getItemImages(htmlDOM: any = null) {
-		console.log('Start getItemImages');
 		const useVar = htmlDOM ? false : true;
 		if (!htmlDOM) htmlDOM = $('html');
 		const getImageFromSite = (configRules: any, index: number = 0): any => {
-			console.log('Start getImageFromSite');
 			const configRule = get(configRules, index, null);
 			if (!configRule) {
 				return [];
 			}
-			console.log(htmlDOM.find(get(configRule, 'block', '')).first());
-			console.log(htmlDOM.find(get(configRule, 'block', '')).first().find(get(configRule, 'loop', '')));
 			const images: Array<any> = [];
+			console.log(htmlDOM.find(get(configRule, 'block', '')).first().find(get(configRule, 'loop', '')));
 			$.each(
 				htmlDOM.find(get(configRule, 'block', '')).first().find(get(configRule, 'loop', '')),
 				(idx: number, element: any) => {
-					console.log('element: ', element);
 					const attrIndex = findIndex(get(configRule, 'attr', []), (attr: any) => {
 						return $(element).attr(attr);
 					});
@@ -271,12 +244,10 @@ export default function NomalItem() {
 						params.delete('width');
 						l.search = params.toString();
 						imgAttrTmp = l.toString();
-						console.log('imgAttrTmp: ', imgAttrTmp);
 					} catch (error) {
 						console.log('error: ', error);
 					}
 					let imgUrl = find(split(imgAttrTmp, ' '), (src) => src) as any;
-					console.log('imgUrl: ', imgUrl);
 					try {
 						if (imgUrl && imgUrl.match(/{width}x/gim)) {
 							let size = '180';
@@ -293,39 +264,26 @@ export default function NomalItem() {
 			if (!images.length) {
 				return getImageFromSite(configRules, index + 1);
 			}
-			console.log(`%c=======>>> Get Images, Use configRules ==> ${index}`, 'background: #222; color: #bada55');
 			return images;
 		};
 		if (!useVar) {
 			return filter(union(getImageFromSite(get(ExtensionRule, 'images', []), 0)), (imgSrc) => imgSrc);
 		}
-		return __INITIAL_STATE__?.product?.product?.images
-			? filter(
-					map(__INITIAL_STATE__?.product?.product?.images, (image) => image?.src),
-					(imgSrc) => imgSrc
-			  )
-			: __NEXT_DATA__?.props?.pageProps?.product?.gallery
-			? filter(
-					map(__NEXT_DATA__?.props?.pageProps?.product?.gallery, (image) => image?.src),
-					(imgSrc) => imgSrc
-			  )
-			: filter(union(getImageFromSite(get(ExtensionRule, 'images', []), 0)), (imgSrc) => imgSrc);
+		return filter(union(getImageFromSite(get(ExtensionRule, 'images', []), 0)), (imgSrc) => imgSrc);
 	}
 
 	return (
 		<>
 			<Notification ErrorMsg={ErrorMsg} SuccessMsg={SuccessMsg} Loading={Loading} />
-			<h3 className="text-center">Item crawl</h3>
+			<h3 className="text-center mb-2">Item crawl</h3>
 
 			{item?.name ? (
 				<div className="mt-2">
-					{item?.id ? (
+					{item?.id && (
 						<div className="d-flex">
 							<strong>#ID:</strong>
-							<span className="mx-2">{item?.id}</span>
+							<span className="mx-2">{item.id}</span>
 						</div>
-					) : (
-						false
 					)}
 					<Row>
 						<Col sm={12}>
@@ -337,7 +295,7 @@ export default function NomalItem() {
 								value={item?.name}
 								onChange={(e) => setItem({ ...item, name: e.target.value })}
 							></Input>
-							<p style={{ fontSize: 10 }}>
+							<p style={{ fontSize: 10 }} className="mb-1">
 								<strong>Origin name:</strong> {item?.origin_name}
 							</p>
 						</Col>
@@ -561,7 +519,6 @@ function NomalItemSave({
 			});
 			setItems(Items);
 			// let itemDone = [];
-			console.log(Items);
 			while (find(Items, (item) => !item.done && item.checked && item.itemUrl)) {
 				let item = find(Items, (item) => !item.done && item.checked && item.itemUrl);
 				if (item?.itemUrl) {
@@ -596,10 +553,6 @@ function NomalItemSave({
 								set(Items, [index, 'done'], true);
 								set(Items, [index, 'status'], 'Exist');
 								setItems(Items);
-								console.log(
-									`%c=======>>> ${get(item, 'name', '')} ==> ${get(response, 'data', '')}`,
-									'background: #222; color: #c73c3c'
-								);
 								if (item?.itemUrl) {
 									if ($(`a[href="${item?.itemUrl}"]`)) {
 										// movingOnElm(`a[href="${item?.itemUrl}"]`);
@@ -617,7 +570,6 @@ function NomalItemSave({
 							}
 						})
 						.fail((error) => {
-							console.log('error: ', error);
 							resolve('next');
 						});
 					// eslint-disable-next-line no-loop-func
@@ -639,11 +591,9 @@ function NomalItemSave({
 									});
 								})
 								.fail((error) => {
-									console.log('error: ', error);
 									resolve(item);
 								});
 						}).then(async (itemInfo: any) => {
-							console.log('itemInfo: ', itemInfo);
 							if (!itemInfo) {
 								return Promise.resolve('99');
 							}
@@ -678,14 +628,6 @@ function NomalItemSave({
 										set(Items, [index, 'done'], true);
 										if (get(response, 'data', '').includes('OK, New Identity is')) {
 											set(Items, [index, 'status'], 'Done');
-											console.log(
-												`%c=======>>> ${get(itemInfo, 'name', '')} ==> ${get(
-													response,
-													'data',
-													''
-												)}`,
-												'background: #222; color: #bada55'
-											);
 											resolve('0');
 										} else if (get(response, 'data', '') === 'Item not found!') {
 											setErrorMsg('Template item ID not setup!');
@@ -696,14 +638,6 @@ function NomalItemSave({
 											resolve('1');
 										} else if (get(response, 'data', '') === 'Item has exist!') {
 											set(Items, [index, 'status'], 'Exist');
-											console.log(
-												`%c=======>>> ${get(itemInfo, 'name', '')} ==> ${get(
-													response,
-													'data',
-													''
-												)}`,
-												'background: #222; color: #c73c3c'
-											);
 											resolve('2');
 										}
 										setItems(Items);

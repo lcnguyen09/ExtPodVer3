@@ -18,7 +18,11 @@ export const ExtRule = {
 		'.main-product__block-title', //Shopify
 		'span[value="product.title"]', //ShopBase
 		'._2rn4tqXP', //Other
-		'h1.p-n.mt15.mb0'
+		'h1.p-n.mt15.mb0',
+		'.product-briefing h1',
+		'.prodDesc h1',
+		'h1.product-info__header_title',
+		'._2rn4tqXP',
 	].join(', '),
 	images: [
 		// Printerval
@@ -80,7 +84,7 @@ export const ExtRule = {
 			loop: 'img',
 			attr: ['srcset', 'data-src', 'src'],
 		},
-		
+
 		// Ebay
 		{
 			block: '.ux-image-carousel-container .ux-image-carousel',
@@ -103,6 +107,21 @@ export const ExtRule = {
 			block: '.s-view',
 			loop: 'img.lazyload',
 			attr: ['data-src', 'src'],
+		},
+		{
+			block: '#prodContImgFeat',
+			loop: 'img',
+			attr: ['src', 'data-src'],
+		},
+		{
+			block: '.product-main-images .spz-carousel-slide',
+			loop: 'img',
+			attr: ['src', 'data-src'],
+		},
+		{
+			block: '.ALsph7jA',
+			loop: 'img',
+			attr: ['src', 'data-src'],
 		},
 	],
 	id: [
@@ -214,7 +233,6 @@ export const ExtRule = {
 			image_attr: 'src',
 		},
 		{
-			
 			block: '.product-grid',
 			loop: '.grid__item',
 			url: '.card__heading  a.full-unstyled-link',
@@ -264,7 +282,27 @@ export const ExtRule = {
 			name: 'h4',
 			name_attr: 'text',
 			image: 'img',
-			image_attr: 'srcset',
+			image_attr: 'src',
+		},
+		{
+			block: '.prodList',
+			loop: '.prodDefault',
+			url: 'a',
+			url_attr: 'href',
+			name: '.prodTitle a',
+			name_attr: 'text_only',
+			image: 'img',
+			image_attr: 'src',
+		},
+		{
+			block: '.collection-list',
+			loop: '.shoplazza-product-snippet',
+			url: 'a.product-snippet__title-link',
+			url_attr: 'href',
+			name: 'a.product-snippet__title-link',
+			name_attr: 'text',
+			image: '.product-snippet__img img',
+			image_attr: 'src',
 		},
 	],
-}
+};
