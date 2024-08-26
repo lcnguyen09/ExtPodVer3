@@ -700,6 +700,7 @@ function NomalItemSave({
 					name: ItemTitle,
 					images: ItemImages,
 					origin_id: ForceCreateNew ? '' : ItemId || '',
+					url: window.location.href,
 				},
 				method: 'GET',
 				timeout: 0,
