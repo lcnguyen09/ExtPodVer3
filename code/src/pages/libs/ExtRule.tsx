@@ -23,7 +23,8 @@ export const ExtRule = {
 		'.prodDesc h1',
 		'h1.product-info__header_title',
 		'._2rn4tqXP',//https://www.temu.com/
-		'.product-briefing .WBVL_7 span'//https://shopee.vn/
+		'.product-briefing .WBVL_7 span',//https://shopee.vn/
+		'#productTitle'//amazon
 	].join(', '),
 	images: [
 		// Printerval
@@ -129,6 +130,11 @@ export const ExtRule = {
 			loop: 'picture img',
 			attr: ['src', 'data-src'],
 		},//https://shopee.vn/
+		{
+			block: '.a-unordered-list.a-nostyle.a-horizontal.list.maintain-height',
+			loop: 'img',
+			attr: ['src', 'data-src'],
+		},//amazon
 		
 	],
 	id: [
