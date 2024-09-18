@@ -24,7 +24,8 @@ export const ExtRule = {
 		'h1.product-info__header_title',
 		'._2rn4tqXP',//https://www.temu.com/
 		'.product-briefing .WBVL_7 span',//https://shopee.vn/
-		'#productTitle'//amazon
+		'#productTitle',//amazon
+		'*[class^="index-title-"]',//tiktok
 	].join(', '),
 	images: [
 		// Printerval
@@ -135,7 +136,11 @@ export const ExtRule = {
 			loop: 'img',
 			attr: ['src', 'data-src'],
 		},//amazon
-		
+		{
+			block: '.slick-slider',
+			loop: 'img',
+			attr: ['data-src']
+		}
 	],
 	id: [
 		//Printerval
