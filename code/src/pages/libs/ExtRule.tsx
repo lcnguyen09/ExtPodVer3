@@ -26,6 +26,7 @@ export const ExtRule = {
 		'.product-briefing .WBVL_7 span',//https://shopee.vn/
 		'#productTitle',//amazon
 		'*[class^="index-title-"]',//tiktok
+		'.productView-title span',
 	].join(', '),
 	images: [
 		// Printerval
@@ -140,6 +141,11 @@ export const ExtRule = {
 			block: '.slick-slider',
 			loop: 'img',
 			attr: ['data-src']
+		},
+		{
+			block: 'productView-thumbnail-wrapper',
+			loop: 'img',
+			attr: 'src'
 		}
 	],
 	id: [
@@ -322,5 +328,16 @@ export const ExtRule = {
 			image: '.product-snippet__img img',
 			image_attr: 'src',
 		},
+		{
+			block: 'ul.productListing',
+			loop: 'li.product',
+			url: 'a.card-link',
+			url_attr: 'href',
+			name: 'a.card-title span',
+			name_attr: 'text',
+			image: '.card-media img',
+			image_attr: 'srcset',
+			
+		}
 	],
 };
