@@ -230,10 +230,11 @@ export default function NomalItem() {
 				return [];
 			}
 			const images: Array<any> = [];
-			console.log(htmlDOM.find(get(configRule, 'block', '')).first().find(get(configRule, 'loop', '')));
+			console.log('getItemImages block', htmlDOM.find(get(configRule, 'block', '')).first().find(get(configRule, 'loop', '')));
 			$.each(
 				htmlDOM.find(get(configRule, 'block', '')).first().find(get(configRule, 'loop', '')),
 				(idx: number, element: any) => {
+					console.log('element: ', element);
 					const attrIndex = findIndex(get(configRule, 'attr', []), (attr: any) => {
 						return $(element).attr(attr);
 					});

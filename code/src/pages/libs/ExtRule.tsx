@@ -27,6 +27,7 @@ export const ExtRule = {
 		'#productTitle',//amazon
 		'*[class^="index-title-"]',//tiktok
 		'.productView-title span',
+		'h1.product-info-title'
 	].join(', '),
 	images: [
 		// Printerval
@@ -145,7 +146,12 @@ export const ExtRule = {
 		{
 			block: 'productView-thumbnail-wrapper',
 			loop: 'img',
-			attr: 'src'
+			attr: ['src']
+		},
+		{
+			block: '.product-images-container',
+			loop: 'img',
+			attr: ['src']
 		}
 	],
 	id: [
@@ -337,7 +343,17 @@ export const ExtRule = {
 			name_attr: 'text',
 			image: '.card-media img',
 			image_attr: 'srcset',
-			
-		}
+		},
+		{
+			block: 'spz-list.collection-list',
+			loop: '.shoplazza-product-snippet',
+			url: '.product-snippet__title a',
+			url_attr: 'href',
+			name: '.product-snippet__title a',
+			name_attr: 'text',
+			image: 'spz-img img',
+			image_attr: 'src',
+		},
+		
 	],
 };
