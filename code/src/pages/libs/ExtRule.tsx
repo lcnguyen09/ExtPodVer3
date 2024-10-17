@@ -144,9 +144,9 @@ export const ExtRule = {
 			attr: ['data-src']
 		},
 		{
-			block: 'productView-thumbnail-wrapper',
+			block: '.productView-image-wrapper',
 			loop: 'img',
-			attr: ['src']
+			attr: ['srcset', 'src']
 		},
 		{
 			block: '.product-images-container',
