@@ -2,4 +2,5 @@ fragment ProductPreset on ProductPreset {
     _id
     id
     name
+    image
 }

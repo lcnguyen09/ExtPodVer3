@@ -24,6 +24,14 @@ import {
 	trim,
 	union,
 } from 'lodash';
+import { useProductPresetLazyQuery } from './../../graphql/graphql';
+import Select, { StylesConfig } from 'react-select';
+
+const colourStyles: StylesConfig = {
+	control: (styles) => ({ ...styles, backgroundColor: 'white' }),
+	menu: (styles) => ({ ...styles, maxHeight: '150px', overflow: 'hidden', padding: '0 6px' }),
+	option: (styles) => ({ ...styles, maxHeight: '150px' }),
+};
 
 var getLocation = function (href: any) {
 	var l = document.createElement('a');
@@ -42,7 +50,17 @@ const convertToJpeg = function (img: any) {
 };
 
 export default function NomalItem() {
-	const { appMode, setAppHide, movingOnElm, autoPage, setAppLoading } = UiContext.UseUIContext();
+	const {
+		appMode,
+		setAppHide,
+		movingOnElm,
+		autoPage,
+		currentDocker,
+		setAppLoading,
+		setGraphqlForHub,
+		productPresetId,
+		setProductPresetId,
+	} = UiContext.UseUIContext();
 
 	// const [infoQuery] = useInfoLazyQuery({ fetchPolicy: 'network-only' });
 
@@ -51,6 +69,9 @@ export default function NomalItem() {
 	const [SuccessMsg, setSuccessMsg] = useState('');
 	const [HasCheck, setHasCheck] = useState<boolean>(false);
 
+	const [productPresets, setProductPresets] = useState<any>({});
+	const [productPreset, setProductPreset] = useState<any>(null);
+
 	// const [ExtensionRule, setExtensionRule] = useState<any>(ExtRule);
 	// Printbase/Shopbase
 
@@ -58,6 +79,8 @@ export default function NomalItem() {
 	const [items, setItems] = useState<Array<any>>([]);
 
 	const [ItemImagesSelected, setItemImagesSelected] = useState<Array<string>>([]);
+
+	const [fetchProductPresetQuery] = useProductPresetLazyQuery({ fetchPolicy: 'network-only' });
 	useEffect(() => {
 		setLoading(false);
 		getItemInfo();
@@ -72,6 +95,26 @@ export default function NomalItem() {
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [HasCheck, appMode, item?.name, items.length]);
+
+	useEffect(() => {
+		if (currentDocker?.domain && (item?.name || items.length)) {
+			fetchProductPreset();
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [currentDocker, item?.name, items.length]);
+
+	function fetchProductPreset() {
+		setLoading(true);
+		setGraphqlForHub()
+			.then(() => fetchProductPresetQuery({ fetchPolicy: 'network-only' }))
+			.then((res: any) => {
+				setProductPresets(res.data?.productPreset);
+				setLoading(false);
+				if (find(res.data?.productPreset, (preset) => preset?._id === productPresetId)) {
+					setProductPreset(find(res.data?.productPreset, (preset) => preset?._id === productPresetId));
+				}
+			});
+	}
 
 	function getItemInfo(htmlDOM: any = null) {
 		const item = {
@@ -230,7 +273,10 @@ export default function NomalItem() {
 				return [];
 			}
 			const images: Array<any> = [];
-			console.log('getItemImages block', htmlDOM.find(get(configRule, 'block', '')).first().find(get(configRule, 'loop', '')));
+			console.log(
+				'getItemImages block',
+				htmlDOM.find(get(configRule, 'block', '')).first().find(get(configRule, 'loop', ''))
+			);
 			$.each(
 				htmlDOM.find(get(configRule, 'block', '')).first().find(get(configRule, 'loop', '')),
 				(idx: number, element: any) => {
@@ -277,16 +323,16 @@ export default function NomalItem() {
 		<>
 			<Notification ErrorMsg={ErrorMsg} SuccessMsg={SuccessMsg} Loading={Loading} />
 			<h3 className="text-center mb-2">Item crawl</h3>
-
+			<hr />
 			{item?.name ? (
 				<div className="mt-2">
-					{item?.id && (
-						<div className="d-flex">
-							<strong>#ID:</strong>
-							<span className="mx-2">{item.id}</span>
-						</div>
-					)}
 					<Row>
+						{item?.id && (
+							<Col sm={12} className="d-flex">
+								<strong>#ID:</strong>
+								<span className="mx-2">{item.id}</span>
+							</Col>
+						)}
 						<Col sm={12}>
 							<strong>Name:</strong>
 						</Col>
@@ -299,6 +345,51 @@ export default function NomalItem() {
 							<p style={{ fontSize: 10 }} className="mb-1">
 								<strong>Origin name:</strong> {item?.origin_name}
 							</p>
+						</Col>
+						<Col sm={12}>
+							<strong>Product type:</strong>
+						</Col>
+						<Col sm={12}>
+							<Select
+								className="basic-single w-100"
+								classNamePrefix="ext-select"
+								placeholder="Select your hub"
+								isClearable={true}
+								isLoading={productPresets === null || productPresets === undefined}
+								isSearchable={true}
+								name="color"
+								options={map(productPresets, (preset) => {
+									return {
+										id: get(preset, '_id', ''),
+										value: get(preset, '_id', ''),
+										label: (
+											<div className="d-flex flex-column">
+												<strong>{get(preset, 'name', '')}</strong>
+											</div>
+										),
+									};
+								})}
+								styles={colourStyles}
+								onChange={(data) => {
+									const productPreset = find(
+										productPresets,
+										(preset) => preset?._id === get(data, 'id', '')
+									);
+									setProductPreset(productPreset);
+									setProductPresetId(productPreset?._id);
+								}}
+								value={{
+									id: productPreset?._id,
+									value: productPreset?._id,
+									label: productPreset?._id ? (
+										<div className="d-flex flex-column">
+											<strong>{get(productPreset, 'name', '')}</strong>
+										</div>
+									) : (
+										<></>
+									),
+								}}
+							/>
 						</Col>
 					</Row>
 					<Row>
@@ -495,7 +586,7 @@ function NomalItemSave({
 	setErrorMsg: Dispatch<SetStateAction<string>>;
 	setItems: Dispatch<SetStateAction<Array<any>>>;
 }) {
-	const { currentUser, currentToken, templateId, urlRestApi, autoPage } = UiContext.UseUIContext();
+	const { currentUser, currentToken, templateId, productPresetId, urlRestApi, autoPage } = UiContext.UseUIContext();
 	const [ForceCreateNew, setForceCreateNew] = useState<boolean>(false);
 
 	useEffect(() => {
@@ -510,8 +601,8 @@ function NomalItemSave({
 	};
 
 	const handleSave = async () => {
-		if (!templateId) {
-			return setErrorMsg('Template item ID not setup!');
+		if (!templateId && !productPresetId) {
+			return setErrorMsg('Template item ID/Product type not setup!');
 		}
 		if (Items.length) {
 			setLoading(true);
@@ -613,6 +704,7 @@ function NomalItemSave({
 									url: `${urlRestApi}/item-clone`,
 									data: {
 										id: templateId,
+										product_id: productPresetId,
 										name: itemInfo?.name,
 										url: itemInfo?.itemUrl,
 										images: itemInfo?.images,
@@ -698,6 +790,7 @@ function NomalItemSave({
 				url: `${urlRestApi}/item-clone`,
 				data: {
 					id: templateId,
+					product_id: productPresetId,
 					name: ItemTitle,
 					images: ItemImages,
 					origin_id: ForceCreateNew ? '' : ItemId || '',

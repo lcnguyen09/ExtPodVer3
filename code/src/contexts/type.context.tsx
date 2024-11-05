@@ -66,6 +66,10 @@ export type ACTION =
         templateId: string | null | undefined
     }
     | {
+        type: "SET_PRODUCT_PRESET_ID"
+        productPresetId: string | null | undefined
+    }
+    | {
         type: "SET_AUTO_PAGE"
         autoPage: boolean | null | undefined
     }

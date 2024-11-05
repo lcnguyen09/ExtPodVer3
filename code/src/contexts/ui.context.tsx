@@ -29,6 +29,7 @@ export interface State {
 	currentDocker: DOCKER | null;
 	currentServer: String | null;
 	templateId: string | null;
+	productPresetId: string | null;
 	autoPage: boolean | null;
 	extendShippingPrice: boolean | null;
 	autoSave: boolean | null;
@@ -47,6 +48,7 @@ const initialState = {
 	currentDocker: null,
 	currentServer: 'podorders.store',
 	templateId: null,
+	productPresetId: null,
 	autoPage: false,
 	extendShippingPrice: false,
 	autoSave: false,
@@ -85,6 +87,9 @@ function uiReducer(state: State, action: ACTION) {
 		}
 		case 'SET_TEMPLATE_ID': {
 			return { ...state, templateId: action.templateId };
+		}
+		case 'SET_PRODUCT_PRESET_ID': {
+			return { ...state, productPresetId: action.productPresetId };
 		}
 		case 'SET_AUTO_PAGE': {
 			return { ...state, autoPage: action.autoPage };
@@ -168,6 +173,8 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		useStorage('_pod_ext_view');
 	const [templateIdStorage, setTemplateIdStorage]: [string | null | undefined, (val: string) => void] =
 		useStorage('_pod_template_id');
+	const [productPresetIdStorage, setProductPresetIdStorage]: [string | null | undefined, (val: string) => void] =
+		useStorage('_pod_product_preset_id');
 	const [autoPageStorage, setAutoPageStorage]: [string | null | undefined, (val: string) => void] =
 		useStorage('_pod_auto_page');
 	const [extendShippingPriceStorage, setExtendShippingPriceStorage]: [
@@ -184,6 +191,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 			server !== undefined &&
 			windowViewStorage !== undefined &&
 			templateIdStorage !== undefined &&
+			productPresetIdStorage !== undefined &&
 			autoPageStorage !== undefined &&
 			extendShippingPriceStorage !== undefined &&
 			autoSaveStorage !== undefined
@@ -191,7 +199,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 			setInit(true);
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [token, docker, server, windowViewStorage, templateIdStorage]);
+	}, [token, docker, server, windowViewStorage, templateIdStorage, productPresetIdStorage]);
 
 	useEffect(() => {
 		console.log(init);
@@ -205,6 +213,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 			if (server !== undefined) setCurrentServer(server ? server : 'podorders.store');
 
 			if (templateIdStorage !== undefined) setTemplateId(templateIdStorage);
+			if (productPresetIdStorage !== undefined) setProductPresetId(productPresetIdStorage);
 			if (autoPageStorage !== undefined) setAutoPage(autoPageStorage === 'true');
 			if (extendShippingPriceStorage !== undefined) setExtendShippingPrice(extendShippingPriceStorage === 'true');
 			if (autoSaveStorage !== undefined) setAutoSave(autoSaveStorage === 'true');
@@ -278,6 +287,11 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	}, [state.templateId]);
 
 	useEffect(() => {
+		setProductPresetIdStorage(state.productPresetId);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [state.productPresetId]);
+
+	useEffect(() => {
 		setAutoPageStorage(state.autoPage ? 'true' : 'false');
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [state.autoPage]);
@@ -308,8 +322,8 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 		setUrlGraphql(isSaleHunter() ? URL_ACCOUNT_GRAPHQL_SALEHUNTER : URL_ACCOUNT_GRAPHQL_PODORDER);
 		return new Promise((resolve) => setTimeout(() => resolve(true), 500));
 	};
-	const setGraphqlForHub = async () => {
-		setUrlGraphql(URL_GRAPHQL(state.currentDocker));
+	const setGraphqlForHub = async (dockerInfo: string | null | undefined) => {
+		setUrlGraphql(URL_GRAPHQL(dockerInfo ? dockerInfo : state.currentDocker));
 		return new Promise((resolve) => setTimeout(() => resolve(true), 500));
 	};
 	const setUrlRestApi = () => {
@@ -333,6 +347,9 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 	const setTemplateId = (templateId?: string | null) => {
 		dispatch({ type: 'SET_TEMPLATE_ID', templateId });
 	};
+	const setProductPresetId = (productPresetId?: string | null) => {
+		dispatch({ type: 'SET_PRODUCT_PRESET_ID', productPresetId });
+	}
 	const setAutoPage = (autoPage?: boolean) => {
 		dispatch({ type: 'SET_AUTO_PAGE', autoPage });
 	};
@@ -565,6 +582,7 @@ export const UIProvider: React.FC<UIManageContextProps> = (props: UIManageContex
 			setCurrentDocker,
 			setCurrentServer,
 			setTemplateId,
+			setProductPresetId,
 			setAutoPage,
 			setExtendShippingPrice,
 			setAutoSave,

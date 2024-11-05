@@ -44,6 +44,7 @@ export type Address = {
   email?: Maybe<Scalars['String']>;
   first_name?: Maybe<Scalars['String']>;
   last_name?: Maybe<Scalars['String']>;
+  need_check_address?: Maybe<Scalars['Boolean']>;
   owner?: Maybe<Scalars['String']>;
   phone?: Maybe<Scalars['String']>;
   postcode?: Maybe<Scalars['String']>;
@@ -326,6 +327,11 @@ export type Configuration = {
   ebay_runame_sandbox?: Maybe<Scalars['String']>;
   ebay_sandbox?: Maybe<Scalars['String']>;
   ebay_trust_link?: Maybe<Scalars['String']>;
+  invoice_address?: Maybe<Scalars['String']>;
+  invoice_note?: Maybe<Scalars['String']>;
+  issuu_id?: Maybe<Scalars['String']>;
+  issuu_secret?: Maybe<Scalars['String']>;
+  issuu_token?: Maybe<Scalars['String']>;
   tiktok_trust_link?: Maybe<Scalars['String']>;
 };
 
@@ -507,6 +513,14 @@ export type DashboardFulfillementProduction = {
   revenue?: Maybe<Scalars['Float']>;
   ship?: Maybe<Scalars['Float']>;
   total?: Maybe<Scalars['Float']>;
+};
+
+export type DashboardInvoice = {
+  __typename?: 'DashboardInvoice';
+  data?: Maybe<DashboardProduction>;
+  date?: Maybe<Scalars['String']>;
+  max_date?: Maybe<Scalars['String']>;
+  min_date?: Maybe<Scalars['String']>;
 };
 
 export type DashboardOrder = {
@@ -1187,6 +1201,12 @@ export type FontFileSigned = {
   variant?: Maybe<Scalars['String']>;
 };
 
+export type FulfilAttribute = {
+  __typename?: 'FulfilAttribute';
+  attribute_type?: Maybe<Scalars['String']>;
+  options?: Maybe<Array<Maybe<Scalars['String']>>>;
+};
+
 export type Fulfilment = {
   __typename?: 'Fulfilment';
   _id?: Maybe<Scalars['String']>;
@@ -1461,6 +1481,23 @@ export type InvoiceByStatus = {
   pending?: Maybe<Scalars['Int']>;
 };
 
+export type InvoiceId = {
+  __typename?: 'InvoiceID';
+  date?: Maybe<Scalars['String']>;
+  id?: Maybe<Scalars['String']>;
+};
+
+export type InvoiceIdInput = {
+  date?: InputMaybe<Scalars['String']>;
+  id?: InputMaybe<Scalars['String']>;
+};
+
+export type Issuu = {
+  __typename?: 'Issuu';
+  time?: Maybe<Scalars['Int']>;
+  url?: Maybe<Scalars['String']>;
+};
+
 export type Item = {
   __typename?: 'Item';
   _id?: Maybe<Scalars['String']>;
@@ -1471,15 +1508,21 @@ export type Item = {
   imported_at?: Maybe<Scalars['Int']>;
   info?: Maybe<ItemInfo>;
   info_id?: Maybe<Scalars['String']>;
+  issuu?: Maybe<Array<Maybe<Issuu>>>;
+  job_list?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
+  package_dimension_unit?: Maybe<Scalars['String']>;
   package_height?: Maybe<Scalars['Float']>;
   package_length?: Maybe<Scalars['Float']>;
   package_width?: Maybe<Scalars['Float']>;
   paypal_email?: Maybe<Scalars['String']>;
   permalink?: Maybe<Scalars['String']>;
   platform?: Maybe<Scalars['String']>;
+  platform_data?: Maybe<Scalars['String']>;
+  platform_data_info?: Maybe<Scalars['String']>;
   platform_id?: Maybe<Scalars['String']>;
   price?: Maybe<Scalars['String']>;
+  promotion?: Maybe<StorePromotionProduct>;
   purchase_note?: Maybe<Scalars['String']>;
   sku?: Maybe<Scalars['String']>;
   sold?: Maybe<Scalars['String']>;
@@ -1516,6 +1559,7 @@ export type ItemInfo = {
   mockup?: Maybe<MockupDesign>;
   mockup_id?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
+  package_dimension_unit?: Maybe<Scalars['String']>;
   package_height?: Maybe<Scalars['Float']>;
   package_length?: Maybe<Scalars['Float']>;
   package_width?: Maybe<Scalars['Float']>;
@@ -1535,13 +1579,22 @@ export type ItemInfo = {
   sku?: Maybe<Scalars['String']>;
   sleeve?: Maybe<Scalars['String']>;
   specifics?: Maybe<Array<Maybe<ItemSpecific>>>;
-  store?: Maybe<Store>;
-  store_queue?: Maybe<Scalars['String']>;
+  store_queue?: Maybe<Array<Maybe<ItemInfoStoreQueue>>>;
   tags?: Maybe<Array<Maybe<Scalars['String']>>>;
   tax_fee?: Maybe<Scalars['Float']>;
   tax_fee_fix?: Maybe<Scalars['Float']>;
   type?: Maybe<Scalars['String']>;
+  url?: Maybe<Scalars['String']>;
   weight?: Maybe<Scalars['Float']>;
+};
+
+export type ItemInfoStoreQueue = {
+  __typename?: 'ItemInfoStoreQueue';
+  queue_at?: Maybe<Scalars['Int']>;
+  queue_messenger?: Maybe<Scalars['String']>;
+  queue_status?: Maybe<Scalars['String']>;
+  store?: Maybe<Store>;
+  store_id?: Maybe<Scalars['String']>;
 };
 
 export type ItemInfoTrend = {
@@ -2262,6 +2315,7 @@ export type PlatformProductCategory = {
   level?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   parent?: Maybe<Scalars['String']>;
+  version?: Maybe<Scalars['String']>;
 };
 
 export type PlatformProductCategorySearch = {
@@ -2281,6 +2335,14 @@ export type PlatformProductSpecifics = {
   placeholder?: Maybe<Scalars['String']>;
   type?: Maybe<Scalars['String']>;
   value?: Maybe<Array<Maybe<Scalars['String']>>>;
+  version?: Maybe<Scalars['String']>;
+};
+
+export type PlatformShippingService = {
+  __typename?: 'PlatformShippingService';
+  id?: Maybe<Scalars['String']>;
+  name?: Maybe<Scalars['String']>;
+  price?: Maybe<Scalars['String']>;
 };
 
 export type PretyAttribute = {
@@ -2522,6 +2584,7 @@ export type ProductPreset = {
   favorite?: Maybe<Scalars['Boolean']>;
   fix_profit?: Maybe<Scalars['Float']>;
   fixed_profit?: Maybe<Scalars['Float']>;
+  fulfil_attributes?: Maybe<Array<Maybe<FulfilAttribute>>>;
   id?: Maybe<Scalars['String']>;
   image?: Maybe<Scalars['String']>;
   international_shipping_additional_cost?: Maybe<Scalars['Float']>;
@@ -2530,6 +2593,7 @@ export type ProductPreset = {
   min_price?: Maybe<Scalars['String']>;
   mockup_count?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
+  package_dimension_unit?: Maybe<Scalars['String']>;
   package_height?: Maybe<Scalars['Float']>;
   package_length?: Maybe<Scalars['Float']>;
   package_width?: Maybe<Scalars['Float']>;
@@ -2567,6 +2631,21 @@ export type ProductPresetMockupProviderCount = {
   private?: Maybe<Scalars['Int']>;
   scalable?: Maybe<Scalars['Int']>;
   total?: Maybe<Scalars['Int']>;
+};
+
+export type PromotionOption = {
+  __typename?: 'PromotionOption';
+  discount_percent_all?: Maybe<Scalars['Float']>;
+  quantity_limit?: Maybe<Scalars['Int']>;
+  quantity_per_user?: Maybe<Scalars['Int']>;
+  variation_value?: Maybe<Scalars['String']>;
+};
+
+export type PromotionOptionInput = {
+  discount_percent_all?: InputMaybe<Scalars['Float']>;
+  quantity_limit?: InputMaybe<Scalars['Int']>;
+  quantity_per_user?: InputMaybe<Scalars['Int']>;
+  variation_value?: InputMaybe<Scalars['String']>;
 };
 
 export type ProviderProductType = {
@@ -2626,6 +2705,11 @@ export type ResponseCheckUserAccess = {
   allowed?: Maybe<Scalars['Boolean']>;
 };
 
+export type ResponseStatus = {
+  __typename?: 'ResponseStatus';
+  status?: Maybe<Scalars['String']>;
+};
+
 export type ResultAppConfig = {
   __typename?: 'ResultAppConfig';
   _id?: Maybe<Scalars['String']>;
@@ -2673,6 +2757,7 @@ export type RootMutation = {
   applyDesign?: Maybe<Task>;
   applyTaskDesignOrder?: Maybe<Order>;
   bulkItemInfo?: Maybe<Array<Maybe<ItemInfo>>>;
+  buyShippingLabel?: Maybe<Order>;
   clipartUpdatePreSignedFile?: Maybe<Clipart>;
   cloneCart?: Maybe<Array<Maybe<Cart>>>;
   cloneOrder?: Maybe<Array<Maybe<Order>>>;
@@ -2702,6 +2787,8 @@ export type RootMutation = {
   dockerMake?: Maybe<Docker>;
   dockerTrash?: Maybe<Array<Maybe<Docker>>>;
   eraseImage?: Maybe<EraseImage>;
+  fetchShippingLabel?: Maybe<Order>;
+  fetchShippingService?: Maybe<Order>;
   fontUpdatePreSignedFile?: Maybe<Font>;
   fulfilmentOrder?: Maybe<Array<Maybe<Order>>>;
   generateImageMask?: Maybe<File>;
@@ -2710,7 +2797,9 @@ export type RootMutation = {
   jobsRemove?: Maybe<Msg>;
   jobsStart?: Maybe<Array<Maybe<Jobs>>>;
   jobsStop?: Maybe<Array<Maybe<Jobs>>>;
+  liveOptimizeItem?: Maybe<Array<Maybe<JobsList>>>;
   login?: Maybe<Scalars['String']>;
+  makeAdressConfiguration?: Maybe<Configuration>;
   makeBigcommerceConfiguration?: Maybe<BigCommerceConfiguration>;
   makeBlog?: Maybe<Blog>;
   /** Cart maker */
@@ -2725,6 +2814,7 @@ export type RootMutation = {
   makeEtsyKeys?: Maybe<Array<Maybe<EtsyKey>>>;
   /** Fulfilment maker */
   makeFulfilment?: Maybe<Array<Maybe<Fulfilment>>>;
+  makeIssuuConfiguration?: Maybe<Configuration>;
   makeItemInfo?: Maybe<Array<Maybe<Item>>>;
   makeItemInfoTrend?: Maybe<ItemInfoTrend>;
   makeItemInfosTrend?: Maybe<Array<Maybe<ItemInfoTrend>>>;
@@ -2761,6 +2851,11 @@ export type RootMutation = {
   productPresetPaste?: Maybe<ProductPreset>;
   productPresetRemove?: Maybe<ProductPreset>;
   productPresetUpdate?: Maybe<ProductPreset>;
+  promotionLiveAddProduct?: Maybe<StorePromotion>;
+  promotionLiveCreate?: Maybe<StorePromotion>;
+  promotionLiveDeactive?: Maybe<StorePromotion>;
+  promotionLiveUpdate?: Maybe<StorePromotion>;
+  pushIssuu?: Maybe<Array<Maybe<JobsList>>>;
   putItemToStore?: Maybe<ItemInfo>;
   queueItem?: Maybe<Array<Maybe<Item>>>;
   queueRemoveItem?: Maybe<Array<Maybe<ItemInfo>>>;
@@ -2811,6 +2906,8 @@ export type RootMutation = {
   trashStore?: Maybe<Array<Maybe<Store>>>;
   trashTrendQueue?: Maybe<Array<Maybe<TrendQueue>>>;
   trashUserGroup?: Maybe<Array<Maybe<UserGroup>>>;
+  updateCategoryItem?: Maybe<Array<Maybe<ResponseStatus>>>;
+  updateInventoryItem?: Maybe<Array<Maybe<ResponseStatus>>>;
   updateMockupDesign?: Maybe<MockupDesign>;
   updatePaypalItem?: Maybe<Array<Maybe<JobsList>>>;
   updatePreSignedFile?: Maybe<File>;
@@ -2862,6 +2959,12 @@ export type RootMutationBulkItemInfoArgs = {
   specifics?: InputMaybe<Array<InputMaybe<ItemSpecificInput>>>;
   tags?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   update_item_sku?: InputMaybe<Scalars['Boolean']>;
+};
+
+
+export type RootMutationBuyShippingLabelArgs = {
+  id?: InputMaybe<Scalars['String']>;
+  service_id?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -3043,6 +3146,16 @@ export type RootMutationEraseImageArgs = {
 };
 
 
+export type RootMutationFetchShippingLabelArgs = {
+  id?: InputMaybe<Scalars['String']>;
+};
+
+
+export type RootMutationFetchShippingServiceArgs = {
+  id?: InputMaybe<Scalars['String']>;
+};
+
+
 export type RootMutationFontUpdatePreSignedFileArgs = {
   family?: InputMaybe<Scalars['String']>;
   variants?: InputMaybe<Array<InputMaybe<InputFontFile>>>;
@@ -3073,7 +3186,13 @@ export type RootMutationHubSyncPaypalArgs = {
 
 export type RootMutationJobItemArgs = {
   ids?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  job_type?: InputMaybe<Scalars['String']>;
   store_ids?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  update_category_specifics?: InputMaybe<Scalars['Boolean']>;
+  update_image?: InputMaybe<Scalars['Boolean']>;
+  update_logistic?: InputMaybe<Scalars['Boolean']>;
+  update_sizechart?: InputMaybe<Scalars['Boolean']>;
+  update_title_description?: InputMaybe<Scalars['Boolean']>;
 };
 
 
@@ -3100,8 +3219,20 @@ export type RootMutationJobsStopArgs = {
 };
 
 
+export type RootMutationLiveOptimizeItemArgs = {
+  platform_ids?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  store_id?: InputMaybe<Scalars['String']>;
+};
+
+
 export type RootMutationLoginArgs = {
   email?: InputMaybe<Scalars['String']>;
+};
+
+
+export type RootMutationMakeAdressConfigurationArgs = {
+  invoice_address?: InputMaybe<Scalars['String']>;
+  invoice_note?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -3197,6 +3328,13 @@ export type RootMutationMakeFulfilmentArgs = {
 };
 
 
+export type RootMutationMakeIssuuConfigurationArgs = {
+  issuu_id?: InputMaybe<Scalars['String']>;
+  issuu_secret?: InputMaybe<Scalars['String']>;
+  issuu_token?: InputMaybe<Scalars['String']>;
+};
+
+
 export type RootMutationMakeItemInfoArgs = {
   _id?: InputMaybe<Scalars['String']>;
   attribute_specifics?: InputMaybe<Array<InputMaybe<SpecificAttributeInput>>>;
@@ -3222,6 +3360,7 @@ export type RootMutationMakeItemInfoArgs = {
   item_id?: InputMaybe<Scalars['String']>;
   mockup_id?: InputMaybe<Scalars['String']>;
   name?: InputMaybe<Scalars['String']>;
+  package_dimension_unit?: InputMaybe<Scalars['String']>;
   package_height?: InputMaybe<Scalars['Float']>;
   package_length?: InputMaybe<Scalars['Float']>;
   package_width?: InputMaybe<Scalars['Float']>;
@@ -3263,11 +3402,13 @@ export type RootMutationMakeItemInfosTrendArgs = {
   external_url?: InputMaybe<Scalars['String']>;
   from_date?: InputMaybe<Scalars['String']>;
   ids?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  image_checked?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   isTM?: InputMaybe<Scalars['String']>;
   missing_image?: InputMaybe<Scalars['String']>;
   name?: InputMaybe<Scalars['String']>;
   push_log?: InputMaybe<Scalars['Boolean']>;
   q?: InputMaybe<Scalars['String']>;
+  remove_last_image?: InputMaybe<Scalars['String']>;
   restore?: InputMaybe<Scalars['Boolean']>;
   rules?: InputMaybe<Array<InputMaybe<TrendQueueRuleInput>>>;
   search_date?: InputMaybe<Scalars['String']>;
@@ -3474,6 +3615,7 @@ export type RootMutationMakeStoreArgs = {
   SMTPSender?: InputMaybe<Scalars['String']>;
   SMTPStatus?: InputMaybe<Scalars['Boolean']>;
   SMTPUser?: InputMaybe<Scalars['String']>;
+  address?: InputMaybe<AddressInput>;
   banner_image_id?: InputMaybe<Scalars['String']>;
   brand_name?: InputMaybe<Scalars['String']>;
   country?: InputMaybe<Scalars['String']>;
@@ -3481,6 +3623,7 @@ export type RootMutationMakeStoreArgs = {
   dispatch_time_max?: InputMaybe<Scalars['String']>;
   ebay_template_id?: InputMaybe<Scalars['String']>;
   etsy_shipping?: InputMaybe<EtsyShippingInput>;
+  full_address?: InputMaybe<Scalars['String']>;
   global_shipping?: InputMaybe<Scalars['String']>;
   id?: InputMaybe<Scalars['String']>;
   ignore_publish?: InputMaybe<Scalars['Boolean']>;
@@ -3491,6 +3634,13 @@ export type RootMutationMakeStoreArgs = {
   international_shipping_cost?: InputMaybe<Scalars['String']>;
   international_shipping_service?: InputMaybe<Scalars['String']>;
   international_shipping_time_max?: InputMaybe<Scalars['String']>;
+  invoice_id?: InputMaybe<InvoiceIdInput>;
+  issuu_auto?: InputMaybe<Scalars['String']>;
+  issuu_description?: InputMaybe<Scalars['String']>;
+  issuu_id?: InputMaybe<Scalars['String']>;
+  issuu_limit?: InputMaybe<Scalars['Int']>;
+  issuu_secret?: InputMaybe<Scalars['String']>;
+  issuu_token?: InputMaybe<Scalars['String']>;
   last_total_product?: InputMaybe<Scalars['Int']>;
   location?: InputMaybe<Scalars['String']>;
   location_detail?: InputMaybe<Scalars['String']>;
@@ -3522,6 +3672,7 @@ export type RootMutationMakeStoreArgs = {
   sto_mailer_secret?: InputMaybe<Scalars['String']>;
   sto_name?: InputMaybe<Scalars['String']>;
   sto_status?: InputMaybe<Scalars['String']>;
+  sto_tracking_delay?: InputMaybe<Scalars['Int']>;
   sto_user?: InputMaybe<Scalars['String']>;
 };
 
@@ -3545,6 +3696,8 @@ export type RootMutationMakeTrendQueueArgs = {
   product_id?: InputMaybe<Scalars['String']>;
   render_description_ai?: InputMaybe<Scalars['Boolean']>;
   render_description_ai_length?: InputMaybe<Scalars['String']>;
+  render_title_ai?: InputMaybe<Scalars['Boolean']>;
+  render_title_ai_length?: InputMaybe<Scalars['String']>;
   status?: InputMaybe<Scalars['String']>;
   store_id?: InputMaybe<Scalars['String']>;
 };
@@ -3619,6 +3772,7 @@ export type RootMutationProductPresetUpdateArgs = {
   international_shipping_additional_cost?: InputMaybe<Scalars['Float']>;
   international_shipping_cost?: InputMaybe<Scalars['Float']>;
   name?: InputMaybe<Scalars['String']>;
+  package_dimension_unit?: InputMaybe<Scalars['String']>;
   package_height?: InputMaybe<Scalars['Float']>;
   package_length?: InputMaybe<Scalars['Float']>;
   package_width?: InputMaybe<Scalars['Float']>;
@@ -3638,6 +3792,58 @@ export type RootMutationProductPresetUpdateArgs = {
   tax_fee?: InputMaybe<Scalars['Float']>;
   tax_fee_fix?: InputMaybe<Scalars['Float']>;
   weight?: InputMaybe<Scalars['Float']>;
+};
+
+
+export type RootMutationPromotionLiveAddProductArgs = {
+  discount_amount?: InputMaybe<Scalars['Float']>;
+  discount_percent?: InputMaybe<Scalars['Float']>;
+  id?: InputMaybe<Scalars['String']>;
+  ids?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  quantity_limit?: InputMaybe<Scalars['Int']>;
+  quantity_per_user?: InputMaybe<Scalars['Int']>;
+  store?: InputMaybe<Scalars['String']>;
+};
+
+
+export type RootMutationPromotionLiveCreateArgs = {
+  activity_type?: InputMaybe<Scalars['String']>;
+  auto_review?: InputMaybe<Scalars['Boolean']>;
+  begin_time?: InputMaybe<Scalars['Int']>;
+  discount_percent_all?: InputMaybe<Scalars['Float']>;
+  end_time?: InputMaybe<Scalars['Int']>;
+  keyword?: InputMaybe<Scalars['String']>;
+  options?: InputMaybe<Array<InputMaybe<PromotionOptionInput>>>;
+  quantity_limit?: InputMaybe<Scalars['Int']>;
+  quantity_per_user?: InputMaybe<Scalars['Int']>;
+  store?: InputMaybe<Scalars['String']>;
+  title?: InputMaybe<Scalars['String']>;
+};
+
+
+export type RootMutationPromotionLiveDeactiveArgs = {
+  ids?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  store?: InputMaybe<Scalars['String']>;
+};
+
+
+export type RootMutationPromotionLiveUpdateArgs = {
+  activity_type?: InputMaybe<Scalars['String']>;
+  auto_review?: InputMaybe<Scalars['Boolean']>;
+  begin_time?: InputMaybe<Scalars['Int']>;
+  discount_percent_all?: InputMaybe<Scalars['Float']>;
+  double?: InputMaybe<Scalars['String']>;
+  end_time?: InputMaybe<Scalars['Int']>;
+  id?: InputMaybe<Scalars['String']>;
+  quantity_limit?: InputMaybe<Scalars['Int']>;
+  quantity_per_user?: InputMaybe<Scalars['Int']>;
+  store?: InputMaybe<Scalars['String']>;
+  title?: InputMaybe<Scalars['String']>;
+};
+
+
+export type RootMutationPushIssuuArgs = {
+  ids?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
 };
 
 
@@ -3806,7 +4012,7 @@ export type RootMutationSplitCartArgs = {
 
 export type RootMutationSplitOrderArgs = {
   id: Scalars['String'];
-  product_ids: Array<InputMaybe<Scalars['String']>>;
+  order_line_item_id: Array<InputMaybe<Scalars['String']>>;
 };
 
 
@@ -3939,6 +4145,25 @@ export type RootMutationTrashTrendQueueArgs = {
 
 export type RootMutationTrashUserGroupArgs = {
   delete_ids?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+};
+
+
+export type RootMutationUpdateCategoryItemArgs = {
+  new_category?: InputMaybe<Scalars['String']>;
+  old_category?: InputMaybe<Scalars['String']>;
+  platform_ids?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  product_id?: InputMaybe<Scalars['String']>;
+  store_id?: InputMaybe<Scalars['String']>;
+  update_category?: InputMaybe<Scalars['Boolean']>;
+  update_logictic?: InputMaybe<Scalars['Boolean']>;
+  update_sizechart?: InputMaybe<Scalars['Boolean']>;
+};
+
+
+export type RootMutationUpdateInventoryItemArgs = {
+  platform_ids?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  quantity?: InputMaybe<Scalars['Int']>;
+  store_id?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -4115,6 +4340,7 @@ export type RootQuery = {
   getUserById?: Maybe<User>;
   info?: Maybe<Info>;
   invoiceCount?: Maybe<InvoiceByStatus>;
+  invoiceReport?: Maybe<Array<Maybe<DashboardInvoice>>>;
   invoices?: Maybe<Array<Maybe<Invoice>>>;
   /**
    * Item
@@ -4124,6 +4350,7 @@ export type RootQuery = {
   itemsInfo?: Maybe<Array<Maybe<ItemInfo>>>;
   itemsInfoTrend?: Maybe<Array<Maybe<ItemInfoTrend>>>;
   itemsLive?: Maybe<Array<Maybe<Item>>>;
+  itemsLiveScanInventory?: Maybe<Array<Maybe<Item>>>;
   itemsPreset?: Maybe<Array<Maybe<ItemPreset>>>;
   jobGroups?: Maybe<Array<Maybe<Jobs>>>;
   jobs?: Maybe<Array<Maybe<Jobs>>>;
@@ -4159,6 +4386,9 @@ export type RootQuery = {
   productPresetCountProvider?: Maybe<DashboardProductPresetProvider>;
   /** product type mockup template */
   productPresetMockupCountProvider?: Maybe<ProductPresetMockupProviderCount>;
+  promotionInfoLive?: Maybe<Array<Maybe<StorePromotionProduct>>>;
+  promotionLive?: Maybe<Array<Maybe<StorePromotion>>>;
+  promotionWarehouseLive?: Maybe<Array<Maybe<StoreWarehouse>>>;
   providerProductType?: Maybe<Array<Maybe<ProviderProductType>>>;
   providerProductTypePrintArea?: Maybe<Array<Maybe<ProviderProductTypePrintArea>>>;
   providerProductTypeProvider?: Maybe<Array<Maybe<ProviderProductTypeProvider>>>;
@@ -4542,6 +4772,15 @@ export type RootQueryInvoiceCountArgs = {
 };
 
 
+export type RootQueryInvoiceReportArgs = {
+  date_type?: InputMaybe<Scalars['String']>;
+  end?: InputMaybe<Scalars['String']>;
+  group_by?: InputMaybe<Scalars['String']>;
+  start?: InputMaybe<Scalars['String']>;
+  store_id?: InputMaybe<Scalars['String']>;
+};
+
+
 export type RootQueryInvoicesArgs = {
   amount?: InputMaybe<Scalars['String']>;
   end?: InputMaybe<Scalars['String']>;
@@ -4568,6 +4807,7 @@ export type RootQueryItemsInfoArgs = {
   collection?: InputMaybe<Scalars['String']>;
   identities?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   identity?: InputMaybe<Scalars['String']>;
+  in_store?: InputMaybe<Scalars['String']>;
   name?: InputMaybe<Scalars['String']>;
   search?: InputMaybe<Scalars['String']>;
   store?: InputMaybe<Scalars['String']>;
@@ -4589,11 +4829,22 @@ export type RootQueryItemsInfoTrendArgs = {
   store?: InputMaybe<Scalars['String']>;
   tags?: InputMaybe<Scalars['String']>;
   to_date?: InputMaybe<Scalars['String']>;
+  without_pushed?: InputMaybe<Scalars['String']>;
 };
 
 
 export type RootQueryItemsLiveArgs = {
   _id?: InputMaybe<Scalars['String']>;
+  promotion_id?: InputMaybe<Scalars['String']>;
+  store?: InputMaybe<Scalars['String']>;
+};
+
+
+export type RootQueryItemsLiveScanInventoryArgs = {
+  categories?: InputMaybe<Scalars['String']>;
+  category_version?: InputMaybe<Scalars['String']>;
+  listing_quality_tier?: InputMaybe<Scalars['String']>;
+  name?: InputMaybe<Scalars['String']>;
   store?: InputMaybe<Scalars['String']>;
 };
 
@@ -4773,6 +5024,7 @@ export type RootQueryPlatformProductCategoryArgs = {
   level?: InputMaybe<Scalars['Int']>;
   parent?: InputMaybe<Scalars['String']>;
   platform: Scalars['String'];
+  version?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -4785,6 +5037,7 @@ export type RootQueryPlatformProductCategorySearchArgs = {
 export type RootQueryPlatformProductSpecificsArgs = {
   id: Scalars['String'];
   platform: Scalars['String'];
+  version?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -4849,6 +5102,25 @@ export type RootQueryProductPresetCountProviderArgs = {
   _id?: InputMaybe<Scalars['String']>;
   name?: InputMaybe<Scalars['String']>;
   withoutCustom?: InputMaybe<Scalars['Boolean']>;
+};
+
+
+export type RootQueryPromotionInfoLiveArgs = {
+  _id?: InputMaybe<Scalars['String']>;
+  store?: InputMaybe<Scalars['String']>;
+};
+
+
+export type RootQueryPromotionLiveArgs = {
+  _id?: InputMaybe<Scalars['String']>;
+  activity_type?: InputMaybe<Scalars['String']>;
+  store?: InputMaybe<Scalars['String']>;
+};
+
+
+export type RootQueryPromotionWarehouseLiveArgs = {
+  _id?: InputMaybe<Scalars['String']>;
+  store?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -5230,6 +5502,7 @@ export type SpecificAttribute = {
   __typename?: 'SpecificAttribute';
   barcode?: Maybe<Scalars['String']>;
   base_price?: Maybe<Scalars['Float']>;
+  base_price_invoice?: Maybe<Scalars['Float']>;
   fix_profit?: Maybe<Scalars['Float']>;
   fixed_profit?: Maybe<Scalars['Float']>;
   image?: Maybe<File>;
@@ -5254,6 +5527,7 @@ export type SpecificAttributeImageSizeInput = {
 export type SpecificAttributeInput = {
   barcode?: InputMaybe<Scalars['String']>;
   base_price?: InputMaybe<Scalars['Float']>;
+  base_price_invoice?: InputMaybe<Scalars['Float']>;
   fix_profit?: InputMaybe<Scalars['Float']>;
   fixed_profit?: InputMaybe<Scalars['Float']>;
   image?: InputMaybe<SpecificAttributeImageInput>;
@@ -5291,6 +5565,7 @@ export type Storage = {
 export type Store = {
   __typename?: 'Store';
   _id?: Maybe<Scalars['String']>;
+  address?: Maybe<Address>;
   banner_image_id?: Maybe<Scalars['String']>;
   brand_name?: Maybe<Scalars['String']>;
   country?: Maybe<Scalars['String']>;
@@ -5300,6 +5575,7 @@ export type Store = {
   ebay_template_id?: Maybe<Scalars['String']>;
   etsy_shipping?: Maybe<EtsyShipping>;
   fetched_at?: Maybe<Scalars['Int']>;
+  full_address?: Maybe<Scalars['String']>;
   global_shipping?: Maybe<Scalars['String']>;
   ignore_publish?: Maybe<Scalars['Boolean']>;
   ignore_watermark?: Maybe<Scalars['Boolean']>;
@@ -5309,6 +5585,13 @@ export type Store = {
   international_shipping_cost?: Maybe<Scalars['String']>;
   international_shipping_service?: Maybe<Scalars['String']>;
   international_shipping_time_max?: Maybe<Scalars['String']>;
+  invoice_id?: Maybe<Array<Maybe<InvoiceId>>>;
+  issuu_auto?: Maybe<Scalars['String']>;
+  issuu_description?: Maybe<Scalars['String']>;
+  issuu_id?: Maybe<Scalars['String']>;
+  issuu_limit?: Maybe<Scalars['Int']>;
+  issuu_secret?: Maybe<Scalars['String']>;
+  issuu_token?: Maybe<Scalars['String']>;
   item_per_day?: Maybe<Scalars['Int']>;
   item_per_month?: Maybe<Scalars['Int']>;
   item_per_week?: Maybe<Scalars['Int']>;
@@ -5357,6 +5640,7 @@ export type Store = {
   sto_shopify_config?: Maybe<Shopify>;
   sto_status?: Maybe<Status>;
   sto_tiktok_config?: Maybe<Tiktok>;
+  sto_tracking_delay?: Maybe<Scalars['Int']>;
   sto_type?: Maybe<Scalars['String']>;
   sto_updated_at?: Maybe<Scalars['Int']>;
   sto_user?: Maybe<Scalars['String']>;
@@ -5367,6 +5651,20 @@ export type Store = {
   transaction_summary_at?: Maybe<Scalars['Int']>;
   user_owners?: Maybe<Array<Maybe<User>>>;
   warning_level?: Maybe<Scalars['Int']>;
+};
+
+export type StoreAddress = {
+  __typename?: 'StoreAddress';
+  city?: Maybe<Scalars['String']>;
+  contact_person?: Maybe<Scalars['String']>;
+  distict?: Maybe<Scalars['String']>;
+  full_address?: Maybe<Scalars['String']>;
+  phone_number?: Maybe<Scalars['String']>;
+  postal_code?: Maybe<Scalars['String']>;
+  region?: Maybe<Scalars['String']>;
+  region_code?: Maybe<Scalars['String']>;
+  state?: Maybe<Scalars['String']>;
+  town?: Maybe<Scalars['String']>;
 };
 
 export type StoreCounter = {
@@ -5402,6 +5700,70 @@ export type StoreInput = {
   sto_tiktok_config?: InputMaybe<TiktokInput>;
   sto_wish_config?: InputMaybe<WishStoreInput>;
   sto_woocommerce_config?: InputMaybe<WoocommerceInput>;
+};
+
+export type StorePromotion = {
+  __typename?: 'StorePromotion';
+  _id?: Maybe<Scalars['String']>;
+  activity_type?: Maybe<Scalars['String']>;
+  begin_time?: Maybe<Scalars['String']>;
+  create_time?: Maybe<Scalars['String']>;
+  end_time?: Maybe<Scalars['String']>;
+  id?: Maybe<Scalars['String']>;
+  in_job?: Maybe<Scalars['Boolean']>;
+  in_renew?: Maybe<Scalars['Boolean']>;
+  job_info?: Maybe<StorePromotionJob>;
+  job_renew?: Maybe<StorePromotionJobRenew>;
+  products?: Maybe<Array<Maybe<StorePromotionProduct>>>;
+  status?: Maybe<Scalars['String']>;
+  store_id?: Maybe<Scalars['String']>;
+  title?: Maybe<Scalars['String']>;
+};
+
+export type StorePromotionJob = {
+  __typename?: 'StorePromotionJob';
+  discount_percent_all?: Maybe<Scalars['String']>;
+  msg?: Maybe<Scalars['String']>;
+  options?: Maybe<Array<Maybe<StorePromotionJobOption>>>;
+  pending?: Maybe<Scalars['Int']>;
+  quantity_limit?: Maybe<Scalars['String']>;
+  quantity_per_user?: Maybe<Scalars['String']>;
+};
+
+export type StorePromotionJobOption = {
+  __typename?: 'StorePromotionJobOption';
+  discount_percent_all?: Maybe<Scalars['String']>;
+  quantity_limit?: Maybe<Scalars['String']>;
+  quantity_per_user?: Maybe<Scalars['String']>;
+  variation_value?: Maybe<Scalars['String']>;
+};
+
+export type StorePromotionJobRenew = {
+  __typename?: 'StorePromotionJobRenew';
+  ref_id?: Maybe<Scalars['String']>;
+};
+
+export type StorePromotionProduct = {
+  __typename?: 'StorePromotionProduct';
+  _id?: Maybe<Scalars['String']>;
+  amount?: Maybe<Scalars['String']>;
+  discount?: Maybe<Scalars['String']>;
+  id?: Maybe<Scalars['String']>;
+  promo_id?: Maybe<Scalars['String']>;
+  quantity_limit?: Maybe<Scalars['String']>;
+  quantity_per_user?: Maybe<Scalars['String']>;
+  raw_data_product?: Maybe<Scalars['String']>;
+};
+
+export type StoreWarehouse = {
+  __typename?: 'StoreWarehouse';
+  address?: Maybe<StoreAddress>;
+  effect_status?: Maybe<Scalars['String']>;
+  id?: Maybe<Scalars['String']>;
+  is_default?: Maybe<Scalars['Boolean']>;
+  name?: Maybe<Scalars['String']>;
+  sub_type?: Maybe<Scalars['String']>;
+  type?: Maybe<Scalars['String']>;
 };
 
 export type Tag = {
@@ -5506,14 +5868,14 @@ export type TaskTarget = {
 
 export type TelegramChat = {
   __typename?: 'TelegramChat';
-  id?: Maybe<Scalars['Int']>;
+  id?: Maybe<Scalars['Float']>;
   title?: Maybe<Scalars['String']>;
   type?: Maybe<Scalars['String']>;
 };
 
 export type TelegramGroup = {
   __typename?: 'TelegramGroup';
-  id?: Maybe<Scalars['Int']>;
+  id?: Maybe<Scalars['Float']>;
   title?: Maybe<Scalars['String']>;
 };
 
@@ -5572,6 +5934,7 @@ export type TiktokInput = {
 export type TiktokShopList = {
   __typename?: 'TiktokShopList';
   region?: Maybe<Scalars['String']>;
+  shop_cipher?: Maybe<Scalars['String']>;
   shop_id?: Maybe<Scalars['String']>;
   shop_name?: Maybe<Scalars['String']>;
   type?: Maybe<Scalars['Int']>;
@@ -5641,6 +6004,10 @@ export type TrackingType = {
   multrans_logistics?: Maybe<Shipment>;
   order_platform_id?: Maybe<Scalars['String']>;
   order_platform_id_short?: Maybe<Scalars['String']>;
+  platform_fulfillment_type?: Maybe<Scalars['String']>;
+  platform_shipping_label?: Maybe<Scalars['String']>;
+  platform_shipping_services?: Maybe<Array<Maybe<PlatformShippingService>>>;
+  platform_shipping_type?: Maybe<Scalars['String']>;
   shipping_country_code?: Maybe<Scalars['String']>;
   tracking?: Maybe<Scalars['String']>;
   tracking_at?: Maybe<Scalars['Int']>;
@@ -5726,6 +6093,8 @@ export type TrendQueue = {
   product_id?: Maybe<Scalars['String']>;
   render_description_ai?: Maybe<Scalars['Boolean']>;
   render_description_ai_length?: Maybe<Scalars['String']>;
+  render_title_ai?: Maybe<Scalars['Boolean']>;
+  render_title_ai_length?: Maybe<Scalars['String']>;
   status?: Maybe<Scalars['String']>;
   store?: Maybe<Store>;
   store_id?: Maybe<Scalars['String']>;
@@ -5956,7 +6325,7 @@ export type ItemSpecificFragment = { __typename?: 'ItemSpecific', key?: string |
 
 export type OrderFragment = { __typename?: 'Order', _id?: string | null, platform?: string | null, platform_id?: string | null, identity?: string | null, status?: string | null };
 
-export type ProductPresetFragment = { __typename?: 'ProductPreset', _id?: string | null, id?: string | null, name?: string | null };
+export type ProductPresetFragment = { __typename?: 'ProductPreset', _id?: string | null, id?: string | null, name?: string | null, image?: string | null };
 
 export type UserFragment = { __typename?: 'User', _id?: string | null, email?: string | null, name?: string | null, identity?: string | null, identity_label?: string | null, role?: string | null, created_at?: number | null, token?: string | null, auth_docker?: Array<{ __typename?: 'AuthDocker', docker_id?: string | null, docker?: { __typename?: 'Docker', _id?: string | null, domain?: string | null, label?: string | null, server?: string | null, sku?: string | null } | null } | null> | null };
 
@@ -5990,7 +6359,7 @@ export type ProductPresetQueryVariables = Exact<{
 }>;
 
 
-export type ProductPresetQuery = { __typename?: 'RootQuery', productPreset?: Array<{ __typename?: 'ProductPreset', _id?: string | null, id?: string | null, name?: string | null } | null> | null };
+export type ProductPresetQuery = { __typename?: 'RootQuery', productPreset?: Array<{ __typename?: 'ProductPreset', _id?: string | null, id?: string | null, name?: string | null, image?: string | null } | null> | null };
 
 export type CUserQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -6215,6 +6584,7 @@ export const ProductPresetFragmentDoc = gql`
   _id
   id
   name
+  image
 }
     `;
 export const PutItemToStoreDocument = gql`
