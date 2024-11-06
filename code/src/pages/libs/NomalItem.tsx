@@ -60,6 +60,8 @@ export default function NomalItem() {
 		setGraphqlForHub,
 		productPresetId,
 		setProductPresetId,
+		urlRestApi,
+		currentToken,
 	} = UiContext.UseUIContext();
 
 	// const [infoQuery] = useInfoLazyQuery({ fetchPolicy: 'network-only' });
@@ -101,19 +103,35 @@ export default function NomalItem() {
 			fetchProductPreset();
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [currentDocker, item?.name, items.length]);
+	}, [currentDocker]);
 
 	function fetchProductPreset() {
+		setProductPresets([]);
 		setLoading(true);
-		setGraphqlForHub()
-			.then(() => fetchProductPresetQuery({ fetchPolicy: 'network-only' }))
-			.then((res: any) => {
-				setProductPresets(res.data?.productPreset);
-				setLoading(false);
-				if (find(res.data?.productPreset, (preset) => preset?._id === productPresetId)) {
-					setProductPreset(find(res.data?.productPreset, (preset) => preset?._id === productPresetId));
-				}
-			});
+		var settings = {
+			url: `https://api-${currentDocker?.domain}.${currentDocker?.server}/graphql`,
+			method: 'POST',
+			timeout: 0,
+			headers: {
+				accept: '*/*',
+				'accept-language': 'vi,en-US;q=0.9,en;q=0.8',
+				authorization: `Bearer ${currentToken.token}`,
+				'content-type': 'application/json',
+			},
+			data: JSON.stringify({
+				query: 'query productPreset($_id: String) {\n  productPreset(_id: $_id) {\n    ...ProductPreset\n    __typename\n  }\n}\n\nfragment ProductPreset on ProductPreset {\n  _id\n  id\n  name\n  image\n  __typename\n}',
+				variables: {},
+			}),
+		};
+
+		$.ajax(settings).done(function (res) {
+			console.log(res);
+			setProductPresets(get(res, ['data', 'productPreset']));
+			setLoading(false);
+			if (find(res.data?.productPreset, (preset) => preset?._id === productPresetId)) {
+				setProductPreset(find(res.data?.productPreset, (preset) => preset?._id === productPresetId));
+			}
+		});
 	}
 
 	function getItemInfo(htmlDOM: any = null) {
@@ -350,46 +368,47 @@ export default function NomalItem() {
 							<strong>Product type:</strong>
 						</Col>
 						<Col sm={12}>
-							<Select
-								className="basic-single w-100"
-								classNamePrefix="ext-select"
-								placeholder="Select your hub"
-								isClearable={true}
-								isLoading={productPresets === null || productPresets === undefined}
-								isSearchable={true}
-								name="color"
-								options={map(productPresets, (preset) => {
-									return {
-										id: get(preset, '_id', ''),
-										value: get(preset, '_id', ''),
-										label: (
+							{productPresets && productPresets.length ? (
+								<Select
+									className="basic-single w-100"
+									classNamePrefix="ext-select"
+									placeholder="Select your hub"
+									isClearable={true}
+									isLoading={productPresets === null || productPresets === undefined}
+									isSearchable={true}
+									name="color"
+									options={map(productPresets, (preset) => {
+										console.log('preset: ', preset);
+										return {
+											id: get(preset, '_id', ''),
+											value: get(preset, '_id', ''),
+											label: get(preset, 'name', ''),
+										};
+									})}
+									styles={colourStyles}
+									onChange={(data) => {
+										const productPreset = find(
+											productPresets,
+											(preset) => preset?._id === get(data, 'id', '')
+										);
+										setProductPreset(productPreset);
+										setProductPresetId(productPreset?._id);
+									}}
+									value={{
+										id: productPreset?._id,
+										value: productPreset?._id,
+										label: productPreset?._id ? (
 											<div className="d-flex flex-column">
-												<strong>{get(preset, 'name', '')}</strong>
+												<strong>{get(productPreset, 'name', '')}</strong>
 											</div>
+										) : (
+											<></>
 										),
-									};
-								})}
-								styles={colourStyles}
-								onChange={(data) => {
-									const productPreset = find(
-										productPresets,
-										(preset) => preset?._id === get(data, 'id', '')
-									);
-									setProductPreset(productPreset);
-									setProductPresetId(productPreset?._id);
-								}}
-								value={{
-									id: productPreset?._id,
-									value: productPreset?._id,
-									label: productPreset?._id ? (
-										<div className="d-flex flex-column">
-											<strong>{get(productPreset, 'name', '')}</strong>
-										</div>
-									) : (
-										<></>
-									),
-								}}
-							/>
+									}}
+								/>
+							) : (
+								false
+							)}
 						</Col>
 					</Row>
 					<Row>
