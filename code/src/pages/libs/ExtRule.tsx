@@ -22,12 +22,13 @@ export const ExtRule = {
 		'.product-briefing h1',
 		'.prodDesc h1',
 		'h1.product-info__header_title',
-		'._2rn4tqXP',//https://www.temu.com/
-		'.product-briefing .WBVL_7 span',//https://shopee.vn/
-		'#productTitle',//amazon
-		'*[class^="index-title-"]',//tiktok
+		'._2rn4tqXP', //https://www.temu.com/
+		'.product-briefing .WBVL_7 span', //https://shopee.vn/
+		'#productTitle', //amazon
+		'*[class^="index-title-"]', //tiktok
 		'.productView-title span',
-		'h1.product-info-title'
+		'.productView-title',
+		'h1.product-info-title',
 	].join(', '),
 	images: [
 		// Printerval
@@ -52,12 +53,12 @@ export const ExtRule = {
 		{
 			block: '.product__photos, .product_gallery',
 			loop: 'img',
-			attr: ['data-src', 'src'],
+			attr: ['data-image-gallery-zoom-image-url', 'data-src', 'src'],
 		},
 		{
 			block: '.product-single__photos',
 			loop: 'img.zoomImg',
-			attr: ['data-src', 'src'],
+			attr: ['data-image-gallery-zoom-image-url', 'data-src', 'src'],
 		},
 		{
 			block: '.product__media-wrapper',
@@ -67,27 +68,27 @@ export const ExtRule = {
 		{
 			block: '.owl-carousel.thumbnails, .owl-carousel, .thumbnails',
 			loop: 'img',
-			attr: ['srcset', 'src', 'data-src'],
+			attr: ['data-image-gallery-zoom-image-url', 'srcset', 'src', 'data-src'],
 		},
 		{
 			block: '.product__media-list.slider',
 			loop: 'img',
-			attr: ['srcset', 'src', 'data-src'],
+			attr: ['data-image-gallery-zoom-image-url', 'srcset', 'src', 'data-src'],
 		},
 		{
 			block: '.product-images-wrapper',
 			loop: 'img',
-			attr: ['src', 'srcset', 'data-src'],
+			attr: ['data-image-gallery-zoom-image-url', 'src', 'srcset', 'data-src'],
 		},
 		{
 			block: '.t4s-product__media-wrapper',
 			loop: 'img',
-			attr: ['srcset', 'data-src', 'src'],
+			attr: ['data-image-gallery-zoom-image-url', 'srcset', 'data-src', 'src'],
 		},
 		{
 			block: '.main-slider',
 			loop: 'img',
-			attr: ['srcset', 'data-src', 'src'],
+			attr: ['data-image-gallery-zoom-image-url', 'srcset', 'data-src', 'src'],
 		},
 
 		// Ebay
@@ -100,59 +101,64 @@ export const ExtRule = {
 		{
 			block: '.VueCarousel-inner',
 			loop: 'img',
-			attr: ['data-src', 'src'],
+			attr: ['data-image-gallery-zoom-image-url', 'data-src', 'src'],
 		},
 		// Other
 		{
 			block: '.ALsph7jA',
 			loop: 'img',
-			attr: ['data-src', 'src'],
+			attr: ['data-image-gallery-zoom-image-url', 'data-src', 'src'],
 		},
 		{
 			block: '.s-view',
 			loop: 'img.lazyload',
-			attr: ['data-src', 'src'],
+			attr: ['data-image-gallery-zoom-image-url', 'data-src', 'src'],
 		},
 		{
 			block: '#prodContImgFeat',
 			loop: 'img',
-			attr: ['src', 'data-src'],
+			attr: ['data-image-gallery-zoom-image-url', 'src', 'data-src'],
 		},
 		{
 			block: '.product-main-images .spz-carousel-slide',
 			loop: 'img',
-			attr: ['src', 'data-src'],
+			attr: ['data-image-gallery-zoom-image-url', 'src', 'data-src'],
 		},
 		{
 			block: '.ALsph7jA',
 			loop: 'img',
-			attr: ['src', 'data-src'],
+			attr: ['data-image-gallery-zoom-image-url', 'src', 'data-src'],
 		},
 		{
 			block: '.airUhU',
 			loop: 'picture img',
 			attr: ['src', 'data-src'],
-		},//https://shopee.vn/
+		}, //https://shopee.vn/
 		{
 			block: '.a-unordered-list.a-nostyle.a-horizontal.list.maintain-height',
 			loop: 'img',
-			attr: ['src', 'data-src'],
-		},//amazon
+			attr: ['data-image-gallery-zoom-image-url', 'src', 'data-src'],
+		}, //amazon
+		{
+			block: 'ul.productView-thumbs',
+			loop: 'a.productView-thumbnail-link',
+			attr: ['data-image-gallery-zoom-image-url', 'data-src', 'src'],
+		},
 		{
 			block: '.slick-slider',
 			loop: 'img',
-			attr: ['data-src']
+			attr: ['data-image-gallery-zoom-image-url', 'data-src'],
 		},
 		{
 			block: '.productView-image-wrapper',
 			loop: 'img',
-			attr: ['srcset', 'src']
+			attr: ['srcset', 'src'],
 		},
 		{
 			block: '.product-images-container',
 			loop: 'img',
-			attr: ['src']
-		}
+			attr: ['src'],
+		},
 	],
 	id: [
 		//Printerval
@@ -354,6 +360,5 @@ export const ExtRule = {
 			image: 'spz-img img',
 			image_attr: 'src',
 		},
-		
 	],
 };
