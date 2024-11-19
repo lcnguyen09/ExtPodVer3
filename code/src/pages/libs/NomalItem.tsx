@@ -451,6 +451,54 @@ export default function NomalItem() {
 				</div>
 			) : (
 				<div className="mt-2">
+					<Row>
+						<Col sm={12}>
+							<strong>Product type:</strong>
+						</Col>
+						<Col sm={12}>
+							{productPresets && productPresets.length ? (
+								<Select
+									className="basic-single w-100"
+									classNamePrefix="ext-select"
+									placeholder="Select your hub"
+									isClearable={true}
+									isLoading={productPresets === null || productPresets === undefined}
+									isSearchable={true}
+									name="color"
+									options={map(productPresets, (preset) => {
+										console.log('preset: ', preset);
+										return {
+											id: get(preset, '_id', ''),
+											value: get(preset, '_id', ''),
+											label: get(preset, 'name', ''),
+										};
+									})}
+									styles={colourStyles}
+									onChange={(data) => {
+										const productPreset = find(
+											productPresets,
+											(preset) => preset?._id === get(data, 'id', '')
+										);
+										setProductPreset(productPreset);
+										setProductPresetId(productPreset?._id);
+									}}
+									value={{
+										id: productPreset?._id,
+										value: productPreset?._id,
+										label: productPreset?._id ? (
+											<div className="d-flex flex-column">
+												<strong>{get(productPreset, 'name', '')}</strong>
+											</div>
+										) : (
+											<></>
+										),
+									}}
+								/>
+							) : (
+								false
+							)}
+						</Col>
+					</Row>
 					<Table bordered>
 						<thead>
 							<tr>
